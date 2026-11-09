@@ -1,0 +1,45 @@
+{
+  "67a82f5e56f1b457bb4d0e5d51df368a": {
+    "status": "RESOLVED",
+    "acknowledgedBy": "Quản Trị Viên",
+    "acknowledgedAt": "2026-11-01T08:28:40.667Z",
+    "resolvedBy": "Quản Trị Viên",
+    "resolvedAt": "2026-11-01T08:28:47.954Z",
+    "notes": [],
+    "updatedAt": "2026-11-01T08:28:47.954Z"
+  },
+  "318ae2bf2572a0005925b80c28a1e5aa": {
+    "status": "NEW",
+    "acknowledgedBy": null,
+    "acknowledgedAt": null,
+    "resolvedBy": null,
+    "resolvedAt": null,
+    "notes": [
+      {
+        "id": "note_1793760161494",
+        "author": "Giám Sát Viên",
+        "text": "okok",
+        "createdAt": "2026-11-04T02:42:41.494Z"
+      }
+    ],
+    "updatedAt": "2026-11-04T02:42:41.494Z"
+  },
+  "5a1888bee0616ba051466ed44f97011d": {
+    "status": "ACKNOWLEDGED",
+    "acknowledgedBy": "Quản Trị Viên",
+    "acknowledgedAt": "2026-11-04T02:48:05.819Z",
+    "resolvedBy": null,
+    "resolvedAt": null,
+    "notes": [],
+    "updatedAt": "2026-11-04T02:48:05.819Z"
+  },
+  "b90d14677a3c7173a4780239afce6431": {
+    "status": "ACKNOWLEDGED",
+    "acknowledgedBy": "Quản Trị Viên",
+    "acknowledgedAt": "2026-11-04T03:22:12.315Z",
+    "resolvedBy": null,
+    "resolvedAt": null,
+    "notes": [],
+    "updatedAt": "2026-11-04T03:22:12.315Z"
+  }
+}

@@ -1,0 +1,1014 @@
+/* ── Modern SaaS Select / Dropdown Customization ────────────────────────────── */
+select.select-filter,
+.form-group select,
+.custom-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: var(--bg-input, var(--bg-card));
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23818cf8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 14px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.5rem 2.2rem 0.5rem 0.85rem;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 38px;
+}
+
+[data-theme="light"] select.select-filter,
+[data-theme="light"] .form-group select {
+  background-color: #ffffff;
+  border-color: #cbd5e1;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%234f46e5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+select.select-filter:hover,
+.form-group select:hover {
+  border-color: var(--accent-primary);
+  background-color: var(--bg-card-hover, var(--bg-card));
+}
+
+select.select-filter:focus,
+.form-group select:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+}
+
+select.select-filter option,
+.form-group select option {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  padding: 0.5rem;
+  font-size: 0.85rem;
+}
+
+/* ── KPI Clickable Card ─────────────────────────────────────────────────────── */
+.kpi-card-clickable {
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kpi-card-clickable:hover {
+  transform: translateY(-3px);
+  border-color: var(--accent-primary);
+  box-shadow: 0 8px 24px -4px rgba(99, 102, 241, 0.25);
+}
+
+/* ── Modern SaaS Custom Date & Time Picker ────────────────────────────────── */
+.modern-datepicker-container {
+  position: relative;
+  width: 100%;
+}
+
+.modern-datepicker-container.is-active {
+  z-index: 50;
+}
+
+.search-filter-card {
+  position: relative;
+  z-index: 30 !important;
+  overflow: visible !important;
+}
+
+.search-results-card {
+  position: relative;
+  z-index: 1 !important;
+}
+
+.modern-datepicker-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.55rem 0.85rem;
+  background: var(--bg-input, var(--bg-card));
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-size: 0.86rem;
+  font-family: inherit;
+  cursor: pointer;
+  min-height: 40px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+
+.modern-datepicker-trigger:hover {
+  border-color: var(--accent-primary);
+  background: var(--bg-card-hover, var(--bg-card));
+}
+
+.modern-datepicker-trigger.is-open {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+  background: var(--bg-card);
+}
+
+.modern-datepicker-clear-btn {
+  background: none;
+  border: none;
+  padding: 3px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.modern-datepicker-clear-btn:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.modern-datepicker-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  z-index: 9999;
+  width: 310px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.35), 0 10px 20px -5px rgba(0, 0, 0, 0.2);
+  padding: 1rem;
+  backdrop-filter: blur(16px);
+  animation: modernDatepickerFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="light"] .modern-datepicker-popover {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 20px 35px -8px rgba(0, 0, 0, 0.12), 0 8px 16px -4px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .modern-datepicker-popover {
+  background: #0f172a;
+  border-color: #334155;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.55), 0 10px 20px -5px rgba(0, 0, 0, 0.35);
+}
+
+.modern-datepicker-popover.align-left {
+  left: 0;
+}
+
+.modern-datepicker-popover.align-right {
+  right: 0;
+}
+
+@keyframes modernDatepickerFadeIn {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modern-datepicker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.modern-datepicker-month-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.modern-datepicker-nav-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: var(--text-secondary);
+  padding: 4px 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+}
+
+.modern-datepicker-nav-btn:hover {
+  background: var(--bg-hover, rgba(99, 102, 241, 0.1));
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.modern-datepicker-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+  margin-bottom: 0.35rem;
+}
+
+.modern-datepicker-weekday-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 0;
+}
+
+.modern-datepicker-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.modern-datepicker-day-cell {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: inherit;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modern-datepicker-day-cell:hover:not(:disabled) {
+  background: var(--bg-hover, rgba(99, 102, 241, 0.1));
+  color: var(--accent-primary);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.modern-datepicker-day-cell.is-selected {
+  background: var(--accent-primary) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.45);
+}
+
+.modern-datepicker-day-cell.is-today {
+  border-color: var(--accent-primary);
+  font-weight: 600;
+}
+
+.modern-datepicker-day-cell.is-outside {
+  opacity: 0.32;
+  color: var(--text-muted);
+}
+
+.modern-datepicker-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 0.75rem 0;
+}
+
+.modern-datepicker-time-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.modern-datepicker-select {
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input, var(--bg-card));
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+}
+
+.modern-datepicker-select:focus {
+  border-color: var(--accent-primary);
+}
+
+.modern-datepicker-time-chips {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.85rem;
+}
+
+.modern-datepicker-chip {
+  padding: 0.18rem 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: all 0.15s;
+}
+
+.modern-datepicker-chip:hover {
+  background: var(--bg-hover, rgba(99, 102, 241, 0.1));
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.modern-datepicker-chip.is-accent {
+  color: var(--accent-primary);
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.08);
+  font-weight: 600;
+}
+
+.modern-datepicker-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.modern-datepicker-action-btn {
+  padding: 0.35rem 0.75rem !important;
+  font-size: 0.8rem !important;
+  border-radius: 8px !important;
+}
+
+/* ── Custom Styled DateTime Picker Controls (Backward compatibility) ────────── */
+.custom-date-picker-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.custom-date-picker-icon {
+  position: absolute;
+  left: 0.85rem;
+  color: var(--accent-primary);
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.85;
+}
+
+.custom-date-input {
+  width: 100%;
+  padding: 0.55rem 0.85rem 0.55rem 2.4rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-size: 0.88rem;
+  font-family: var(--font-sans);
+  outline: none;
+  min-height: 40px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.custom-date-input:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.18);
+  background: var(--bg-card);
+}
+
+.custom-date-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  padding: 3px;
+  border-radius: 6px;
+  opacity: 0.75;
+  transition: opacity 0.2s;
+}
+
+.custom-date-input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+[data-theme="light"] .custom-date-input::-webkit-calendar-picker-indicator {
+  filter: brightness(0.25);
+}
+
+[data-theme="dark"] .custom-date-input::-webkit-calendar-picker-indicator {
+  filter: invert(0.8);
+}
+
+/* ── Modern Enterprise SaaS Data Table & Sticky Columns ─────────────────────── */
+.table-responsive-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+}
+
+.table-responsive-container table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table-responsive-container th {
+  position: sticky;
+  top: 0;
+  background: var(--bg-table-header);
+  backdrop-filter: blur(8px);
+  z-index: 10;
+  white-space: nowrap;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.75rem 1rem;
+}
+
+.table-responsive-container td {
+  padding: 0.75rem 1rem;
+  font-size: 0.84rem;
+  border-bottom: 1px solid var(--border-color-subtle);
+  white-space: nowrap;
+}
+
+/* Sticky column - left (Timestamp / ID) */
+.sticky-left-col {
+  position: sticky;
+  left: 0;
+  background: var(--bg-card) !important;
+  z-index: 2;
+  box-shadow: 2px 0 6px -2px rgba(0, 0, 0, 0.12);
+}
+
+/* Sticky column - right (Actions) */
+.sticky-right-col {
+  position: sticky;
+  right: 0;
+  background: var(--bg-card) !important;
+  z-index: 2;
+  box-shadow: -2px 0 6px -2px rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .sticky-left-col,
+[data-theme="light"] .sticky-right-col {
+  background: #ffffff !important;
+}
+
+[data-theme="dark"] .sticky-left-col,
+[data-theme="dark"] .sticky-right-col {
+  background: #0f172a !important;
+}
+
+tr:hover .sticky-left-col,
+tr:hover .sticky-right-col {
+  background: var(--bg-card-hover) !important;
+}
+
+[data-theme="light"] tr:hover .sticky-left-col,
+[data-theme="light"] tr:hover .sticky-right-col {
+  background: #f1f5f9 !important;
+}
+
+/* ── 3-Column Compact Grid for Anomalies Tab Method Cards ─────────────────── */
+.anomalies-compact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.anomalies-card-compact {
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-top: 2px solid var(--accent-primary);
+  backdrop-filter: var(--backdrop-blur);
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.25s;
+}
+
+.anomalies-card-compact:hover {
+  box-shadow: none;
+  transform: translateY(-2px);
+}
+
+/* Mỗi card có màu top-border riêng theo chức năng */
+.anomalies-card-compact:nth-child(1) { border-top-color: var(--severity-error); }
+.anomalies-card-compact:nth-child(1):hover { border-color: rgba(239,68,68,0.5); box-shadow: none; }
+
+.anomalies-card-compact:nth-child(2) { border-top-color: var(--severity-warn); }
+.anomalies-card-compact:nth-child(2):hover { border-color: rgba(245,158,11,0.5); box-shadow: none; }
+
+.anomalies-card-compact:nth-child(3) { border-top-color: var(--accent-primary); }
+.anomalies-card-compact:nth-child(3):hover { border-color: rgba(99,102,241,0.5); box-shadow: none; }
+
+.anomalies-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-bottom: 0.4rem;
+}
+
+.anomalies-card-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+@media (max-width: 900px) {
+  .anomalies-compact-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Fixed Height & Internal Scrollbar for Search Table Results ────────────── */
+.search-table-scroll-container {
+  max-height: 440px;
+  overflow-y: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  box-shadow: inset 0 0 0 1px rgba(99, 102, 241, 0.06), var(--shadow-card);
+}
+
+.search-table-scroll-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.search-table-scroll-container::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+
+.search-table-scroll-container::-webkit-scrollbar-thumb {
+  background: var(--border-color-glow);
+  border-radius: 3px;
+}
+
+.search-table-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+}
+
+/* ── Modal Log Inspection ──────────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.modal-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color-glow);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 680px;
+  box-shadow: 0 0 40px rgba(99, 102, 241, 0.22), 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+  animation: modalFadeIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+}
+
+.modal-body {
+  padding: 1.25rem;
+  max-height: 75vh;
+  overflow-y: auto;
+}
+
+.modal-json-box {
+  background: #0d1117;
+  color: #c9d1d9;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  font-family: monospace;
+  font-size: 0.85rem;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  border: 1px solid #30363d;
+}
+
+.clickable-row {
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.clickable-row:hover {
+  background: rgba(99, 102, 241, 0.08) !important;
+}
+
+/* ── Brand Monogram Typography Logo ────────────────────────────────────────── */
+.brand-monogram-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(6, 182, 212, 0.12));
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: var(--accent-primary);
+  letter-spacing: -0.02em;
+  flex-shrink: 0;
+  user-select: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"] .brand-monogram-logo {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #4f46e5;
+}
+
+/* ── Tab Help Icon Button ──────────────────────────────────────────────────── */
+.tab-help-icon-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-left: 0.6rem;
+  flex-shrink: 0;
+}
+
+.tab-help-icon-btn:hover {
+  color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  background: rgba(99, 102, 241, 0.1);
+  transform: scale(1.06);
+}
+
+/* ── Enterprise 2-Column Authentication Portal ────────────────────────────── */
+.login-portal-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: var(--bg-primary);
+  backdrop-filter: blur(20px);
+}
+
+.login-portal-card {
+  width: 100%;
+  max-width: 860px;
+  min-height: 480px;
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 18px;
+  box-shadow: 0 24px 64px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+  animation: modalFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 768px) {
+  .login-portal-card {
+    grid-template-columns: 1fr;
+    max-width: 440px;
+  }
+  .login-banner-side {
+    display: none;
+  }
+}
+
+.login-banner-side {
+  background: linear-gradient(145deg, rgba(24, 24, 28, 0.95), rgba(14, 14, 18, 0.98));
+  border-right: 1px solid var(--border-color);
+  padding: 2.25rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="light"] .login-banner-side {
+  background: linear-gradient(145deg, #f8fafc, #f1f5f9);
+}
+
+.login-brand-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.login-logo-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(6, 182, 212, 0.2));
+  border: 1px solid rgba(99, 102, 241, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: var(--accent-primary);
+  letter-spacing: -0.02em;
+}
+
+.login-brand-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.login-brand-subtitle {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.login-features-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  margin: 2rem 0;
+}
+
+.login-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.85rem;
+}
+
+.login-feature-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  color: var(--accent-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.login-feature-name {
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.login-feature-desc {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.login-banner-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.login-form-side {
+  padding: 2.25rem 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-form-header {
+  margin-bottom: 1.5rem;
+}
+
+.login-icon-circle {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(99, 102, 241, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-error-alert {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  color: #ef4444;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.login-form-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+
+
+
+/* ── Recharts Tooltip Dark Mode Fix ─────────────────────────────────────────── */
+.recharts-default-tooltip {
+  background: var(--bg-secondary) !important;
+  border-color: var(--border-color) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+}
+.recharts-tooltip-item,
+.recharts-tooltip-label {
+  color: var(--text-primary) !important;
+}
+.recharts-tooltip-item-name,
+.recharts-tooltip-item-value {
+  color: var(--text-primary) !important;
+}
+
+/* ── Anomaly Sub-Tabs Segmented Control ─────────────────────────────────────── */
+.anomaly-sub-tabs {
+  display: inline-flex;
+  align-items: center;
+  background: var(--bg-card);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  gap: 4px;
+  width: fit-content;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.anomaly-sub-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  font-size: 0.84rem;
+  font-weight: 500;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: inherit;
+  user-select: none;
+}
+
+.anomaly-sub-tab:hover:not(.active) {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+.anomaly-sub-tab.active {
+  background: var(--accent-primary);
+  color: #ffffff;
+  font-weight: 600;
+  border-color: var(--accent-primary);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+}
+
+[data-theme="light"] .anomaly-sub-tab.active {
+  background: var(--accent-primary);
+  color: #ffffff;
+  border-color: var(--accent-primary);
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+}
+
+/* ── Analytics Filter Pills & Controls ─────────────────────────────────────── */
+.analytics-filters {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.analytics-time-pills {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-input);
+  padding: 3px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+}
+
+.analytics-time-pill {
+  padding: 4px 12px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: inherit;
+}
+
+.analytics-time-pill:hover:not(.active) {
+  color: var(--text-primary);
+}
+
+.analytics-time-pill.active {
+  background: var(--accent-primary);
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+.cross-filter-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--accent-primary);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.cross-filter-badge:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+/* ── Heatmap Styles ─────────────────────────────────────────────────────────── */
+.heatmap-scroll-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.5rem;
+}
+
+.heatmap-cell {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 700;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  cursor: default;
+}
+
+.heatmap-cell:hover {
+  transform: scale(1.25);
+  z-index: 5;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}

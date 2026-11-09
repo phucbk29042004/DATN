@@ -1,0 +1,50 @@
+1 081109 203518 3 INFO dfs.DataNode$DataXceiver: Receiving block blk_-1608999687919862906 src: /10.250.10.6:51628 dest: /10.250.10.6:50010
+2 081109 203518 3 INFO dfs.DataNode$PacketResponder: PacketResponder 0 for block blk_-1608999687919862906 terminating
+3 081109 203519 6 INFO dfs.DataNode$DataXceiver: Receiving block blk_2692723707014603099 src: /10.251.43.115:50010 dest: /10.251.43.115:50010
+4 081109 203519 6 INFO dfs.DataNode$PacketResponder: PacketResponder 1 for block blk_2692723707014603099 terminating
+5 081109 203520 9 WARN dfs.DataNode$DataXceiver: Verification succeeded for block blk_2692723707014603099
+6 081109 203520 9 INFO dfs.DataNode$DataXceiver: Received block blk_2692723707014603099 of size 67108864 from /10.251.43.115
+7 081109 203521 12 ERROR dfs.DataNode$DataXceiver: BLOCK* NameSystem.addStoredBlock: Redundant addStoredBlock request received for blk_7503483334287303044
+8 081109 203521 15 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/rand/_temporary/_task_200811092030_0001_m_000000_0/part-00000. blk_-1608999687919862906
+9 081109 203522 18 INFO dfs.DataNode$DataXceiver: Receiving block blk_7503483334287303044 src: /10.250.10.6:51629 dest: /10.250.10.6:50010
+10 081109 203522 18 INFO dfs.DataNode$PacketResponder: PacketResponder 0 for block blk_7503483334287303044 terminating
+11 081109 203523 21 INFO dfs.DataNode$DataXceiver: Receiving block blk_-3544583377289625638 src: /10.251.43.115:50010 dest: /10.251.43.115:50010
+12 081109 203523 21 INFO dfs.DataNode$PacketResponder: Received block blk_-3544583377289625638 of size 67108864 from /10.251.43.115
+13 081109 203524 24 WARN dfs.DataNode$DataXceiver: Exception in receiveBlock for block blk_-1608999687919862906
+14 081109 203524 24 ERROR dfs.DataNode$DataXceiver: DataXceiver error processing WRITE_BLOCK operation src: /10.250.10.6:51628 dst: /10.250.10.6:50010
+15 081109 203525 27 INFO dfs.DataNode$DataXceiver: Receiving block blk_8229193803249955061 src: /10.251.43.115:50010 dest: /10.251.43.115:50010
+16 081109 203525 27 INFO dfs.DataNode$PacketResponder: PacketResponder 2 for block blk_8229193803249955061 terminating
+17 081109 203526 30 INFO dfs.DataNode$DataXceiver: Receiving block blk_1539705384502418695 src: /10.250.10.6:51630 dest: /10.250.10.6:50010
+18 081109 203526 30 INFO dfs.DataNode$PacketResponder: PacketResponder 1 for block blk_1539705384502418695 terminating
+19 081109 203527 33 INFO dfs.DataNode$DataXceiver: Received block blk_1539705384502418695 of size 134217728 from /10.250.10.6
+20 081109 203527 33 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/input/part-00001. blk_8229193803249955061
+21 081109 203528 36 WARN dfs.DataNode$DataXceiver: Verification succeeded for block blk_8229193803249955061
+22 081109 203528 36 INFO dfs.DataNode$DataXceiver: Received block blk_8229193803249955061 of size 67108864 from /10.251.43.115
+23 081109 203529 39 ERROR dfs.DataNode$DataXceiver: Exception in receiveBlock for block blk_-3544583377289625638
+24 081109 203529 39 FATAL dfs.DataNode: Connection refused to /10.251.73.10:50010 retrying in 5 seconds
+25 081109 203530 42 INFO dfs.DataNode$DataXceiver: Receiving block blk_3587227872709123919 src: /10.250.10.6:51631 dest: /10.250.10.6:50010
+26 081109 203530 42 INFO dfs.DataNode$PacketResponder: PacketResponder 0 for block blk_3587227872709123919 terminating
+27 081109 203531 45 INFO dfs.DataNode$DataXceiver: Received block blk_3587227872709123919 of size 67108864 from /10.250.10.6
+28 081109 203531 45 WARN dfs.FSNamesystem: BLOCK* NameSystem.addStoredBlock: addStoredBlock request received for blk_3587227872709123919 on /10.251.43.115:50010 size 67108864 but does not belong to any file
+29 081109 203532 48 INFO dfs.DataNode$DataXceiver: Receiving block blk_-9208591135553098634 src: /10.251.43.115:50010 dest: /10.251.43.115:50010
+30 081109 203532 48 INFO dfs.DataNode$PacketResponder: PacketResponder 1 for block blk_-9208591135553098634 terminating
+31 081109 203533 51 INFO dfs.DataNode$DataXceiver: Received block blk_-9208591135553098634 of size 67108864 from /10.251.43.115
+32 081109 203533 51 ERROR dfs.DataNode$DataXceiver: BLOCK* NameSystem.addStoredBlock: Redundant addStoredBlock request received for blk_-9208591135553098634
+33 081109 203534 54 INFO dfs.DataNode$DataXceiver: Receiving block blk_4911508417741479827 src: /10.250.10.6:51632 dest: /10.250.10.6:50010
+34 081109 203534 54 INFO dfs.DataNode$PacketResponder: PacketResponder 0 for block blk_4911508417741479827 terminating
+35 081109 203535 57 INFO dfs.DataNode$DataXceiver: Received block blk_4911508417741479827 of size 134217728 from /10.250.10.6
+36 081109 203535 57 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/output/part-00002. blk_4911508417741479827
+37 081109 203536 60 WARN dfs.DataNode$DataXceiver: Verification succeeded for block blk_4911508417741479827
+38 081109 203536 60 INFO dfs.DataNode$DataXceiver: Received block blk_4911508417741479827 of size 134217728 from /10.250.10.6
+39 081109 203537 63 INFO dfs.DataNode$DataXceiver: Receiving block blk_-6675079613870441341 src: /10.251.43.115:50010 dest: /10.251.43.115:50010
+40 081109 203537 63 INFO dfs.DataNode$PacketResponder: PacketResponder 2 for block blk_-6675079613870441341 terminating
+41 081109 203538 66 INFO dfs.DataNode$DataXceiver: Received block blk_-6675079613870441341 of size 67108864 from /10.251.43.115
+42 081109 203538 66 WARN dfs.DataNode$DataXceiver: Exception in receiveBlock for block blk_-6675079613870441341
+43 081109 203539 69 ERROR dfs.DataNode$DataXceiver: DataXceiver error processing WRITE_BLOCK operation src: /10.251.43.115:50010 dst: /10.251.43.115:50010
+44 081109 203539 69 FATAL dfs.DataNode: Connection refused to /10.251.73.11:50010 retrying in 5 seconds
+45 081109 203540 72 INFO dfs.DataNode$DataXceiver: Receiving block blk_1906496895319259785 src: /10.250.10.6:51633 dest: /10.250.10.6:50010
+46 081109 203540 72 INFO dfs.DataNode$PacketResponder: PacketResponder 0 for block blk_1906496895319259785 terminating
+47 081109 203541 75 INFO dfs.DataNode$DataXceiver: Received block blk_1906496895319259785 of size 67108864 from /10.250.10.6
+48 081109 203541 75 INFO dfs.FSNamesystem: BLOCK* NameSystem.allocateBlock: /user/root/temp/part-00003. blk_1906496895319259785
+49 081109 203542 78 WARN dfs.DataNode$DataXceiver: Verification succeeded for block blk_1906496895319259785
+50 081109 203542 78 INFO dfs.DataNode$DataXceiver: Received block blk_1906496895319259785 of size 67108864 from /10.250.10.6

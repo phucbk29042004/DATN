@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+*/node_modules/
+*/*/node_modules/
+
+# Environment variables & secrets
+.env
+.env.*
+*.env
+!.env.example
+!*/.env.example
+
+# Production & Build outputs
+dist/
+FE/dist/
+build/
+Mobile/.expo/
+.expo/
+.expo-shared/
+web-build/
+
+# Logs & Runtime Database dumps
+*.log
+!BE/datasets/**/*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dump.rdb
+
+# OS & Editor generated files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python cache / virtualenv
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/

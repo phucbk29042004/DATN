@@ -1,0 +1,36 @@
+{
+  "name": "log-analytics-backend",
+  "version": "1.0.0",
+  "description": "Centralized Log Analytics & Anomaly Detection Backend System",
+  "main": "collector/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "start:all": "node index.js",
+    "start:collector": "node collector/index.js",
+    "start:parser": "node parser/index.js",
+    "start:api": "node search-api/index.js",
+    "start:engine": "node anomaly-engine/index.js",
+    "generate:logs": "node log_generator.js",
+    "stream:real": "node datasets/stream_real_hdfs.js",
+    "stream:real-hdfs": "node datasets/stream_real_hdfs.js",
+    "generate:vectors-hdfs": "node datasets/hdfs/generate_vectors.js",
+    "generate:vectors-bgl": "node datasets/bgl/generate_vectors.js",
+    "ml:train-hdfs": "python anomaly-engine/ml-models/train_and_evaluate.py --input datasets/hdfs/vectors_hdfs.json --output anomaly-engine/ml-models/results_hdfs.json --save-model",
+    "ml:train-bgl": "python anomaly-engine/ml-models/train_and_evaluate.py --input datasets/bgl/vectors_bgl.json --output anomaly-engine/ml-models/results_bgl.json --save-model",
+    "benchmark": "node benchmark/pipeline_benchmark.js"
+  },
+  "dependencies": {
+    "@opensearch-project/opensearch": "^2.6.0",
+    "bcryptjs": "^3.0.3",
+    "bullmq": "^5.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "ioredis": "^5.3.2",
+    "jsonwebtoken": "^9.0.3",
+    "node-cron": "^4.6.0",
+    "nodemailer": "^10.3.1",
+    "socket.io": "^4.7.5"
+  }
+}
