@@ -2,6 +2,16 @@
 
 ## Nhật Ký Cập Nhật (Chronological Log)
 
+### [09/11/2026 20:13] — Thiết Lập .gitignore, Khởi Tạo Git & Đẩy Thành Công Toàn Bộ Mã Nguồn Lên GitHub
+- **Loại**: Quản trị mã nguồn (DevOps / Git)
+- **File**: `.gitignore`, `BE/.env.example`, `README.md`, `tiendo.md`
+- **Mô tả**:
+  1. Tạo file `.gitignore` chuẩn bảo mật: loại trừ `node_modules/`, `dist/`, `.env`, `dump.rdb`, `.expo/`, cache và logs.
+  2. Tạo template `BE/.env.example` với đầy đủ tham số cấu hình mẫu, che giấu các secret nhạy cảm.
+  3. Che các API key và SMTP credentials trong `README.md` để vượt qua cơ chế GitHub Push Protection.
+  4. Khởi tạo Git repository nhánh `main`, liên kết remote `origin https://github.com/phucbk29042004/DATN.git` và đẩy toàn bộ mã nguồn đồ án (94 files) lên GitHub thành công.
+- **Kết quả**: Kho lưu trữ GitHub đã được cập nhật đầy đủ mã nguồn đồ án, an toàn bảo mật 100%.
+
 ### [09/11/2026 19:28] — Tinh Chỉnh Icon Chatbot Kéo Thả Tự Do (Draggable), Ẩn Nút Đóng Trùng Lặp, Rút Gọn Prompt Chatbot & Chuẩn Hóa Tiếng Việt Form Đăng Nhập (Đồng Bộ Web & Mobile)
 - **Loại**: Cải tiến giao diện & UX/UI, Nâng cấp Chatbot AI, Tinh chỉnh Form Đăng nhập, Đồng bộ hóa Mobile
 - **File**: `FE/src/components/AiAssistant.jsx`, `FE/src/components/LoginModal.jsx`, `FE/src/App.jsx`, `BE/search-api/aiService.js`, `Mobile/src/screens/auth/LoginScreen.js`, `tiendo.md`
