@@ -2,6 +2,15 @@
 
 ## Nhật Ký Cập Nhật (Chronological Log)
 
+### [09/11/2026 20:19] — Xóa Bỏ Hoàn Toàn Thông Tin Nhạy Cảm Trong README.md & Đồng Bộ Lên GitHub
+- **Loại**: Bảo mật mã nguồn (Security / Hardening)
+- **File**: `README.md`, `nghiepvu.md`, `tiendo.md`
+- **Mô tả**:
+  1. Xóa toàn bộ khối khai báo `.env` và `JWT_SECRET` trong `README.md`, thay bằng hướng dẫn sao chép file an toàn `copy BE\.env.example BE\.env`.
+  2. Ẩn toàn bộ mật khẩu tài khoản trong bảng phân quyền của `README.md` và `nghiepvu.md`.
+  3. Commit và đẩy bản cập nhật bảo mật lên GitHub repository `https://github.com/phucbk29042004/DATN.git`.
+- **Kết quả**: Tài liệu công khai trên GitHub không còn chứa bất kỳ thông tin nhạy cảm nào.
+
 ### [09/11/2026 20:13] — Thiết Lập .gitignore, Khởi Tạo Git & Đẩy Thành Công Toàn Bộ Mã Nguồn Lên GitHub
 - **Loại**: Quản trị mã nguồn (DevOps / Git)
 - **File**: `.gitignore`, `BE/.env.example`, `README.md`, `tiendo.md`

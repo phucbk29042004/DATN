@@ -72,12 +72,8 @@ Hệ thống được thiết kế phục vụ 2 nhóm đối tượng người 
 ### 2.1. Quản trị viên hệ thống (Admin / DevOps Lead)
 - **Mục tiêu**: Đảm bảo pipeline thu thập log hoạt động ổn định không bị nghẽn, kiểm soát tài nguyên lưu trữ, thiết lập chính sách cảnh báo và phân quyền.
 - **Quyền hạn**: Toàn quyền trên toàn bộ các tính năng, bao gồm các hành động can thiệp cấu hình và dọn dẹp dữ liệu.
-- **Tài khoản mẫu**: `admin` / mật khẩu: `admin123`.
-
-### 2.2. Kỹ sư giám sát / Lập trình viên (Viewer / SOC Analyst / Developer)
-- **Mục tiêu**: Theo dõi tình trạng vận hành của ứng dụng theo thời gian thực, phát hiện lỗi phát sinh, nắm bắt nguyên nhân gốc và cập nhật tiến độ khắc phục sự cố.
-- **Quyền hạn**: Được cấp quyền tra cứu, xem biểu đồ, đọc phân tích AI, tiếp nhận sự cố (ACK) và ghi chú; không được phép thay đổi cấu hình hệ thống hoặc xóa log.
-- **Tài khoản mẫu**: `viewer` / mật khẩu: `viewer123`.
+- **Tài khoản mẫu**: `admin` / mật khẩu khởi tạo nội bộ.
+- **Tài khoản mẫu**: `viewer` / mật khẩu khởi tạo nội bộ.
 
 ---
 

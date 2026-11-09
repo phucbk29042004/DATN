@@ -28,28 +28,12 @@ Hệ thống được thiết kế theo kiến trúc **Microservices & Event-Dri
    - **Python**: Phiên bản 3.9+ (nếu chạy mô hình học máy ML).
    - **Redis**: Đã cài đặt trên máy tính (hoặc chạy qua Docker).
    - **OpenSearch**: Phiên bản 2.x (khuyến nghị `2.19.6`).
-2. **Cấu hình file biến môi trường (`d:\DATN\BE\.env`)**:
-   - Đảm bảo file `BE/.env` đã có đầy đủ các cấu hình sau:
-     ```env
-     PORT=5000
-     COLLECTOR_PORT=4000
-     REDIS_HOST=localhost
-     REDIS_PORT=6379
-     OPENSEARCH_NODE=http://localhost:9200
-     JWT_SECRET=logpulse_jwt_secret_datn_2026_super_secure_key
-
-     # Cảnh báo Discord & Gmail SMTP
-     DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/your_webhook_here
-     SMTP_HOST=smtp.gmail.com
-     SMTP_PORT=587
-     SMTP_USERNAME=your_email@gmail.com
-     SMTP_PASSWORD=your_app_password_here
-     ADMIN_EMAIL=your_email@gmail.com
-
-     # Trợ lý AI LogPulse Copilot
-     GROQ_API_KEY=your_groq_api_key_here
-     GEMINI_API_KEY=your_gemini_api_key_here
+2. **Cấu hình biến môi trường (`BE/.env`)**:
+   - Sao chép file cấu hình mẫu `BE/.env.example` thành `BE/.env`:
+     ```powershell
+     copy BE\.env.example BE\.env
      ```
+   - Cập nhật các thông số kết nối, tài khoản, khóa API cá nhân (Groq/Gemini) và kênh cảnh báo vào file `BE/.env` nội bộ trên máy của bạn (file này đã được đưa vào `.gitignore` để bảo mật tuyệt đối, không chia sẻ lên kho công khai).
 
 ---
 
@@ -177,14 +161,14 @@ Ngay sau khi lệnh chạy, log thật từ tập dữ liệu HDFS sẽ được
 
 ## 🔐 THÔNG TIN TÀI KHOẢN ĐĂNG NHẬP & PHÂN QUYỀN (RBAC)
 
-Hệ thống tích hợp sẵn 2 tài khoản mẫu phục vụ thử nghiệm và thuyết trình đồ án:
+Hệ thống hỗ trợ cơ chế xác thực JWT và phân quyền theo vai trò (Role-Based Access Control):
 
-| Tài Khoản | Mật Khẩu | Vai Trò (Role) | Quyền Hạn Thực Tế |
+| Tài Khoản | Mật Khẩu Khởi Tạo | Vai Trò (Role) | Quyền Hạn Thực Tế |
 | :--- | :--- | :---: | :--- |
-| **`admin`** | `admin123` | **Quản Trị Viên (Admin)** | **Toàn quyền:** Quản lý cấu hình rule, thêm/xóa từ khóa cảnh báo động, kích hoạt chế độ bảo trì (Silence), dọn dẹp log quá hạn (Retention), kích hoạt gửi Daily Digest tức thì, đổi trạng thái sự cố. |
-| **`viewer`** | `viewer123` | **Người Giám Sát (Viewer)** | **Chỉ xem:** Tra cứu và tìm kiếm log, xem biểu đồ, theo dõi sức khỏe pipeline, hỏi đáp cùng trợ lý AI Copilot. Các nút lưu cấu hình quản trị sẽ tự động bị khóa và ẩn. |
+| **`admin`** | *Khởi tạo nội bộ qua AuthService* | **Quản Trị Viên (Admin)** | **Toàn quyền:** Quản lý cấu hình rule, thêm/xóa từ khóa cảnh báo động, kích hoạt chế độ bảo trì (Silence), dọn dẹp log quá hạn (Retention), kích hoạt gửi Daily Digest tức thì, đổi trạng thái sự cố. |
+| **`viewer`** | *Khởi tạo nội bộ qua AuthService* | **Người Giám Sát (Viewer)** | **Chỉ xem:** Tra cứu và tìm kiếm log, xem biểu đồ, theo dõi sức khỏe pipeline, hỏi đáp cùng trợ lý AI Copilot. Các nút lưu cấu hình quản trị sẽ tự động bị khóa và ẩn. |
 
-> 💡 **Mẹo Demo Nhanh:** Tại Modal Đăng nhập, hệ thống trang bị sẵn 2 nút **"Quick Login (Admin)"** và **"Quick Login (Viewer)"** cho phép chuyển đổi vai trò ngay lập tức chỉ với 1 cú click chuột mà không cần gõ bàn phím!
+> 💡 **Lưu ý bảo mật:** Thông tin mật khẩu được mã hóa và quản lý nội bộ. Trong môi trường phát triển (Development), hệ thống trang bị sẵn 2 nút chuyển vai trò nhanh trên giao diện để thuận tiện thao tác demo.
 
 ---
 
