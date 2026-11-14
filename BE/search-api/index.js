@@ -15,7 +15,7 @@ import {
 } from './opensearchQueries.js';
 import { chatWithAI, explainLog } from './aiService.js';
 import { alertConfig, dispatchAlerts, sendDiscordAlert, sendEmailAlert, setMaintenanceMode, getMaintenanceMode } from './alertService.js';
-import { loginUser, authenticateToken, requireAdmin, optionalAuth } from './authService.js';
+import { loginUser, changePassword, authenticateToken, requireAdmin, optionalAuth } from './authService.js';
 import { getPipelineHealth, recordPipelineLog } from './pipelineMetrics.js';
 import { updateIncidentStatus, addIncidentNote, enrichAnomaliesWithIncidentState } from './incidentService.js';
 import { cronConfig, sendDailyDigestReport, runLogRetentionCleanup, initCronJobs, reloadCronJobs } from './cronService.js';
@@ -43,12 +43,6 @@ const io = new SocketIOServer(httpServer, {
 // Cache in-memory để broadcast log mới qua Socket.IO
 const recentLogBuffer = [];
 const MAX_BUFFER = 200;
-
-// --- Multi-Channel Alert Dispatcher (Discord & Email) ---
-// Backward compatibility cho các module khác có thể còn import sendTelegramAlert
-export async function sendTelegramAlert(logEntry) {
-  return dispatchAlerts(logEntry);
-}
 
 /**
  * Hàm này được gọi bởi Parser Worker (thông qua import) mỗi khi
@@ -119,6 +113,17 @@ app.post('/api/v1/auth/login', async (req, res) => {
 
 app.get('/api/v1/auth/me', authenticateToken, (req, res) => {
   return res.status(200).json({ user: req.user });
+});
+
+app.post('/api/v1/auth/change-password', authenticateToken, async (req, res) => {
+  try {
+    const { currentPassword, oldPassword, newPassword } = req.body;
+    const currentPass = currentPassword || oldPassword;
+    const result = await changePassword(req.user.id, currentPass, newPassword);
+    return res.status(200).json(result);
+  } catch (err) {
+    return res.status(400).json({ error: err.message });
+  }
 });
 
 // ── PIPELINE HEALTH & BULLMQ QUEUE METRICS ────────────────────────────────────
@@ -420,16 +425,30 @@ app.get('/api/v1/export/csv', async (req, res) => {
  */
 app.post('/api/v1/ai/chat', async (req, res) => {
   try {
-    const { messages, systemContext } = req.body;
+    let { messages, query, systemContext } = req.body;
+    if (!messages && query) {
+      messages = [{ role: 'user', content: query }];
+    }
     if (!Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ error: 'Thiếu nội dung tin nhắn (messages)' });
     }
     const result = await chatWithAI(messages, systemContext || '');
-    return res.status(200).json({ reply: result.text, provider: result.provider });
+    return res.status(200).json({ reply: result.text, answer: result.text, provider: result.provider });
   } catch (err) {
     console.error('[AI Chat Error]:', err.message);
     return res.status(500).json({ error: err.message || 'AI Assistant không phản hồi' });
   }
+});
+
+// Alias cho các client có thể còn gọi /api/v1/ai/query
+app.post('/api/v1/ai/query', (req, res) => {
+  let { messages, query, systemContext } = req.body;
+  if (!messages && query) {
+    messages = [{ role: 'user', content: query }];
+  }
+  return chatWithAI(messages || [], systemContext || '')
+    .then(result => res.status(200).json({ reply: result.text, answer: result.text, provider: result.provider }))
+    .catch(err => res.status(500).json({ error: err.message || 'AI Assistant không phản hồi' }));
 });
 
 // ── POST /api/v1/ai/explain-log ──────────────────────────────────────────────

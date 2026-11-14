@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
-  CalendarClock, X, Play, RefreshCw, Trash2, CheckCircle2, 
-  AlertCircle, Clock, ShieldCheck, Mail, MessageSquare, Database, Sparkles, Send
+  CalendarClock, X, Play, RefreshCw, Trash2, 
+  Clock, Mail, MessageSquare, Database, Sparkles, Send
 } from 'lucide-react';
 
 export default function CronJobsModal({

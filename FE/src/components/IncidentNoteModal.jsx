@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, Send, X, Clock, User, CheckCircle2 } from 'lucide-react';
+import { FileText, Send, X, Clock, User } from 'lucide-react';
 
 export default function IncidentNoteModal({ isOpen, onClose, anomaly, onAddNote, lang }) {
   const [noteText, setNoteText] = useState('');

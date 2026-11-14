@@ -80,6 +80,11 @@ export const logParserWorker = new Worker(
       return;
     }
 
+    // Gắn receivedAt từ Collector để tính toán độ trễ (latency) thời gian thực của pipeline
+    if (receivedAt) {
+      normalizedLog.receivedAt = receivedAt;
+    }
+
     // 2. Per-log Rule-based check (sync, nhanh) — gắn is_anomaly vào document trước khi lưu OpenSearch
     const ruleCheck = checkLogLineSingle(normalizedLog);
     if (ruleCheck.is_anomaly) {

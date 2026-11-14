@@ -67,7 +67,7 @@ export const AuthProvider = ({ children }) => {
   const changePassword = async (oldPassword, newPassword) => {
     return await apiClient('/api/v1/auth/change-password', {
       method: 'POST',
-      body: JSON.stringify({ oldPassword, newPassword }),
+      body: JSON.stringify({ currentPassword: oldPassword, oldPassword, newPassword }),
     });
   };
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   Settings, X, Bell, Send, BellOff, ShieldAlert,
-  Calendar, Database, Plus, Trash2, RefreshCw, Eye, Download, FileSpreadsheet
+  Calendar, Database, Plus, Trash2, RefreshCw, Eye, FileSpreadsheet
 } from 'lucide-react';
 import { translations } from '../i18n.js';
 

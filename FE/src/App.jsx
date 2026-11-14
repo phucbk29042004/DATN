@@ -832,8 +832,13 @@ export default function App() {
     if (activeTab === 'templates' && templates === null) fetchTemplates();
     if (activeTab === 'search' && searchResults === null) handleSearch(false);
     if (activeTab === 'pipeline') fetchPipelineHealth();
-    if (activeTab === 'settings') fetchConfig();
-  }, [activeTab, anomalies, templates, searchResults, fetchAnomalies, fetchTemplates, handleSearch, fetchPipelineHealth, fetchConfig]);
+  }, [activeTab, anomalies, templates, searchResults, fetchAnomalies, fetchTemplates, handleSearch, fetchPipelineHealth]);
+
+  useEffect(() => {
+    if (isAdminSettingsOpen || isCronJobsModalOpen) {
+      fetchConfig();
+    }
+  }, [isAdminSettingsOpen, isCronJobsModalOpen, fetchConfig]);
 
   // ── Filtered Logs (Table) ────────────────────────────────────────────────
   const filteredLogs = realtimeLogs.filter(log => {

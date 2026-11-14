@@ -27,7 +27,14 @@ export const apiClient = async (endpoint, options = {}) => {
   const baseUrl = await getServerUrl();
   const token = await getAuthToken();
 
-  const url = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint}`;
+  let normalizedPath = endpoint;
+  if (!endpoint.startsWith('http')) {
+    if (!endpoint.startsWith('/api/v1') && !endpoint.startsWith('/health')) {
+      normalizedPath = `/api/v1${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+    }
+  }
+
+  const url = endpoint.startsWith('http') ? endpoint : `${baseUrl}${normalizedPath}`;
 
   const headers = {
     'Content-Type': 'application/json',

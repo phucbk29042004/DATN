@@ -67,6 +67,35 @@ export async function loginUser(username, password) {
 }
 
 /**
+ * Đổi mật khẩu người dùng
+ * @param {string} userId 
+ * @param {string} currentPassword 
+ * @param {string} newPassword 
+ */
+export async function changePassword(userId, currentPassword, newPassword) {
+  if (!userId || !currentPassword || !newPassword) {
+    throw new Error('Vui lòng điền đầy đủ mật khẩu hiện tại và mật khẩu mới');
+  }
+
+  if (newPassword.length < 6) {
+    throw new Error('Mật khẩu mới phải có ít nhất 6 ký tự');
+  }
+
+  const user = USERS.find(u => u.id === userId);
+  if (!user) {
+    throw new Error('Không tìm thấy tài khoản người dùng');
+  }
+
+  const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!isMatch) {
+    throw new Error('Mật khẩu hiện tại không chính xác');
+  }
+
+  user.passwordHash = bcrypt.hashSync(newPassword, 10);
+  return { success: true, message: 'Đổi mật khẩu thành công' };
+}
+
+/**
  * Middleware xác thực JWT Token từ Header Authorization: Bearer <token>
  */
 export function authenticateToken(req, res, next) {

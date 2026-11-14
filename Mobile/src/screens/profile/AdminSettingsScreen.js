@@ -31,7 +31,7 @@ export default function AdminSettingsScreen({ navigation }) {
   useEffect(() => {
     (async () => {
       try {
-        const config = await apiClient('/config/notifications').catch(() => ({}));
+        const config = await apiClient('/config').catch(() => ({}));
         if (config) {
           setDiscordWebhookUrl(config.discordWebhookUrl || '');
           setDiscordEnabled(!!config.discordEnabled);
@@ -50,7 +50,7 @@ export default function AdminSettingsScreen({ navigation }) {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await apiClient('/config/notifications', {
+      await apiClient('/config', {
         method: 'POST',
         body: JSON.stringify({
           discordWebhookUrl,
@@ -80,8 +80,9 @@ export default function AdminSettingsScreen({ navigation }) {
           style: 'destructive',
           onPress: async () => {
             try {
-              const res = await apiClient(`/logs/retention-cleanup?days=${retentionDays}`, {
+              const res = await apiClient('/storage/retention/cleanup', {
                 method: 'POST',
+                body: JSON.stringify({ days: parseInt(retentionDays, 10) || 30 }),
               });
               Alert.alert('Thành công', `Đã dọn dẹp ${res.deletedCount || 0} bản ghi log cũ!`);
             } catch (err) {

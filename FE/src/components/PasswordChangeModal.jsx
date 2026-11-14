@@ -26,7 +26,7 @@ export default function PasswordChangeModal({ isOpen, onClose, currentUser, addT
     }
 
     setLoading(true);
-    const token = localStorage.getItem('logpulse_auth_token');
+    const token = sessionStorage.getItem('logpulse_auth_token') || localStorage.getItem('logpulse_auth_token');
     try {
       const res = await fetch(`${API_BASE}/auth/change-password`, {
         method: 'POST',
@@ -45,13 +45,7 @@ export default function PasswordChangeModal({ isOpen, onClose, currentUser, addT
       addToast('Đổi mật khẩu thành công!', 'success');
       onClose();
     } catch (err) {
-      // Nếu API backend chưa hỗ trợ endpoint này, vẫn báo thành công demo
-      if (err.message.includes('404') || err.message.includes('Failed to fetch')) {
-        addToast('Đã lưu mật khẩu mới cho tài khoản ' + (currentUser?.username || ''), 'success');
-        onClose();
-      } else {
-        setError(err.message);
-      }
+      setError(err.message);
     } finally {
       setLoading(false);
     }

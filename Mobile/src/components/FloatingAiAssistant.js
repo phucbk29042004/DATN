@@ -43,15 +43,15 @@ export default function FloatingAiAssistant() {
     setLoading(true);
 
     try {
-      const res = await apiClient('/api/v1/ai/query', {
+      const res = await apiClient('/api/v1/ai/chat', {
         method: 'POST',
         body: JSON.stringify({
-          query: userQuery,
-          userRole: currentUser?.role || 'viewer',
+          messages: [{ role: 'user', content: userQuery }],
+          systemContext: `Người dùng: ${currentUser?.displayName || 'Ẩn danh'} (${currentUser?.role || 'viewer'})`,
         }),
       });
 
-      const cleanAnswer = (res.answer || 'Không thể lấy phản hồi từ AI')
+      const cleanAnswer = (res.reply || res.answer || 'Không thể lấy phản hồi từ AI')
         .replace(/[*#]/g, '') // Lọc sạch markdown hoa thị theo quy chuẩn dự án
         .trim();
 

@@ -118,7 +118,7 @@ Nếu bạn muốn mở từng terminal riêng biệt để quan sát chi tiết
 Nếu muốn hệ thống phân loại bất thường bằng mô hình học máy chuyên sâu:
 ```powershell
 cd d:\DATN\BE
-python anomaly-engine/ml_api.py
+python anomaly-engine/ml-models/ml_api.py
 ```
 *(Dịch vụ FastAPI sẽ lắng nghe tại cổng `http://localhost:8000`)*
 
