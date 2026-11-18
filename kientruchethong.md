@@ -30,7 +30,7 @@ graph TD
 | **AI Assistant Service** | Groq + Gemini REST API | N/A (tích hợp trong Search API :5000) | Trợ lý AI phân tích log, giải thích nguyên nhân bất thường, hỏi đáp tự do về giám sát hệ thống. Groq (primary) + Gemini (fallback) |
 | **Pipeline Health Service** | BullMQ API + Rolling Metrics | N/A (tích hợp trong Search API :5000) | Giám sát trạng thái hàng đợi BullMQ (waiting/active/failed), tính thông lượng throughput (log/s) & độ trễ pipeline |
 | **Authentication & RBAC** | JWT + bcryptjs | N/A (tích hợp trong Search API :5000) | Quản lý đăng nhập và phân quyền truy cập: Admin (toàn quyền) & Viewer (chỉ xem, khóa lưu cấu hình) |
-| **Incident Lifecycle Service** | In-memory + Persistent JSON Store | N/A (tích hợp trong Search API :5000) | Quản lý vòng đời sự cố (NEW/ACK/RESOLVED), ghi chú khắc phục, deduplication 60s & chế độ bảo trì (Silence) |
+| **Incident Lifecycle Service** | In-memory + Persistent JSON Store | N/A (tích hợp trong Search API :5000) | Quản lý vòng đời sự cố SRE chuẩn hóa (NEW ➔ ACK ➔ RESOLVED), phân loại mức độ ưu tiên (P1/P2/P3), lưu vết Root Cause & Action Taken, ghi chú điều tra (Viewer & Admin), deduplication 60s & chế độ bảo trì (Silence) |
 | **Cron & Retention Service** | node-cron + OpenSearch API | N/A (tích hợp trong Search API :5000) | Lập lịch tự động gửi Daily Digest lúc 08:00 (Discord + Email) & dọn dẹp log cũ quá hạn lúc 00:00 (Retention Policy) |
 
 ## 3. ML Training Pipeline (Offline — chạy 1 lần)

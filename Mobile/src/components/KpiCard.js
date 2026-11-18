@@ -1,19 +1,25 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 
-export default function KpiCard({ title, value, icon: Icon, color, subtitle }) {
+export default function KpiCard({ title, value, icon: Icon, color, subtitle, onPress }) {
   const { colors } = useTheme();
 
+  const ContainerComponent = onPress ? TouchableOpacity : View;
+
   return (
-    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+    <ContainerComponent
+      style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
+      onPress={onPress}
+      activeOpacity={0.75}
+    >
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.textSecondary }]} numberOfLines={1}>
           {title}
         </Text>
         {Icon && (
           <View style={[styles.iconWrapper, { backgroundColor: color ? `${color}18` : colors.primaryLight }]}>
-            <Icon size={16} color={color || colors.primary} />
+            <Icon size={15} color={color || colors.primary} />
           </View>
         )}
       </View>
@@ -25,15 +31,15 @@ export default function KpiCard({ title, value, icon: Icon, color, subtitle }) {
           {subtitle}
         </Text>
       ) : null}
-    </View>
+    </ContainerComponent>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    padding: 14,
-    borderRadius: 14,
+    padding: 12,
+    borderRadius: 12,
     borderWidth: 1,
     margin: 4,
   },
@@ -49,19 +55,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   iconWrapper: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
+    width: 26,
+    height: 26,
+    borderRadius: 7,
     alignItems: 'center',
     justifyContent: 'center',
   },
   value: {
-    fontSize: 20,
+    fontSize: 19,
     fontWeight: '700',
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 11,
+    fontSize: 10.5,
     marginTop: 4,
   },
 });

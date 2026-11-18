@@ -31,19 +31,14 @@ export default function AiAssistant({ lang, t, theme, currentUser, kpiStats }) {
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Position state with localStorage persistence
-  const [position, setPosition] = useState(() => {
+  // Position state: null by default (fixed bottom-right). Temporary drag only, never persisted.
+  const [position, setPosition] = useState(null);
+
+  useEffect(() => {
     try {
-      const saved = localStorage.getItem('logpulse_ai_fab_pos');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (typeof parsed.x === 'number' && typeof parsed.y === 'number') {
-          return parsed;
-        }
-      }
+      localStorage.removeItem('logpulse_ai_fab_pos');
     } catch (e) {}
-    return null;
-  });
+  }, []);
 
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef({ startX: 0, startY: 0, posX: 0, posY: 0, hasMoved: false });
@@ -109,14 +104,6 @@ export default function AiAssistant({ lang, t, theme, currentUser, kpiStats }) {
       window.removeEventListener('mouseup', handleMouseUp);
 
       if (dragStartRef.current.hasMoved) {
-        setPosition(current => {
-          if (current) {
-            try {
-              localStorage.setItem('logpulse_ai_fab_pos', JSON.stringify(current));
-            } catch (err) {}
-          }
-          return current;
-        });
         setTimeout(() => {
           isDraggingRef.current = false;
         }, 80);
@@ -174,14 +161,6 @@ export default function AiAssistant({ lang, t, theme, currentUser, kpiStats }) {
       window.removeEventListener('touchend', handleTouchEnd);
 
       if (dragStartRef.current.hasMoved) {
-        setPosition(current => {
-          if (current) {
-            try {
-              localStorage.setItem('logpulse_ai_fab_pos', JSON.stringify(current));
-            } catch (err) {}
-          }
-          return current;
-        });
         setTimeout(() => {
           isDraggingRef.current = false;
         }, 80);
@@ -195,36 +174,25 @@ export default function AiAssistant({ lang, t, theme, currentUser, kpiStats }) {
     window.addEventListener('touchend', handleTouchEnd);
   };
 
-  // Compute smart drawer position near the dragged icon
+  // Fixed drawer at bottom-right corner
   const getDrawerStyle = () => {
-    if (!position) return {};
     const width = Math.min(380, window.innerWidth - 32);
     const height = Math.min(560, window.innerHeight - 32);
-
-    let left = position.x;
-    if (position.x > window.innerWidth / 2) {
-      left = position.x + 52 - width;
-    }
-    if (left < 16) left = 16;
-    if (left + width > window.innerWidth - 16) left = window.innerWidth - width - 16;
-
-    let top = position.y - height - 12;
-    if (top < 16) {
-      top = position.y + 60;
-    }
-    if (top + height > window.innerHeight - 16) {
-      top = window.innerHeight - height - 16;
-    }
-    if (top < 16) top = 16;
-
     return {
       position: 'fixed',
-      left: `${left}px`,
-      top: `${top}px`,
-      bottom: 'auto',
-      right: 'auto',
-      width: `${width}px`
+      right: '24px',
+      bottom: '24px',
+      left: 'auto',
+      top: 'auto',
+      width: `${width}px`,
+      maxHeight: `${height}px`,
+      zIndex: 9999
     };
+  };
+
+  const handleCloseChat = () => {
+    setIsOpen(false);
+    setPosition(null); // Reset FAB icon back to default bottom-right position
   };
 
   // Auto-scroll to bottom when messages change
@@ -359,7 +327,7 @@ export default function AiAssistant({ lang, t, theme, currentUser, kpiStats }) {
               </button>
               <button
                 className="ai-header-btn"
-                onClick={() => setIsOpen(false)}
+                onClick={handleCloseChat}
                 title={isVi ? 'Đóng' : 'Close'}
                 aria-label="Close AI"
               >

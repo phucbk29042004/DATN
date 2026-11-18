@@ -71,11 +71,13 @@ Xây dựng một hệ thống phân tích log tập trung có khả năng: **th
 | Ngôn ngữ Backend | **Node.js (ES6+)** | Express (đang sử dụng) |
 | Hàng đợi tin nhắn | **Redis + BullMQ** | Redis AOF persistence để không mất job khi restart |
 | Lưu trữ & lập chỉ mục | **OpenSearch** | Đã chốt — KHÔNG dùng Elasticsearch hay Loki. |
-| Truyền tải Realtime | **Socket.IO** | Backend đẩy sự kiện `new_log` trực tiếp đến giao diện |
+| Truyền tải Realtime | **Socket.IO** | Backend đẩy sự kiện `new_log` trực tiếp đến giao diện Web và Mobile |
 | Frontend / Dashboard | **React.js + Vite** | Thiết kế UI/UX hiện đại (Linear/Vercel style), Dark/Light mode |
 | Ứng dụng Di động | **Expo (React Native)** | Ứng dụng Mobile 5 Tabs, Role-based navigation, Socket.IO realtime, Trợ lý AI Bubble |
-| Tính năng phụ trợ | **Export CSV** | Hỗ trợ xuất dữ liệu log và anomaly ra CSV |
-| Cảnh báo | **Telegram Bot API** | Gửi tin nhắn tự động khi phát hiện log mức FATAL/điểm Anomaly cao |
+| Tính năng phụ trợ | **Export CSV / XLSX** | Hỗ trợ xuất dữ liệu log và anomaly ra CSV |
+| Cảnh báo Đa kênh | **Discord Webhook + Gmail (SMTP)** | Gửi tin nhắn Rich Embed Discord và Email khẩn cấp miễn phí |
+| Trợ lý AI Phân tích | **Groq + Gemini API** | Phân tích nguyên nhân gốc rễ (RCA) và Chatbot giải đáp tự do |
+| Quản lý sự cố | **SRE Incident Lifecycle** | Phân loại Priority (P1/P2/P3), Root Cause, Action Taken, Investigation Notes |
 
 ## 7. Anomaly Detection Engine — 3 phương pháp (bắt buộc cả 3, tăng dần độ sâu)
 
@@ -107,15 +109,15 @@ Agent cần tuân thủ/cài đặt các cơ chế sau:
 |---|---|---|
 | 1-3 | Khảo sát, phân tích yêu cầu, xác định kiến trúc | [X] Hoàn thành |
 | 4-5 | Thiết kế DB + Xây Log Collector, Redis/BullMQ | [X] Hoàn thành |
-| 6 | Xây Parser chuẩn hóa + Drain | [X] Hoàn thành cơ bản |
+| 6 | Xây Parser chuẩn hóa + Drain | [X] Hoàn thành |
 | 7 | Triển khai OpenSearch | [X] Hoàn thành |
 | 8 | Xây Search API (lọc mức độ, dịch vụ, xuất CSV) | [X] Hoàn thành |
-| 9 | Xây Anomaly Detection Engine (Rule, Drain, ML) | [ ] Đang thực hiện |
-| 10 | Xây Dashboard (React/Vite) + Telegram Bot + Socket.IO | [X] Hoàn thành |
-| 11 | Chuẩn bị dữ liệu: tiền xử lý HDFS/BGL | [ ] Chưa làm |
-| 12 | Tích hợp toàn bộ pipeline end-to-end, kiểm tra luồng dữ liệu HDFS/BGL đầu cuối | [ ] Chưa làm |
-| 13 | Kiểm thử: benchmark hiệu năng, tính Precision/Recall | [ ] Chưa làm |
-| 14-15| Tối ưu hệ thống, viết báo cáo & bảo vệ | [ ] Chưa làm |
+| 9 | Xây Anomaly Detection Engine (Rule, Drain, ML) | [X] Hoàn thành |
+| 10 | Xây Dashboard (React/Vite) + Mobile App (Expo SDK 58) + Cảnh báo đa kênh + Socket.IO | [X] Hoàn thành |
+| 11 | Chuẩn bị dữ liệu: tiền xử lý HDFS/BGL, trích xuất Drain vector | [X] Hoàn thành |
+| 12 | Tích hợp toàn bộ pipeline end-to-end, stream dữ liệu thật HDFS/BGL | [X] Hoàn thành |
+| 13 | Quản lý vòng đời sự cố SRE (P1/P2/P3, RCA, Actions), Viewer Triage & AI Copilot | [X] Hoàn thành |
+| 14-15| Kiểm thử hiệu năng, tối ưu hệ thống, viết báo cáo & bảo vệ | [ ] Đang thực hiện |
 
 ## 11. Nguyên tắc làm việc cho AI Agent
 

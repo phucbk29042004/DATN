@@ -53,6 +53,36 @@ export default function AnomalyCard({ item, onUpdateStatus, onAddNote, onPress }
               {level}
             </Text>
           </View>
+          {(item.incident_priority || item.priority) && (
+            <View style={[
+              styles.priorityBadge,
+              {
+                backgroundColor: (item.incident_priority || item.priority) === 'P1'
+                  ? 'rgba(239, 68, 68, 0.15)'
+                  : (item.incident_priority || item.priority) === 'P2'
+                  ? 'rgba(245, 158, 11, 0.15)'
+                  : 'rgba(59, 130, 246, 0.15)',
+                borderColor: (item.incident_priority || item.priority) === 'P1'
+                  ? '#ef4444'
+                  : (item.incident_priority || item.priority) === 'P2'
+                  ? '#f59e0b'
+                  : '#3b82f6',
+              }
+            ]}>
+              <Text style={[
+                styles.priorityText,
+                {
+                  color: (item.incident_priority || item.priority) === 'P1'
+                    ? '#ef4444'
+                    : (item.incident_priority || item.priority) === 'P2'
+                    ? '#f59e0b'
+                    : '#3b82f6',
+                }
+              ]}>
+                {item.incident_priority || item.priority}
+              </Text>
+            </View>
+          )}
         </View>
         <Text style={[styles.scoreText, { color: colors.danger }]}>
           {scorePercent}
@@ -149,6 +179,16 @@ const styles = StyleSheet.create({
   levelText: {
     fontSize: 10,
     fontWeight: '700',
+  },
+  priorityBadge: {
+    paddingHorizontal: 5,
+    paddingVertical: 1.5,
+    borderRadius: 4,
+    borderWidth: 1,
+  },
+  priorityText: {
+    fontSize: 9.5,
+    fontWeight: '800',
   },
   scoreText: {
     fontSize: 13.5,

@@ -1,11 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
-// Mặc định: Máy ảo Android dùng 10.0.2.2, iOS simulator dùng localhost, hoặc IP LAN
-const DEFAULT_HOST = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+// Mặc định: Kết nối trực tiếp qua IP Hotspot iPhone 172.20.10.8
+export const CURRENT_LAN_IP = '172.20.10.8';
+export const LOCAL_API_BASE = `http://${CURRENT_LAN_IP}:5000`;
+export const NGROK_SERVER_URL = 'https://job-observing-corporal.ngrok-free.dev';
 
-export const DEFAULT_API_BASE = `http://${DEFAULT_HOST}:5000`;
-export const DEFAULT_COLLECTOR_BASE = `http://${DEFAULT_HOST}:4000`;
+export const DEFAULT_API_BASE = `http://${CURRENT_LAN_IP}:5000`;
+export const DEFAULT_COLLECTOR_BASE = `http://${CURRENT_LAN_IP}:4000`;
 
 const SERVER_URL_KEY = 'LOGPULSE_MOBILE_SERVER_URL';
 

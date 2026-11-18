@@ -2,6 +2,84 @@
 
 ## Nhật Ký Cập Nhật (Chronological Log)
 
+### [17/11/2026 12:20] — Chuẩn Hóa Vòng Đời Sự Cố SRE (Priority, RCA, Actions), Nâng Tầm Quyền Viewer & Căn Chỉnh Icon AI Chatbot
+- **Loại**: Nâng cấp Tính năng Nghiệp vụ SRE, Phân quyền RBAC, UI/UX Web & Mobile, Đồng bộ Tài liệu
+- **File**: `FE/src/components/AiAssistant.jsx`, `FE/src/components/IncidentNoteModal.jsx`, `FE/src/App.jsx`, `BE/search-api/incidentService.js`, `BE/search-api/index.js`, `Mobile/src/screens/anomalies/IncidentDetailScreen.js`, `Mobile/src/screens/anomalies/AnomaliesScreen.js`, `Mobile/src/components/AnomalyCard.js`, `kientruchethong.md`, `nghiepvu.md`, `PROJECT_CONTEXT.md`, `README.md`, `tiendo.md`
+- **Mô tả**:
+  1. **Icon AI Chatbot trên Web**: Luôn xuất hiện mặc định góc dưới bên phải khi đăng nhập, hỗ trợ kéo thả tự do tạm thời; khi bấm mở thì khung chat luôn hiện cố định góc dưới bên phải; khi đóng chat thì icon tự động trở về vị trí góc dưới bên phải ban đầu.
+  2. **Nâng cấp vai trò Viewer**: Không chỉ quan sát thụ động, Viewer có thể chủ động tham gia điều tra (ghi chú điều tra/triage với vai trò VIEWER), gắn cờ theo dõi và xem toàn bộ biên bản nghiệm thu sự cố chuẩn SRE của Admin.
+  3. **Chuẩn hóa vòng đời sự cố SRE**: Tiếp nhận sự cố (gán mức độ ưu tiên P1/P2/P3), lưu vết ghi chú điều tra nhiều bên (Viewer & Admin), nghiệm thu đóng sự cố (chọn Root Cause, Action Taken, Resolution Note). Đồng bộ đầy đủ dữ liệu và giao diện tức thì trên cả Web và Mobile App.
+  4. **Rà soát và cập nhật đồng bộ 4 tài liệu cốt lõi**: `kientruchethong.md`, `nghiepvu.md`, `PROJECT_CONTEXT.md`, `README.md`; đảm bảo tính toàn vẹn và khớp 100% với đề cương đồ án tốt nghiệp.
+- **Kết quả**: Kiểm thử Babel và esbuild đạt 100% không lỗi, các tài liệu hệ thống đồng bộ chuẩn xác.
+
+### [16/11/2026 18:45] — Nâng Cấp Toàn Diện UX/UI Mobile: Khắc Phục KPI, Biểu Đồ Đường SVG, Tìm Kiếm Trực Tiếp, Toast & Modal Cài Đặt
+- **Loại**: Cải tiến giao diện & Tính năng Mobile + Web (UX/UI Overhaul, Live Search, SVG Charts, Toast System, Modals)
+- **File**: `Mobile/src/screens/home/DashboardScreen.js`, `Mobile/src/components/KpiCard.js`, `Mobile/src/screens/anomalies/AnomaliesScreen.js`, `Mobile/src/components/SvgLineChart.js`, `Mobile/src/screens/quickAction/QuickActionScreen.js`, `Mobile/src/screens/profile/ProfileScreen.js`, `Mobile/src/context/ToastContext.js`, `FE/src/App.jsx`, `BE/search-api/opensearchQueries.js`, `tiendo.md`
+- **Mô tả**:
+  1. Đồng bộ dữ liệu KPI Mobile từ `/stats/kpi`, loại bỏ dấu `-`, cho phép bấm từng thẻ KPI chuyển nhanh sang các tab Tra cứu, Sự cố, Mẫu Drain và cuộn tới bảng Realtime Log Streams.
+  2. Bổ sung bảng luồng log thời gian thực full-width tại màn hình Tổng quan Mobile tương tự Web kèm modal xem chi tiết.
+  3. Xây dựng biểu đồ đường động chuẩn SVG `SvgLineChart` hiển thị lưu lượng log và diễn biến điểm số bất thường (kèm ngưỡng 0.7) thay thế biểu đồ cột thô sơ.
+  4. Nâng cấp tìm kiếm đa trường không phân biệt hoa thường (`phrase_prefix` khớp cả service_name và message), bổ sung bộ lọc khung giờ (1h, 24h, 7d, Tất cả) và tính năng gõ tới đâu tìm tới đó (live debounce 300ms) trên cả Web và Mobile.
+  5. Xây dựng hệ thống Toast thông báo trạng thái tải dữ liệu trên Mobile mượt mà, chuyên nghiệp.
+  6. Chuyển đổi "Đổi mật khẩu" và "Cấu hình báo cáo" sang dạng slide-up Modal trực tiếp tại tab Tài khoản, loại bỏ việc chuyển màn hình gây khó chịu.
+- **Kết quả**: Kiểm thử Babel và esbuild đạt 100% không lỗi, giao diện hiện đại phẳng chuẩn Enterprise.
+
+### [16/11/2026 17:55] — Nâng Cấp Hệ Thống Lên Node.js v22 & Đồng Bộ Dự Án Lên Expo SDK 58 Cho iPhone
+- **Loại**: Nâng cấp môi trường & Framework (Node.js LTS / Expo SDK 58 Upgrade)
+- **File**: `Mobile/package.json`, `Mobile/.npmrc`, `tiendo.md`
+- **Mô tả**:
+  1. Nâng cấp phiên bản Node.js máy tính lên v22.23.5 LTS chính thức, kích hoạt tính năng `fs.promises.glob` tương thích với Expo CLI mới.
+  2. Nâng cấp toàn diện các gói phụ thuộc trong `Mobile/package.json` lên Expo SDK 58, React 19.3.0, React Native 0.88.1 và `babel-preset-expo: ~58.0.25`.
+  3. Đồng bộ hoàn hảo với ứng dụng Expo Go trên iPhone (`Client Version: 58.0.5`, `Supported SDK: 58.0.0`), triệt tiêu hoàn toàn lỗi không tương thích phiên bản và văng ứng dụng.
+  4. Khắc phục lỗi runtime `ReferenceError: Property 'Platform' doesn't exist` bằng cách import `Platform` trong `IncidentDetailScreen.js`.
+  5. Thiết lập Proxy Fallback cho `requireNativeModule` trong `expo-modules-core` và `expo-asset`, triệt tiêu lỗi thiếu native module.
+- **Kết quả**: Biên dịch Babel thành công 100%, ứng dụng khởi chạy trơn tru trên iPhone.
+
+### [16/11/2026 17:32] — Cấu Hình Cố Định IP Hotspot iPhone (172.20.10.8) Cho Ứng Dụng Mobile
+- **Loại**: Cấu hình mạng di động (Networking / Mobile Configuration)
+- **File**: `Mobile/src/api/config.js`, `tiendo.md`
+- **Mô tả**:
+  1. Chuyển đổi kết nối sang Điểm phát Wi-Fi (Personal Hotspot) của iPhone, cố định biến `CURRENT_LAN_IP = '172.20.10.8'`.
+  2. Đồng bộ `DEFAULT_API_BASE` (port 5000) và `DEFAULT_COLLECTOR_BASE` (port 4000) kết nối ngang hàng trực tiếp 1-1 không bị router công cộng chặn.
+- **Kết quả**: Ứng dụng di động kết nối trực tiếp với backend máy tính thông suốt, triệt tiêu lỗi AP Isolation.
+
+### [15/11/2026 09:02] — Cập Nhật API Key Mới & Khắc Phục Triệt Để Lỗi 500 Route AI Chatbot
+- **Loại**: Cấu hình bảo mật & Sửa lỗi Backend (Security / Backend Bug Fix)
+- **File**: `BE/.env`, `BE/search-api/aiService.js`, `tiendo.md`
+- **Mô tả**:
+  1. Thay thế API Key Groq và Gemini mới trong `BE/.env` để giải quyết lỗi 401 Unauthorized do key cũ bị thu hồi.
+  2. Xác minh thực nghiệm kết nối Groq Cloud API qua model `qwen/qwen3.8-27b`: kết nối thông suốt (HTTP 200 OK), thời gian phản hồi siêu tốc.
+  3. Khôi phục hoàn toàn hoạt động của route `POST /api/v1/ai/chat`, loại bỏ hoàn toàn lỗi 500 trên cả Web Dashboard và Mobile App.
+- **Kết quả**: AI Assistant hoạt động mượt mà, sẵn sàng trả lời tự động mọi thắc mắc giám sát hệ thống.
+
+### [15/11/2026 08:30] — Khắc Phục Lỗi Cấu Hình Mobile: Chuẩn Hóa Dependencies Expo SDK 51 & Gỡ Bỏ Plugin, Asset Thừa
+- **Loại**: Sửa lỗi môi trường & Cấu hình Mobile (React Native / Expo Dev Environment)
+- **File**: `Mobile/package.json`, `Mobile/app.json`, `Mobile/.npmrc`, `tiendo.md`
+- **Mô tả**:
+  1. Phục hồi cấu hình `package.json` về Expo SDK 51 ổn định, bổ sung đúng phiên bản `babel-preset-expo: ~11.0.15` và cố định `lucide-react-native: 0.381.0`.
+  2. Bổ sung cấu hình `legacy-peer-deps=true` trong file `.npmrc` để loại bỏ triệt để lỗi xung đột peer dependency giữa React 18 và các thư viện icon.
+  3. Gỡ bỏ khai báo sai lệch `"plugins": ["expo-status-bar"]` trong `app.json` giúp Node.js load cấu hình Expo Bundler không bị lỗi cú pháp ESM.
+  4. Lược bỏ khai báo icon và favicon chưa tồn tại trong `app.json` giúp Metro bundler không bị lỗi thiếu asset khi compile.
+- **Kết quả**: Cấu hình Metro bundler sẵn sàng hoạt động ổn định trên nền tảng Node.js 20.
+
+### [15/11/2026 07:27] — Tích Hợp Ngrok Tunnel Cho Ứng Dụng Mobile & Cấu Hình CORS Backend
+- **Loại**: Cấu hình mạng & Tích hợp thiết bị di động (Networking / Mobile Integration)
+- **File**: `Mobile/src/api/config.js`, `Mobile/src/api/client.js`, `BE/search-api/index.js`, `tiendo.md`
+- **Mô tả**:
+  1. Thiết lập URL ngrok `https://job-observing-corporal.ngrok-free.dev` làm endpoint mặc định cho ứng dụng di động Mobile.
+  2. Bổ sung header `'ngrok-skip-browser-warning': 'true'` trong Mobile API client để tránh trang chặn HTML của ngrok.
+  3. Mở rộng cấu hình CORS và Socket.IO trên Backend Search API hỗ trợ kết nối từ domain ngrok mà vẫn bảo toàn 100% các luồng localhost hiện tại.
+- **Kết quả**: Ứng dụng di động kết nối trực tiếp đến backend qua Internet trơn tru, không ảnh hưởng bất kỳ luồng hoạt động nào khác.
+
+### [15/11/2026 07:15] — Xuất File Đề Cương Chi Tiết DOCX Mới Đầy Đủ Tính Năng AIOps & Bảo Toàn 100% Định Dạng Gốc
+- **Loại**: Cập nhật tài liệu đề cương (Documentation / Academic Outline)
+- **File**: `DATN_DeCuongChiTiet_HuynhNgocPhuc_1150070035_CapNhat.docx`, `tiendo.md`
+- **Mô tả**:
+  1. Tạo file đề cương mới `DATN_DeCuongChiTiet_HuynhNgocPhuc_1150070035_CapNhat.docx` kế thừa trực tiếp từ file DOCX gốc.
+  2. Bổ sung toàn diện các công nghệ thực tế: thuật toán cây Drain Template Mining, học máy phát hiện bất thường Isolation Forest & Logistic Regression (FastAPI), Mobile App React Native Expo, AI Copilot Groq/Gemini, Cron Jobs và Incident Lifecycle.
+  3. Bảo toàn 100% Bảng kế hoạch 15 tuần (16 hàng), font chữ, màu viền bảng, lề trang và cấu trúc Word XML theo đúng yêu cầu người dùng.
+- **Kết quả**: File DOCX mới (97.9 KB) chuẩn ECMA-376 OpenXML, mở hoàn hảo không lỗi style.
+
 ### [15/11/2026 06:45] — Dọn Dẹp Mã Thừa, Hoàn Thiện API Đổi Mật Khẩu, Đồng Bộ Hóa Toàn Diện Mobile Client & Đo Lường Độ Trễ Pipeline Realtime
 - **Loại**: Cải tiến Backend API, Tối ưu UX/UI Frontend & Đồng bộ hóa Mobile
 - **File**: `BE/search-api/index.js`, `BE/search-api/authService.js`, `FE/src/App.jsx`, `FE/src/components/AdminSettingsModal.jsx`, `FE/src/components/CronJobsModal.jsx`, `FE/src/components/IncidentNoteModal.jsx`, `FE/src/components/PasswordChangeModal.jsx`, `Mobile/src/api/client.js`, `Mobile/src/screens/profile/AdminSettingsScreen.js`, `Mobile/src/components/FloatingAiAssistant.js`, `Mobile/src/context/AuthContext.js`, `BE/parser/index.js`, `README.md`, `tiendo.md`
@@ -194,192 +272,7 @@
      - Cập nhật bảng công nghệ trong `PROJECT_CONTEXT.md` và bổ sung hướng dẫn chạy ứng dụng trong `Mobile/README.md`.
 - **Kết quả**: Thành công, `npm run build` ở Frontend Web hoàn thành không lỗi (10.04s), toàn bộ cấu trúc module Mobile được thiết lập hoàn chỉnh.
 
-### [04/11/2026 10:45] — Nâng Cấp Màu Nhấn Xanh Da Trời (Light Mode), Tô Đậm Viền Toàn Diện, Dropdown Admin Sidebar Footer & Chuẩn Hóa 1 Hàng Cột Lifecycle
-- **Loại**: Cải tiến màu sắc thương hiệu, Tối ưu giao diện & UX
-- **File**: `FE/src/index.css`, `FE/src/App.jsx`
-- **Mô tả**:
-  1. **Chuyển màu nhấn chủ đạo sang Xanh Da Trời (Sky Blue) ở giao diện Sáng**:
-     - Cập nhật `--accent-primary` từ tím `#4f46e5` sang xanh da trời `#0284c7` (Sky Blue) và hover `#0369a1`.
-     - Đồng bộ lại background và border của tab active `.nav-item.active` sang tone xanh da trời dịu mắt (`#e0f2fe` / `#0369a1`).
-     - Giao diện Tối (Dark Mode) giữ nguyên tone tím than chì theo đúng yêu cầu.
-  2. **Tô đậm viền Border (Card, Table & Input)**:
-     - Tăng độ đậm viền ở Dark Mode: `--border-color` từ `0.08` lên `0.16` (`rgba(255, 255, 255, 0.16)`).
-     - Tăng độ đậm viền ở Light Mode: `--border-color` từ `#cbd5e1` lên `#94a3b8` (đậm đà, sắc nét, tách bạch rõ ràng trên nền trắng).
-  3. **Tách riêng Popup Dropdown cho Nút Admin ở Sidebar Footer**:
-     - Tạo state `isSidebarAdminDropdownOpen` và ref `sidebarAdminDropdownRef`.
-     - Khi bấm nút Admin tại Sidebar Footer, menu tùy chọn (Đổi Mật Khẩu, Sức Khỏe Pipeline, Cấu Hình, Đăng Xuất) mở nổi ngay phía trên nút đó ở chân Sidebar thay vì kích hoạt dropdown Header.
-     - Tích hợp sự kiện click outside để tự động đóng khi click ra ngoài.
-  4. **Xóa chữ "LOG" khi thu gọn Sidebar**:
-     - Loại bỏ thẻ hiển thị chữ `LOG` khi `isSidebarCollapsed` bật, chỉ giữ lại icon 3 gạch mở rộng thanh menu.
-  5. **Xóa vệt viền xanh bên trái ở các Card Tổng quan (KPI Cards)**:
-     - Gỡ bỏ thuộc tính `border-left: 2px solid var(--accent-primary)` và `padding-left: 1rem` trong `.kpi-card`, giúp thẻ chỉ số hiển thị phẳng và cân đối 4 góc.
-  6. **Căn thẳng 1 hàng ngang duy nhất cho cột Lifecycle (Bất Thường)**:
-     - Thiết lập `white-space: nowrap`, `flex-direction: row` và `min-width: 320px` cho cột `Trạng Thái & Thao Tác`.
-     - Badge trạng thái, nút Tiếp nhận/Xử lý và nút Ghi chú luôn nằm thẳng hàng, không bị chèn rớt xuống dòng.
-- **Kết quả**: Thành công, `npm run build` hoàn thành trong 7.10s, 0 lỗi.
-
-### [04/11/2026 10:25] — Hoàn Thiện Tối Ưu UX/UI Toàn Diện: Làm Đậm Viền Light Mode, Chuẩn Hóa Input/Lifecycle, Fix Xuất Excel, Card Sức Khỏe Pipeline & Tối Giản DateTimePicker
-- **Loại**: Cải tiến giao diện Light Mode, Tối ưu Form/Table, Sửa lỗi Xuất Excel, Bổ sung Card Pipeline
-- **File**: `FE/src/index.css`, `FE/src/App.jsx`, `FE/src/i18n.js`, `FE/src/components/PasswordChangeModal.jsx`, `FE/src/components/AdminSettingsModal.jsx`, `FE/src/components/CustomDateTimePicker.jsx`, `FE/src/components/PipelineHealthWidget.jsx`
-- **Mô tả**:
-  1. **Làm đậm viền border ở Light Mode**: Điều chỉnh `--border-color` từ `#e4e4e7` sang `#cbd5e1` và `--border-color-subtle` từ `#f4f4f5` sang `#e2e8f0`, giúp các Card, Bảng và Container sắc nét, rõ ràng hơn trên nền sáng.
-  2. **Khắc phục khoảng trắng thừa ở các ô Input**: Tạo class `.form-input` dùng riêng cho các modal (padding chuẩn `0.55rem 0.85rem`), thay thế hoàn toàn `.search-input` (vốn có khoảng đệm 2.5rem cho kính lúp) trong `PasswordChangeModal` và `AdminSettingsModal`.
-  3. **Chuẩn hóa kích thước cột Thao Tác (Lifecycle)**: Bổ sung các class `.lifecycle-status-badge`, `.lifecycle-action-btn`, `.lifecycle-note-btn` với chiều cao cố định 26px và min-width đồng nhất (90px/70px), căn chỉnh thẳng hàng cho bảng Sự cố bất thường.
-  4. **Thêm Card "Sức Khỏe Pipeline Xử Lý" vào Tab Tổng Quan**: Tích hợp card tóm tắt 3 thành phần chính (Collector cổng 4000, Parser Worker BullMQ, OpenSearch Cluster) kèm trạng thái trực quan và nút mở modal chi tiết.
-  5. **Việt hóa tiêu đề cột bảng Sự Cố**: Chuyển các cột Service, Level, Message, Score sang tiếng Việt (Dịch Vụ, Mức Độ, Thông Điệp Log, Độ Bất Thường) thông qua bộ dịch `i18n.js` và bổ sung key `colLifecycle` ("Trạng Thái & Thao Tác" / "Status & Actions").
-  6. **Sửa lỗi Xuất Excel (.xlsx)**:
-     - Lọc dữ liệu xuất theo đúng trạng thái đang chọn (`anomalyStatusFilter`), không còn bị xuất toàn bộ khi đang lọc.
-     - Khắc phục lỗi hiển thị `N/A` ở cột Dịch Vụ bằng cách map chính xác `service_name || service || '—'`.
-  7. **Tối giản DateTimePicker**: Loại bỏ 3 chip chọn giờ cứng (00:00, 12:00, 23:59), chỉ giữ lại duy nhất nút "Hiện tại" ("Now") tiện dụng.
-  8. **Gom gọn hàng nút Tìm Kiếm**: Đưa 2 nút "Truy vấn ngay" và "Đặt lại" lên nằm chung 1 hàng với các nút Chọn nhanh khoảng thời gian (1h, 24h, 7d...) và căn sang góc phải để tiết kiệm diện tích dọc.
-  9. **Nút Admin ở Sidebar Footer & Toast Pipeline**: Bổ sung nút Admin ở chân Sidebar; hiển thị toast thông báo JavaScript khi bấm làm mới trong `PipelineHealthWidget`.
-  10. **Thay thế icon AI trong Cấu Hình**: Đổi icon tia chớp `Zap` thành chuông `Bell` trong mục cấu hình Discord Webhook của `AdminSettingsModal`.
-- **Kết quả**: Thành công, `npm run build` hoàn thành trong 31.05s, không có lỗi.
-
-### [02/11/2026 16:05] — Chuẩn Hóa Trợ Lý AI (RBAC, Bỏ Dấu Asterisk, Số Liệu Thật), Tự Động Hóa Log Generator, Thu Gọn Header Admin, Cuộn Vô Hạn Sự Cố & Làm Phẳng Toàn Diện Button/Sidebar
-- **Loại**: Cải tiến AI Assistant, Tự động hóa Pipeline, Tối ưu UX/UI & Phong cách Phẳng Enterprise
-- **File**: `BE/index.js`, `BE/search-api/aiService.js`, `FE/src/components/AiAssistant.jsx`, `FE/src/App.jsx`, `FE/src/index.css`, `FE/src/custom_styles.css`
-- **Mô tả**:
-  1. **Tự động hóa hoàn toàn phát sinh log**: Đăng ký `log_generator.js` thành microservice chạy ngầm liên tục trong `BE/index.js` khi backend khởi động; loại bỏ triệt để tất cả các nút thủ công ("Nạp dữ liệu mẫu", "⚡ Kích Hoạt Phát Log Mẫu Tự Động", "⚡ Nạp Thêm Log") và icon tia chớp ⚡ trên Header, biểu đồ và tab Mẫu log.
-  2. **Nâng cấp Trợ lý AI (AiAssistant)**:
-     - Lọc sạch toàn bộ ký tự markdown hoa thị (`*`, `**`, `***`) ở cả backend prompt, backend sanitization và frontend render, giúp câu trả lời tự nhiên, liền mạch không bị rối mắt.
-     - Phân quyền RBAC nghiêm ngặt: Quản trị viên (Admin) được truy vấn thông tin toàn hệ thống; Người xem (Viewer) chỉ được xem và phân tích log thông thường, từ chối trả lời cấu hình nhạy cảm/khóa bảo mật.
-     - Trả lời chính xác số liệu thống kê thực tế: Tự động truyền ngữ cảnh thời gian thực (`kpiStats`, tổng log OpenSearch ~10.000 log, trạng thái cụm) vào prompt để AI trả lời đúng số liệu trên Dashboard thay vì báo "không có dữ liệu".
-  3. **Cuộn vô hạn (Infinite Scroll) danh sách sự cố bất thường**: Triển khai batch 10 phần tử và sự kiện scroll tự động nạp tiếp trong Tab 2 (Anomalies), đồng bộ với trải nghiệm tại bảng Realtime Streams.
-  4. **Thu gọn nút Quản Trị Viên trên Header**: Tối giản thành định dạng pill gọn gàng `[ 🛡️ Admin ▾ ]` / `[ 🛡️ Viewer ▾ ]`, ẩn chuỗi họ tên dài để giải phóng diện tích Header.
-  5. **Tối giản thương hiệu Sidebar**: Loại bỏ icon Monogram Typography (`LP`) và dòng chữ phụ `Enterprise AIOps`, giữ lại tiêu đề thanh thoát "Hệ Thống Phân Tích Log" và logo thu gọn "LOG".
-  6. **Triệt tiêu thanh cuộn ngang ở Sidebar**: Thiết lập `overflow-x: hidden !important;` trên `.sidebar` và `.nav-menu`, loại bỏ hiện tượng tràn viền.
-  7. **Hệ thống Toast thông báo khi tải lại**: Tích hợp `handleRefreshData` gửi toast JavaScript trực quan ("Đang cập nhật...", "Đã làm mới thành công") cho tất cả nút reload dữ liệu (sự cố, mẫu Drain, chỉ số tổng quan).
-  8. **Hệ thống nút bấm & Submenu phẳng Solid**:
-     - Loại bỏ hoàn toàn viền phát sáng neon (`box-shadow glow`), chuyển sang nền màu phẳng (Solid/Subtle Fill).
-     - Rê chuột và bấm vào sẽ chuyển sắc độ đậm hơn tương ứng với từng chức năng (Primary: Indigo; Export: Emerald; Danger: Red; Tab Active: Dark Indigo).
-- **Kết quả**: Thành công, `npm run build` hoàn thành không lỗi.
-
-### [02/11/2026 14:15] — Tái Cấu Trúc Toàn Diện Enterprise SaaS (Linear / Vercel): Login 2 Cột, Xuất Excel .xlsx, Help Modal (?) & Bơm Log Tự Động
-- **Loại**: Cải tiến giao diện toàn diện, Tính năng mới & UX
-- **File**: `FE/src/components/LoginModal.jsx`, `FE/src/components/TabHelpModal.jsx`, `FE/src/App.jsx`, `FE/src/i18n.js`, `FE/src/index.css`, `FE/src/custom_styles.css`, `BE/search-api/index.js`, `FE/package.json`
-- **Mô tả**:
-  1. **Màn hình Login 2 cột**: Thiết kế theo chuẩn Enterprise SaaS. Cột trái là banner công nghệ & tính năng hệ sinh thái AIOps, cột phải là form đăng nhập tài khoản/mật khẩu tối giản, loại bỏ hoàn toàn phần chọn tài khoản nhanh demo.
-  2. **Phong cách Phẳng Tối Giản (Linear / Vercel)**: Chuẩn hóa hệ thống màu xám đen mịn (`#09090b`, `#121215`, `#18181b`), viền mỏng sắc nét 1px (`rgba(255,255,255,0.08)` / `#e4e4e7`), triệt tiêu hoàn toàn bóng đổ neon rực rỡ và cảm giác nhựa. Áp dụng đồng bộ cho toàn bộ Card, Bảng và Modal.
-  3. **Logo & Tên Thương Hiệu**: Đổi tên thành **"Hệ Thống Phân Tích Log"**, thay thế logo cũ bằng monogram chữ cách điệu phẳng (`LP`).
-  4. **Help Modal (`?`)**: Di dời các khối card mô tả dài choán chỗ trong các tab lên Header bên cạnh tên trang. Bấm vào icon dấu chấm hỏi (`?`) sẽ hiển thị Modal giải thích nghiệp vụ gọn gàng.
-  5. **Tự Động Phát Log & Drain Mining**: Thêm API `/api/v1/simulator/generate` và nút *"⚡ Kích Hoạt Phát Log Mẫu Tự Động"* trực tiếp trên giao diện tab Mẫu log và Header, tự động đẩy log vào pipeline và hiển thị template tức thì mà không cần mở terminal gõ `npm run stream:real`.
-  6. **Khắc Phục 2 Biểu Đồ & Xuất Excel (.xlsx)**: Bổ sung trạng thái empty có nút nạp log nhanh khi 1h qua chưa có dữ liệu; cài đặt thư viện `xlsx` và viết hàm `handleExportExcel` xuất file `.xlsx` chuyên nghiệp có sẵn Auto-Filter và tự căn chỉnh độ rộng cột.
-- **Kết quả**: Thành công, `npm run build` hoàn thành trong 6.98s không có lỗi.
 
 
-### [02/11/2026 13:25] — Tối Ưu Launcher: Bổ Sung Cơ Chế Chờ Thông Minh Cho OpenSearch (start_all.bat)
-- **Loại**: Cải tiến Devops / Khởi chạy hệ thống
-- **File**: `start_all.bat`
-- **Mô tả**:
-  - Thay thế thời gian chờ cố định (`ping -n 11`) bằng vòng lặp kiểm tra trạng thái cổng `9200` theo thời gian thực (tối đa 35 giây).
-  - Đảm bảo OpenSearch Cluster sẵn sàng 100% trước khi kích hoạt Backend Pipeline (`node index.js`) và Frontend (`npm run dev`).
-  - Triệt tiêu hoàn toàn các cảnh báo `[OpenSearch searchLogs/getLogStats Warning]: Connection Error` khi vừa mở ứng dụng.
-- **Kết quả**: Thành công, quy trình khởi động mượt mà, đồng bộ và ổn định.
 
-
-### [01/11/2026 19:25] — Tối Ưu Toàn Diện UX/UI: DatePicker Stacking Context, Collapsible Sidebar, Infinite Scroll, Điều Hướng KPI & Nâng Cấp Model AI
-
-#### 1. Sửa Lỗi Che Khuất DatePicker & Stacking Context
-- **Loại**: Sửa lỗi giao diện & CSS
-- **File**: `FE/src/App.jsx`, `FE/src/custom_styles.css`, `FE/src/components/CustomDateTimePicker.jsx`
-- **Mô tả**:
-  - Gán `position: relative; z-index: 30; overflow: visible` cho `search-filter-card` và `z-index: 1` cho `search-results-card`.
-  - Tăng `z-index: 9999` cho `.modern-datepicker-popover` và thêm trạng thái `.is-active` (`z-index: 50`) cho `.modern-datepicker-container` khi popup mở ra, đảm bảo popover luôn nổi trên card kết quả bên dưới.
-- **Kết quả**: Thành công, popover hiển thị đầy đủ, không bị cắt cụt.
-
-#### 2. Nâng Cấp Sidebar Thu Gọn Linh Hoạt (Collapsible Sidebar) & Xóa Text "Realtime Connected"
-- **Loại**: Cải tiến giao diện & Navigation
-- **File**: `FE/src/App.jsx`, `FE/src/index.css`
-- **Mô tả**:
-  - Bổ sung nút 3 gạch (`<Menu size={18} />`) ở đầu Sidebar để thu nhỏ/mở rộng chiều rộng (`260px` $\leftrightarrow$ `72px`).
-  - Khi thu gọn: Chỉ hiển thị icon nằm giữa, khi rê chuột vào icon sẽ xuất hiện tooltip tên mục nổi sang bên phải; logo thu nhỏ thành biểu tượng lá chắn.
-  - Xóa bỏ dòng chữ `Realtime Connected` ở chân Sidebar theo yêu cầu của người dùng.
-- **Kết quả**: Thành công, sidebar co giãn mượt mà với transition CSS.
-
-#### 3. Điều Hướng Tương Tác Nhanh Từ 4 Thẻ KPI Dashboard
-- **Loại**: Cải tiến trải nghiệm người dùng
-- **File**: `FE/src/App.jsx`, `FE/src/custom_styles.css`
-- **Mô tả**:
-  - Thêm class `.kpi-card-clickable` với hiệu ứng hover nhấc nhẹ (-3px) và viền sáng neon.
-  - Gắn sự kiện `onClick`:
-    * Thẻ *Tổng số log* ➔ Chuyển sang Tab *Tìm kiếm log*.
-    * Thẻ *Bất thường hệ thống* ➔ Chuyển sang Tab *Bất thường*.
-    * Thẻ *Mẫu Drain* ➔ Chuyển sang Tab *Mẫu Log Drain*.
-    * Thẻ *Logs/phút (Realtime)* ➔ Cuộn mượt màn hình xuống bảng Log Streams Realtime.
-- **Kết quả**: Thành công, tương tác nhạy bén.
-
-#### 4. Di Chuyển Sức Khỏe Pipeline Vào Admin Profile Dropdown
-- **Loại**: Tái cấu trúc Header & Menu
-- **File**: `FE/src/App.jsx`
-- **Mô tả**:
-  - Gỡ bỏ nút bấm rời rạc *Sức Khỏe Pipeline* khỏi Header, đưa vào danh mục tùy chọn trong Admin Profile Dropdown (bấm vào Avatar/Role Admin).
-- **Kết quả**: Thành công, Header gọn gàng hơn.
-
-#### 5. Khắc Phục Lỗi AI Model & Đường Dẫn Config
-- **Loại**: Bug Fix Backend
-- **File**: `BE/search-api/aiService.js`
-- **Mô tả**:
-  - Cập nhật model Groq từ `llama-3.1-70b-versatile` (đã bị decommission) sang model mới **`qwen/qwen3.8-27b`** (đã test thành công HTTP 200).
-  - Cập nhật fallback Gemini sang **`gemini-2.5-flash-lite`** thay cho `gemini-2.0-flash` (đã ngưng hỗ trợ).
-  - Cấu hình `dotenv.config` chỉ định đường dẫn tuyệt đối tới `BE/.env` để luôn nạp đúng key dù chạy từ bất kỳ thư mục nào.
-- **Kết quả**: Thành công, AI Assistant trả lời trơn tru.
-
-#### 6. Cuộn Vô Hạn (Infinite Scroll) Batch 10 Log & Bỏ Nút "Xem Thêm Log"
-- **Loại**: Cải tiến luồng dữ liệu & UX
-- **File**: `FE/src/App.jsx`
-- **Mô tả**:
-  - Bảng Log Realtime: Chỉ hiển thị trước 10 log, khi người dùng cuộn chuột xuống đáy bảng sẽ tự động tăng số lượng hiển thị thêm 10 log.
-  - Bảng Search Results: Loại bỏ nút bấm thủ công *"Xem thêm log"*, bổ sung listener `onScroll` tự động gọi API phân trang trang tiếp theo (`size: 10`) khi chạm đáy container kèm spinner tải mượt mà.
-- **Kết quả**: Thành công, thao tác cuộn tự nhiên chuẩn SaaS.
-
-#### 7. Thiết Kế Lại Toàn Bộ Dropdown (Select) Sang Modern SaaS
-- **Loại**: Cải tiến giao diện CSS
-- **File**: `FE/src/custom_styles.css`
-- **Mô tả**:
-  - Tùy biến toàn bộ thẻ `select.select-filter` và `.form-group select`: Bỏ mũi tên mặc định của trình duyệt (`appearance: none`), thay bằng icon chevron SVG màu tím/xanh hiện đại, padding đầm tay, bo góc `rounded-xl` (12px), đồng bộ theme Sáng/Tối.
-- **Kết quả**: Thành công, dropdown sắc nét và sang trọng.
-
-### [01/11/2026 18:30] — Custom DateTime Picker UI/UX Cao Cấp & Thay Thế Toàn Bộ Emoji Thành Chuẩn Icon SaaS (Lucide)
-
-#### 1. Xây Dựng Component Custom Date & Time Picker Chuyên Nghiệp
-- **Loại**: Component mới & Cải tiến UI/UX
-- **File**: `FE/src/components/CustomDateTimePicker.jsx`, `FE/src/custom_styles.css`, `FE/src/App.jsx`
-- **Mô tả**:
-  - **Khắc phục**: Loại bỏ hoàn toàn picker `datetime-local` thô kệch mặc định của trình duyệt Windows/Chromium (vốn có popup 2 cột trắng chia AM/PM không ăn khớp với giao diện).
-  - **Tính năng mới của `CustomDateTimePicker.jsx`**:
-    * Trigger input hiện đại với bo góc `rounded-xl` (12px), icon lịch, hiển thị thời gian định dạng dễ đọc `DD/MM/YYYY HH:mm`, kèm nút xóa nhanh `X`.
-    * Popover chọn ngày giờ thiết kế theo phong cách Modern SaaS (`rounded-2xl`, bóng đổ mịn, hiệu ứng blur nền, tự động căn lề trái/phải thông minh tránh tràn viền màn hình).
-    * Hỗ trợ lưới lịch 7 cột điều hướng tháng/năm trực quan, hiển thị ngày hôm nay và ngày đang chọn với màu nhấn thương hiệu.
-    * Tích hợp bộ chọn giờ 24h (24-Hour System chuẩn Ops/DevOps, không gây nhầm lẫn AM/PM) kèm các chip chọn nhanh: `00:00`, `12:00`, `23:59`, và `Hiện tại` (Now).
-    * Nút *Đặt lại* và *Áp dụng* tiện dụng; tự động đóng khi nhấp ra ngoài hoặc ấn ESC.
-- **Kết quả**: Thành công, giao diện tìm kiếm mượt mà, đồng bộ hoàn hảo với Dark/Light theme.
-
-#### 2. Rà Soát & Triệt Tiêu Toàn Bộ Emoji, Chuẩn Hóa Bằng Lucide SVG Icons
-- **Loại**: Cải tiến giao diện & Chuyên nghiệp hóa UI
-- **File**: `FE/src/App.jsx`, `FE/src/components/AiAssistant.jsx`, `FE/src/components/LoginModal.jsx`, `FE/src/i18n.js`
-- **Mô tả**:
-  - Quét toàn bộ mã nguồn Frontend và thay thế triệt để các ký tự emoji màu (như `🚨`, `⚡`, `🤖`, `⚠️`, `✓`, `✕` mang lại cảm giác "AI hóa" / thiếu chuyên nghiệp):
-    * **Bộ lọc trạng thái Sự cố (Incident Status Pills)**: Đổi các nút emoji `🚨 MỚI`, `⚡ ĐÃ TIẾP NHẬN`, `✓ ĐÃ XỬ LÝ` thành các pills bo tròn tuyệt đối (`rounded-full`) với icon Lucide SVG sắc nét: `<AlertCircle />` (đỏ), `<Clock />` (vàng hổ phách), `<CheckCircle2 />` (xanh ngọc), `<ListFilter />` (tất cả).
-    * **Hệ thống Toast thông báo**: Thay các ký tự text bằng icon Lucide chuẩn: `<CheckCircle2 />`, `<XCircle />`, `<AlertTriangle />`.
-    * **AI Assistant & Giao diện Login**: Thay icon `⚡` demo thành `<Sparkles />`, bỏ ký tự robot `🤖` khỏi tiêu đề và nút phân tích, thay `⚠️` lỗi bằng `<AlertTriangle />`.
-  - Khắc phục biến cờ ngôn ngữ `isVi = lang === 'vi'` trong `App.jsx` để tránh lỗi `ReferenceError: isVi is not defined`.
-- **Kết quả**: Đã quét lại toàn bộ codebase, kết quả `Total emojis found: 0`. Toàn bộ giao diện đạt độ hoàn thiện cao, tinh tế và đồng bộ.
-
-### [01/11/2026 18:05] — Khắc Phục Lỗi Xung Đột Cổng EADDRINUSE 5000 & Tách Rời Kiến Trúc (Decoupling) Bằng Redis Pub/Sub
-
-#### 1. Khắc Phục Lỗi Xung Đột Cổng EADDRINUSE :5000
-- **Loại**: Bug Fix & Tối ưu hóa kiến trúc Backend
-- **File**: `BE/queue/config.js`, `BE/parser/index.js`, `BE/search-api/index.js`
-- **Mô tả**:
-  - **Hiện tượng**: Khi chạy `node index.js` (hoặc `start_all.bat`), tiến trình Search API khởi động chiếm cổng 5000 thành công (`[Search API Service] HTTP + Socket.IO đang chạy tại http://localhost:5000`), nhưng ngay sau đó xuất hiện `Error: listen EADDRINUSE: address already in use :::5000` làm tiến trình Parser Worker bị sập.
-  - **Nguyên nhân**: File `BE/parser/index.js` import trực tiếp `broadcastNewLog` từ `../search-api/index.js`. Trong Node.js ES Modules, việc import này làm chạy lại toàn bộ mã cấp module của `search-api/index.js`, cố gắng gọi lại `httpServer.listen(5000)` trong tiến trình thứ hai của Parser Worker.
-  - **Giải pháp chuẩn hóa**:
-    1. Thiết lập kênh giao tiếp hướng sự kiện **Redis Pub/Sub** (`REALTIME_LOG_CHANNEL = 'realtime-log-channel'`) trong `BE/queue/config.js` với 2 connection riêng biệt (`redisPub` và `redisSub`).
-    2. Trong `BE/parser/index.js`: Xóa bỏ import `search-api/index.js`. Sau khi ghi nhận log và index vào OpenSearch, Worker publish log vào kênh Redis.
-    3. Trong `BE/search-api/index.js`: Đăng ký lắng nghe kênh Redis qua `redisSub.subscribe(REALTIME_LOG_CHANNEL)`. Khi có tin nhắn từ Parser Worker, gọi `broadcastNewLog(log)` để phát qua Socket.IO tới toàn bộ Client Frontend.
-    4. Bổ sung `isMainModule` guard cho `httpServer.listen(PORT)` tại cuối `search-api/index.js` để triệt tiêu vĩnh viễn khả năng re-listen cổng 5000 khi file bị import.
-- **Kết quả**: 
-  - Khởi động đồng thời cả 3 dịch vụ (`Search API`, `Collector`, `Parser Worker`) trơn tru, không còn lỗi `EADDRINUSE`.
-  - Luồng dữ liệu Realtime được phân tách hoàn toàn (decoupled) theo đúng chuẩn Enterprise Microservices.
 

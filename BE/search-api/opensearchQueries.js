@@ -20,7 +20,13 @@ export async function searchLogs({ query, level, service, from, to, page, size }
   }
 
   const mustClauses = query
-    ? [{ match: { message: { query, operator: 'and' } } }]
+    ? [{
+        multi_match: {
+          query,
+          fields: ['message^2', 'service_name^3', 'level', 'drain_template'],
+          type: 'phrase_prefix'
+        }
+      }]
     : [{ match_all: {} }];
 
   const body = {

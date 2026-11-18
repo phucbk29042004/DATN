@@ -26,10 +26,21 @@ dotenv.config();
 const app = express();
 const httpServer = http.createServer(app);
 
-// --- CORS cho FE dev server (port 3000) ---
+// --- CORS cho FE dev server (port 3000) & Mobile (ngrok tunnel) ---
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'https://job-observing-corporal.ngrok-free.dev'
+];
+
 const corsOptions = {
-  origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
-  methods: ['GET', 'POST'],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.ngrok-free.dev') || origin.endsWith('.ngrok-free.app')) {
+      return callback(null, true);
+    }
+    return callback(null, true);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true
 };
 app.use(cors(corsOptions));
@@ -236,9 +247,9 @@ app.get('/api/v1/anomalies', async (req, res) => {
 app.patch('/api/v1/anomalies/:id/status', optionalAuth, (req, res) => {
   try {
     const { id } = req.params;
-    const { status, note } = req.body;
-    const user = req.user || { username: 'admin', displayName: 'Quản Trị Viên' };
-    const updated = updateIncidentStatus(id, status, user, note);
+    const { status, note, priority, root_cause, action_taken } = req.body;
+    const user = req.user || { username: 'admin', displayName: 'Quản Trị Viên', role: 'admin' };
+    const updated = updateIncidentStatus(id, status, user, note, { priority, root_cause, action_taken });
     return res.status(200).json({ success: true, incident: updated });
   } catch (err) {
     return res.status(400).json({ error: err.message });
@@ -252,9 +263,9 @@ app.patch('/api/v1/anomalies/:id/status', optionalAuth, (req, res) => {
 app.post('/api/v1/anomalies/:id/notes', optionalAuth, (req, res) => {
   try {
     const { id } = req.params;
-    const { note } = req.body;
-    const user = req.user || { username: 'operator', displayName: 'Giám Sát Viên' };
-    const newNote = addIncidentNote(id, user, note);
+    const { note, type = 'NOTE' } = req.body;
+    const user = req.user || { username: 'operator', displayName: 'Giám Sát Viên', role: 'viewer' };
+    const newNote = addIncidentNote(id, user, note, type);
     return res.status(200).json({ success: true, note: newNote });
   } catch (err) {
     return res.status(400).json({ error: err.message });

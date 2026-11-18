@@ -70,9 +70,13 @@ Hệ thống được thiết kế phục vụ 2 nhóm đối tượng người 
 ```
 
 ### 2.1. Quản trị viên hệ thống (Admin / DevOps Lead)
-- **Mục tiêu**: Đảm bảo pipeline thu thập log hoạt động ổn định không bị nghẽn, kiểm soát tài nguyên lưu trữ, thiết lập chính sách cảnh báo và phân quyền.
-- **Quyền hạn**: Toàn quyền trên toàn bộ các tính năng, bao gồm các hành động can thiệp cấu hình và dọn dẹp dữ liệu.
+- **Mục tiêu**: Đảm bảo pipeline thu thập log hoạt động ổn định không bị nghẽn, kiểm soát tài nguyên lưu trữ, thiết lập chính sách cảnh báo, phân loại mức độ ưu tiên sự cố (P1/P2/P3) và phê duyệt biên bản nghiệm thu xử lý lỗi (Root Cause + Action Taken).
+- **Quyền hạn**: Toàn quyền trên toàn bộ các tính năng, bao gồm các hành động can thiệp cấu hình, dọn dẹp dữ liệu, tiếp nhận gán Priority và giải quyết sự cố.
 - **Tài khoản mẫu**: `admin` / mật khẩu khởi tạo nội bộ.
+
+### 2.2. Người giám sát & Kỹ sư vận hành (Viewer / SOC Analyst / L1 Support)
+- **Mục tiêu**: Theo dõi luồng log thời gian thực, phát hiện sớm dấu hiệu bất thường, chủ động ghi chú điều tra phân tích (Investigation & Triage Notes), hỗ trợ đội ngũ Admin khoanh vùng lỗi.
+- **Quyền hạn**: Theo dõi toàn bộ dashboard và biểu đồ, tra cứu và lọc log không giới hạn, hỏi đáp cùng AI Copilot, bổ sung nhật ký điều tra sự cố (`INVESTIGATION` notes), theo dõi biên bản xử lý sự cố chuẩn SRE của Admin.
 - **Tài khoản mẫu**: `viewer` / mật khẩu khởi tạo nội bộ.
 
 ---
@@ -88,9 +92,10 @@ Hệ thống được thiết kế phục vụ 2 nhóm đối tượng người 
 | **Chat & Nhờ AI Copilot phân tích log** | ✅ Có | ✅ Có | Không giới hạn tra cứu |
 | **Xem Widget Sức khỏe Pipeline (Health)** | ✅ Có | ✅ Có | Theo dõi BullMQ, Throughput, Latency |
 | **Xuất báo cáo danh sách log ra CSV** | ✅ Có | ✅ Có | Tải file trực tiếp về máy |
-| **Tiếp nhận sự cố (Chuyển sang ACK)** | ✅ Có | ✅ Có | Ghi nhận người bấm tiếp nhận |
-| **Xử lý xong sự cố (RESOLVED)** | ✅ Có | ✅ Có | Đánh dấu hoàn tất xử lý |
-| **Thêm ghi chú khắc phục sự cố** | ✅ Có | ✅ Có | Lưu vết lịch sử kèm thời gian |
+| **Tiếp nhận sự cố (ACK & Gán Priority P1/P2/P3)** | ✅ Có | 👁️ Xem | Admin thiết lập mức độ ưu tiên P1/P2/P3 |
+| **Ghi chú điều tra sự cố (Investigation Notes)** | ✅ Có | ✅ Có | Viewer & Admin cùng ghi chú phân tích, log trace |
+| **Giải quyết sự cố (RESOLVED & SRE Report)** | ✅ Có | 👁️ Xem | Admin chọn Root Cause & Action Taken chuẩn SRE |
+| **Xem biên bản nghiệm thu sự cố (SRE Report)** | ✅ Có | ✅ Có | Minh bạch nguyên nhân & hành động khắc phục |
 | **Bật / Tắt chế độ bảo trì (Silence Mode)** | ✅ Có | ❌ Bị khóa | Viewer chỉ thấy trạng thái đang bật/tắt |
 | **Chỉnh sửa từ khóa cảnh báo (Alert Keywords)** | ✅ Có | ❌ Bị khóa | Nút thêm/xóa tag bị vô hiệu hóa với Viewer |
 | **Thay đổi ngưỡng Anomaly Score / Cooldown** | ✅ Có | ❌ Bị khóa | Nút "Lưu Cấu Hình" bị ẩn/khóa với Viewer |
@@ -191,18 +196,30 @@ flowchart TD
 
 ---
 
-### Quy trình 5: Quản lý vòng đời sự cố (Incident Lifecycle)
-- **Mục đích**: Theo dõi tiến độ giải quyết sự cố minh bạch, tránh tình trạng "ai cũng nghĩ người khác đang xử lý".
-- **Vòng đời 3 trạng thái**:
+### Quy trình 5: Quản lý vòng đời sự cố chuẩn SRE (SRE Incident Lifecycle)
+- **Mục đích**: Chuẩn hóa quy trình ứng phó và xử lý sự cố (Incident Response Workflow), kết nối phối hợp chặt chẽ giữa Quản trị viên (Admin/SRE Lead) và Người giám sát (Viewer/SOC/Dev), lưu vết toàn diện phục vụ kiểm toán và hậu kiểm (Post-mortem Analysis).
+- **Vòng đời 3 trạng thái & phân loại mức độ ưu tiên**:
   ```
-  [MỚI (NEW)] ──(Kỹ sư bấm "Tiếp nhận")──► [ĐÃ TIẾP NHẬN (ACK)] ──(Khắc phục xong)──► [ĐÃ XỬ LÝ (RESOLVED)]
+  [MỚI (NEW)] ──(Admin Tiếp nhận & Gán P1/P2/P3)──► [ĐÃ TIẾP NHẬN (ACK)] ──(Admin Giải quyết + SRE Report)──► [ĐÃ XỬ LÝ (RESOLVED)]
+       │                                                      │
+       └── Viewer & Admin: Phân tích & Ghi chú Điều tra ──────┘
   ```
-  1. **MỚI (NEW)**: Bất thường vừa được phát hiện, hiển thị huy hiệu màu đỏ trên giao diện.
-  2. **ĐÃ TIẾP NHẬN (ACKNOWLEDGED)**: Kỹ sư trực bấm nút "Tiếp nhận". Trạng thái chuyển sang màu cam, ghi nhận rõ tên tài khoản tiếp nhận để các thành viên khác trong đội ngũ biết sự cố đã có người xử lý.
-  3. **ĐÃ XỬ LÝ (RESOLVED)**: Sau khi vá lỗi hoặc khôi phục dịch vụ, kỹ sư bấm "Xử lý xong". Huy hiệu chuyển sang màu xanh lá.
-- **Remediation Notes (Ghi chú khắc phục)**:
-  - Kỹ sư có thể mở Modal ghi chú để nhập nhật ký: nguyên nhân tìm thấy là gì, đã thực hiện lệnh gì để xử lý (ví dụ: *Đã restart pod auth-service lúc 14:15, giải phóng 2GB bộ nhớ*).
-  - Dữ liệu sự cố được lưu trữ bền vững (Persistent JSON Store) để phục vụ việc tra cứu hậu kiểm (Post-mortem Analysis).
+  1. **MỚI (NEW)**: Bất thường vừa được phát hiện từ tầng Rule/Z-Score/ML, hiển thị thẻ màu đỏ kèm điểm Anomaly Score.
+  2. **ĐÃ TIẾP NHẬN (ACKNOWLEDGED)**:
+     - Admin bấm nút **"Tiếp nhận"** và chọn mức độ ưu tiên nghiệp vụ:
+       - `P1 (Critical)`: Sự cố khẩn cấp, ảnh hưởng toàn hệ thống (Database chết, OutOfMemory hàng loạt).
+       - `P2 (High)`: Sự cố nghiêm trọng, suy giảm hiệu năng dịch vụ chính (Auth-service phản hồi chậm, nghẽn hàng đợi).
+       - `P3 (Medium)`: Sự cố trung bình, lỗi logic nghiệp vụ cục bộ.
+     - Hệ thống lưu vết người tiếp nhận và thời điểm tiếp nhận (MTTA - Mean Time to Acknowledge).
+  3. **ĐIỀU TRA & PHỐI HỢP LIÊN TỤC (Investigation & Triage)**:
+     - Kỹ sư giám sát (Viewer) và Admin mở Modal Sự cố để trao đổi thông tin, nhập các phát hiện mới (`INVESTIGATION` notes): IP nghi vấn, traceback lỗi, log correlation.
+     - Lịch sử ghi chú hiển thị dạng dòng thời gian (Timeline) kèm vai trò rõ ràng (ADMIN/VIEWER) và thời gian thực.
+  4. **ĐÃ XỬ LÝ (RESOLVED & SRE Resolution Report)**:
+     - Khi sự cố đã được khôi phục, Admin mở hộp thoại đóng sự cố và hoàn tất Biên bản nghiệm thu SRE:
+       - **Nguyên nhân gốc rễ (Root Cause)**: Lỗi phần mềm (Bug / Exception), Quá tải tài nguyên (CPU/RAM/Disk), Lỗi kết nối CSDL / OpenSearch, Lỗi mạng / Timeout, Dịch vụ bên thứ ba (Third-party), hoặc Khác.
+       - **Hành động khắc phục (Action Taken)**: Khởi động lại Pod / Service, Rollback bản phát hành, Tăng tài nguyên phần cứng, Điều chỉnh cấu hình / Rule, Vá lỗi mã nguồn (Hotfix), hoặc Đã kiểm tra và phục hồi.
+       - **Ghi chú nghiệm thu (Resolution Note)**: Chi tiết giải pháp xử lý.
+     - Hệ thống niêm phong biên bản, hiển thị trực quan khung **"Biên Bản Nghiệm Thu Sự Cố (SRE Resolution Report)"** trên cả giao diện Web và Mobile để toàn bộ đội ngũ (kể cả Viewer) đều nắm rõ.
 
 ---
 

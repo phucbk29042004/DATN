@@ -33,8 +33,10 @@ import {
 } from 'lucide-react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { apiClient } from '../../api/client';
 import AnomalyCard from '../../components/AnomalyCard';
+import SvgLineChart from '../../components/SvgLineChart';
 
 const LEVEL_COLORS = {
   INFO: '#3b82f6',
@@ -54,6 +56,7 @@ export default function AnomaliesScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const { colors, isDark } = useTheme();
   const { currentUser } = useAuth();
+  const { showToast } = useToast();
 
   // Sub-Tab Switcher: 'list' | 'charts'
   const [subTab, setSubTab] = useState('list');
@@ -90,8 +93,9 @@ export default function AnomaliesScreen({ navigation }) {
   }, []);
 
   // ── Fetch Analytics Data ──
-  const fetchAnalytics = useCallback(async () => {
+  const fetchAnalytics = useCallback(async (isUserAction = false) => {
     setAnalyticsLoading(true);
+    if (isUserAction) showToast('Đang làm mới biểu đồ phân tích...', 'info');
     try {
       const rangeMap = { '1h': 3600000, '6h': 21600000, '24h': 86400000, '7d': 604800000 };
       const ms = rangeMap[analyticsTimeRange] || 3600000;
@@ -103,26 +107,37 @@ export default function AnomaliesScreen({ navigation }) {
 
       const data = await apiClient(endpoint);
       setAnalyticsData(data);
+      if (isUserAction) showToast('Đã làm mới dữ liệu phân tích', 'success');
     } catch (err) {
       console.warn('Lỗi tải dữ liệu phân tích:', err);
+      if (isUserAction) showToast('Lỗi khi tải dữ liệu phân tích', 'error');
     } finally {
       setAnalyticsLoading(false);
     }
-  }, [analyticsTimeRange, analyticsService, analyticsLevel]);
+  }, [analyticsTimeRange, analyticsService, analyticsLevel, showToast]);
 
   useEffect(() => {
     fetchAnomalies();
-  }, [fetchAnomalies]);
+    const unsubscribe = navigation?.addListener ? navigation.addListener('focus', () => {
+      fetchAnomalies();
+    }) : undefined;
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [navigation, fetchAnomalies]);
 
   useEffect(() => {
     if (subTab === 'charts') {
-      fetchAnalytics();
+      fetchAnalytics(false);
     }
   }, [subTab, fetchAnalytics]);
 
   const onRefreshList = () => {
     setRefreshing(true);
-    fetchAnomalies();
+    showToast('Đang làm mới danh sách sự cố...', 'info');
+    fetchAnomalies().then(() => {
+      showToast('Đã cập nhật danh sách sự cố', 'success');
+    });
   };
 
   const handleUpdateStatus = async (id, newStatus) => {
@@ -484,38 +499,37 @@ export default function AnomaliesScreen({ navigation }) {
             );
           })()}
 
-          {/* HÀNG 2: Timeline Log Theo Thời Gian */}
+          {/* HÀNG 2: Biểu Đồ Đường Log & Bất Thường Theo Thời Gian */}
           <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
             <View style={styles.cardHeader}>
               <Activity size={16} color={colors.primary} />
               <Text style={[styles.cardTitle, { color: colors.text }]}>Lượng Log & Bất Thường Theo Thời Gian</Text>
             </View>
-            {analyticsLoading ? (
-              <ActivityIndicator color={colors.primary} style={{ marginVertical: 20 }} />
-            ) : analyticsData?.timeline && analyticsData.timeline.length > 0 ? (
-              <View style={{ marginTop: 8 }}>
-                {analyticsData.timeline.slice(-8).map((point, idx) => {
-                  const maxLogs = Math.max(...analyticsData.timeline.map((p) => p.total || 1), 1);
-                  const total = point.total || 0;
-                  const ratio = Math.min(total / maxLogs, 1);
-                  const hasAnomaly = (point.anomaly_count || 0) > 0;
-
-                  return (
-                    <View key={idx} style={styles.timelineRow}>
-                      <Text style={[styles.timelineTime, { color: colors.textSecondary }]}>{point.time}</Text>
-                      <View style={[styles.timelineBarTrack, { backgroundColor: colors.surfaceVariant }]}>
-                        <View style={[styles.timelineBarFill, { width: `${Math.max(ratio * 100, 6)}%`, backgroundColor: hasAnomaly ? colors.danger : colors.primary }]} />
-                      </View>
-                      <Text style={[styles.timelineTotal, { color: colors.text }]}>{total}</Text>
-                      {hasAnomaly && (
-                        <View style={styles.anomalyDotBadge}>
-                          <Text style={styles.anomalyDotText}>🚨 {point.anomaly_count}</Text>
-                        </View>
-                      )}
-                    </View>
-                  );
-                })}
+            <View style={styles.chartLegendRow}>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: colors.primary }]} />
+                <Text style={[styles.legendText, { color: colors.textSecondary }]}>Tổng log</Text>
               </View>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: colors.danger }]} />
+                <Text style={[styles.legendText, { color: colors.textSecondary }]}>Bất thường</Text>
+              </View>
+            </View>
+            {analyticsLoading ? (
+              <ActivityIndicator color={colors.primary} style={{ marginVertical: 25 }} />
+            ) : analyticsData?.timeline && analyticsData.timeline.length > 0 ? (
+              <SvgLineChart
+                data={analyticsData.timeline.map((point) => ({
+                  label: point.time || '',
+                  total: point.total || 0,
+                  anomalies: point.anomaly_count || 0,
+                }))}
+                valueKey="total"
+                valueKey2="anomalies"
+                color={colors.primary}
+                color2={colors.danger}
+                height={185}
+              />
             ) : (
               <Text style={[styles.emptyHint, { color: colors.textMuted }]}>Chưa có dữ liệu timeline trong khung giờ này</Text>
             )}
@@ -589,34 +603,37 @@ export default function AnomaliesScreen({ navigation }) {
             )}
           </View>
 
-          {/* HÀNG 3c: Diễn Biến Điểm Bất Thường */}
+          {/* HÀNG 3c: Biểu Đồ Đường Diễn Biến Điểm Bất Thường */}
           <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border, overflow: 'hidden' }]}>
             <View style={styles.cardHeader}>
               <TrendingUp size={16} color="#f59e0b" />
-              <Text style={[styles.cardTitle, { color: colors.text }]}>Điểm Bất Thường</Text>
+              <Text style={[styles.cardTitle, { color: colors.text }]}>Điểm Bất Thường Theo Thời Gian</Text>
+            </View>
+            <View style={styles.chartLegendRow}>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: '#f59e0b' }]} />
+                <Text style={[styles.legendText, { color: colors.textSecondary }]}>Điểm số (0 - 1.0)</Text>
+              </View>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDashedLine, { borderColor: '#ef4444' }]} />
+                <Text style={[styles.legendText, { color: colors.danger }]}>Ngưỡng sự cố (0.7)</Text>
+              </View>
             </View>
             {analyticsLoading ? (
-              <ActivityIndicator color={colors.primary} style={{ marginVertical: 20 }} />
+              <ActivityIndicator color={colors.primary} style={{ marginVertical: 25 }} />
             ) : (analyticsData?.anomalyScores || analyticsData?.score_timeline || []).length > 0 ? (
-              <View style={{ marginTop: 8 }}>
-                {(analyticsData?.anomalyScores || analyticsData?.score_timeline || []).slice(-6).map((item, idx) => {
-                  const score = item.score ?? 0;
-                  const pct = Math.min(Math.round(score * 100), 100);
-                  const isHigh = score >= 0.7;
-
-                  return (
-                    <View key={idx} style={styles.scoreRow}>
-                      <Text style={[styles.scoreTime, { color: colors.textSecondary }]}>{item.time || item.timestamp?.slice(11, 16)}</Text>
-                      <Text style={[styles.scoreService, { color: colors.text }]} numberOfLines={1}>{item.service || 'unknown'}</Text>
-                      <View style={[styles.scoreTrack, { backgroundColor: colors.surfaceVariant }]}>
-                        <View style={[styles.scoreFill, { width: `${pct}%`, backgroundColor: isHigh ? colors.danger : '#f59e0b' }]} />
-                        <View style={styles.thresholdMarker} />
-                      </View>
-                      <Text style={[styles.scoreText, { color: isHigh ? colors.danger : '#f59e0b' }]}>{pct}%</Text>
-                    </View>
-                  );
-                })}
-              </View>
+              <SvgLineChart
+                data={(analyticsData?.anomalyScores || analyticsData?.score_timeline || []).map((item) => ({
+                  label: item.time || (item.timestamp ? item.timestamp.slice(11, 16) : ''),
+                  score: item.score ?? item.anomaly_score ?? 0,
+                }))}
+                valueKey="score"
+                color="#f59e0b"
+                height={185}
+                showThreshold={true}
+                thresholdValue={0.7}
+                yDomain={[0, 1]}
+              />
             ) : (
               <Text style={[styles.emptyHint, { color: colors.textMuted }]}>Không có điểm bất thường nào ghi nhận</Text>
             )}
@@ -1190,6 +1207,34 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'center',
     paddingVertical: 12,
+  },
+  chartLegendRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    marginTop: 4,
+    marginBottom: 6,
+    paddingHorizontal: 4,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  legendDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  legendDashedLine: {
+    width: 14,
+    height: 0,
+    borderTopWidth: 1.5,
+    borderStyle: 'dashed',
+  },
+  legendText: {
+    fontSize: 11,
+    fontWeight: '500',
   },
   modalBackdrop: {
     flex: 1,

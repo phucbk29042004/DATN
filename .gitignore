@@ -30,6 +30,7 @@ dump.rdb
 # OS & Editor generated files
 .DS_Store
 Thumbs.db
+~$*
 .vscode/
 .idea/
 *.swp

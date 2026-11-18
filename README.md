@@ -165,8 +165,8 @@ Hệ thống hỗ trợ cơ chế xác thực JWT và phân quyền theo vai tr�
 
 | Tài Khoản | Mật Khẩu Khởi Tạo | Vai Trò (Role) | Quyền Hạn Thực Tế |
 | :--- | :--- | :---: | :--- |
-| **`admin`** | *Khởi tạo nội bộ qua AuthService* | **Quản Trị Viên (Admin)** | **Toàn quyền:** Quản lý cấu hình rule, thêm/xóa từ khóa cảnh báo động, kích hoạt chế độ bảo trì (Silence), dọn dẹp log quá hạn (Retention), kích hoạt gửi Daily Digest tức thì, đổi trạng thái sự cố. |
-| **`viewer`** | *Khởi tạo nội bộ qua AuthService* | **Người Giám Sát (Viewer)** | **Chỉ xem:** Tra cứu và tìm kiếm log, xem biểu đồ, theo dõi sức khỏe pipeline, hỏi đáp cùng trợ lý AI Copilot. Các nút lưu cấu hình quản trị sẽ tự động bị khóa và ẩn. |
+| **`admin`** | *Khởi tạo nội bộ qua AuthService* | **Quản Trị Viên (Admin)** | **Toàn quyền:** Quản lý cấu hình rule, thêm/xóa từ khóa cảnh báo, bật Silence mode, dọn dẹp log quá hạn (Retention), kích hoạt Daily Digest, tiếp nhận sự cố gán độ ưu tiên (P1/P2/P3) và nghiệm thu giải quyết sự cố (Root Cause + Action Taken). |
+| **`viewer`** | *Khởi tạo nội bộ qua AuthService* | **Người Giám Sát (Viewer)** | **Giám sát & Điều tra:** Tra cứu log, xem biểu đồ, theo dõi sức khỏe pipeline, hỏi đáp cùng AI Copilot, bổ sung nhật ký điều tra sự cố (Investigation Notes), xem toàn bộ biên bản nghiệm thu sự cố chuẩn SRE. |
 
 > 💡 **Lưu ý bảo mật:** Thông tin mật khẩu được mã hóa và quản lý nội bộ. Trong môi trường phát triển (Development), hệ thống trang bị sẵn 2 nút chuyển vai trò nhanh trên giao diện để thuận tiện thao tác demo.
 
@@ -175,11 +175,13 @@ Hệ thống hỗ trợ cơ chế xác thực JWT và phân quyền theo vai tr�
 ## 🌟 HƯỚNG DẪN TRẢI NGHIỆM CÁC TÍNH NĂNG NỔI BẬT
 
 1. **Trợ lý AI LogPulse Copilot (RCA & Chatbot)**:
-   - Nhấp vào biểu tượng bot neon nổi ở góc dưới bên phải màn hình để chat trực tiếp với AI về tình trạng hệ thống.
+   - Nhấp vào biểu tượng bot neon nổi ở góc dưới bên phải màn hình để chat trực tiếp với AI về tình trạng hệ thống (icon kéo thả tự do, khung chat cố định góc phải, khi đóng icon tự động trở về vị trí góc phải).
    - Nhấp vào bất kỳ dòng log nào trên bảng log ➔ Trong cửa sổ Modal xem chi tiết log, bấm nút **"🤖 Phân tích cùng AI"** để AI tự động phân tích nguyên nhân gốc rễ (Root Cause) và đưa ra các hành động khắc phục cụ thể.
-2. **Quản lý Vòng Đời Sự Cố (Incident Lifecycle)**:
-   - Chuyển sang tab **Bất Thường (Anomalies)**: Lọc các sự cố theo trạng thái `TẤT CẢ`, `MỚI (NEW)`, `ĐÃ TIẾP NHẬN (ACK)`, `ĐÃ XỬ LÝ (RESOLVED)`.
-   - Bấm **"Tiếp nhận"** hoặc **"Xử lý xong"** để đổi trạng thái, bấm **"Ghi chú"** để nhập nhật ký khắc phục sự cố kèm chữ ký người thực hiện.
+2. **Quản Lý Vòng Đời Sự Cố Chuẩn SRE (SRE Incident Lifecycle)**:
+   - Chuyển sang tab **Bất Thường (Anomalies)** trên Web hoặc màn hình Sự Cố trên Mobile: Lọc các sự cố theo trạng thái `TẤT CẢ`, `MỚI (NEW)`, `ĐÃ TIẾP NHẬN (ACK)`, `ĐÃ XỬ LÝ (RESOLVED)`.
+   - **Admin Tiếp nhận**: Bấm "Tiếp nhận" và chọn mức độ ưu tiên (`P1` Khẩn cấp, `P2` Cao, `P3` Trung bình).
+   - **Phối hợp Điều tra**: Cả Viewer và Admin đều có thể thêm ghi chú phân tích (`INVESTIGATION`) kèm mốc thời gian và vai trò hiển thị trên Timeline.
+   - **Admin Nghiệm thu Giải quyết**: Bấm "Xử lý xong" và chọn Nguyên nhân gốc rễ (Root Cause) + Hành động khắc phục (Action Taken) để niêm phong Biên bản SRE Resolution Report. Đồng bộ tức thì giữa Web và Mobile.
 3. **Cảnh Báo Đa Kênh Tức Thì & Chống Bão Tin Nhắn (Deduplication)**:
    - Khi có log lỗi mức độ nghiêm trọng hoặc Anomaly Score cao, tin nhắn sẽ tự động bắn về **Discord Webhook** (dạng Rich Embed) và hòm thư **Gmail** của Admin.
    - Cơ chế Deduplication sẽ tự động gom các lỗi lặp lại trong 60 giây để tránh tình trạng spam bão thông báo.

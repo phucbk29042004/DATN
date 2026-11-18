@@ -61,6 +61,9 @@ export function getIncidentState(id) {
   if (!id) return null;
   return incidentMap.get(id) || {
     status: 'NEW',
+    priority: 'P2',
+    root_cause: null,
+    action_taken: null,
     acknowledgedBy: null,
     acknowledgedAt: null,
     resolvedBy: null,
@@ -70,13 +73,14 @@ export function getIncidentState(id) {
 }
 
 /**
- * Cập nhật trạng thái sự cố (ACKNOWLEDGED hoặc RESOLVED)
+ * Cập nhật trạng thái sự cố (ACKNOWLEDGED hoặc RESOLVED) kèm metadata
  * @param {string} id 
  * @param {'NEW' | 'ACKNOWLEDGED' | 'RESOLVED'} status 
  * @param {Object} user - { username, displayName }
  * @param {string} [noteText] 
+ * @param {Object} [meta] - { priority, root_cause, action_taken }
  */
-export function updateIncidentStatus(id, status, user = {}, noteText = '') {
+export function updateIncidentStatus(id, status, user = {}, noteText = '', meta = {}) {
   if (!id) throw new Error('Thiếu Incident ID');
   const validStatuses = ['NEW', 'ACKNOWLEDGED', 'RESOLVED'];
   if (!validStatuses.includes(status)) {
@@ -92,6 +96,10 @@ export function updateIncidentStatus(id, status, user = {}, noteText = '') {
     status,
     updatedAt: now
   };
+
+  if (meta.priority) updated.priority = meta.priority;
+  if (meta.root_cause) updated.root_cause = meta.root_cause;
+  if (meta.action_taken) updated.action_taken = meta.action_taken;
 
   if (status === 'ACKNOWLEDGED') {
     updated.acknowledgedBy = userName;
@@ -111,6 +119,8 @@ export function updateIncidentStatus(id, status, user = {}, noteText = '') {
       {
         id: `note_${Date.now()}`,
         author: userName,
+        role: user.role || 'admin',
+        type: status === 'RESOLVED' ? 'RESOLUTION' : 'NOTE',
         text: noteText.trim(),
         createdAt: now
       }
@@ -124,12 +134,13 @@ export function updateIncidentStatus(id, status, user = {}, noteText = '') {
 }
 
 /**
- * Thêm ghi chú vào sự cố
+ * Thêm ghi chú vào sự cố (Hỗ trợ cả Admin và Viewer)
  * @param {string} id 
  * @param {Object} user 
  * @param {string} noteText 
+ * @param {string} [noteType] - 'NOTE' | 'INVESTIGATION' | 'RESOLUTION'
  */
-export function addIncidentNote(id, user = {}, noteText = '') {
+export function addIncidentNote(id, user = {}, noteText = '', noteType = 'NOTE') {
   if (!id) throw new Error('Thiếu Incident ID');
   if (!noteText || !noteText.trim()) {
     throw new Error('Nội dung ghi chú không được để trống');
@@ -142,6 +153,8 @@ export function addIncidentNote(id, user = {}, noteText = '') {
   const newNote = {
     id: `note_${Date.now()}`,
     author: userName,
+    role: user.role || 'viewer',
+    type: noteType,
     text: noteText.trim(),
     createdAt: now
   };
@@ -172,6 +185,9 @@ export function enrichAnomaliesWithIncidentState(anomalies) {
     return {
       ...item,
       incident_status: incidentState.status,
+      incident_priority: incidentState.priority || 'P2',
+      root_cause: incidentState.root_cause || null,
+      action_taken: incidentState.action_taken || null,
       acknowledged_by: incidentState.acknowledgedBy,
       acknowledged_at: incidentState.acknowledgedAt,
       resolved_by: incidentState.resolvedBy,

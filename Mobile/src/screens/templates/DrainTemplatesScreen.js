@@ -11,35 +11,40 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Layers, RefreshCw, Hash, Cpu } from 'lucide-react-native';
 import { useTheme } from '../../theme/ThemeContext';
+import { useToast } from '../../context/ToastContext';
 import { apiClient } from '../../api/client';
 
 export default function DrainTemplatesScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
+  const { showToast } = useToast();
 
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchTemplates = useCallback(async () => {
+  const fetchTemplates = useCallback(async (isUserAction = false) => {
+    if (isUserAction) showToast('Đang làm mới danh sách mẫu Drain...', 'info');
     try {
       const data = await apiClient('/templates');
       setTemplates(data?.templates || []);
+      if (isUserAction) showToast('Đã làm mới danh sách mẫu Drain', 'success');
     } catch (err) {
       console.warn('Lỗi tải mẫu Drain:', err);
+      if (isUserAction) showToast('Lỗi khi tải mẫu Drain', 'error');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [showToast]);
 
   useEffect(() => {
-    fetchTemplates();
+    fetchTemplates(false);
   }, [fetchTemplates]);
 
   const onRefresh = () => {
     setRefreshing(true);
-    fetchTemplates();
+    fetchTemplates(true);
   };
 
   return (

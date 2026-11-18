@@ -283,7 +283,7 @@ export default function App() {
     }
   };
 
-  const handleUpdateAnomalyStatus = async (anomalyId, newStatus) => {
+  const handleUpdateAnomalyStatus = async (anomalyId, newStatus, meta = {}) => {
     const token = localStorage.getItem('logpulse_auth_token');
     try {
       const res = await fetch(`${API_BASE}/anomalies/${anomalyId}/status`, {
@@ -292,7 +292,13 @@ export default function App() {
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
-        body: JSON.stringify({ status: newStatus })
+        body: JSON.stringify({
+          status: newStatus,
+          note: meta.note,
+          priority: meta.priority,
+          root_cause: meta.root_cause,
+          action_taken: meta.action_taken
+        })
       });
       const data = await res.json();
       if (res.ok) {
@@ -306,15 +312,31 @@ export default function App() {
                 return {
                   ...a,
                   incident_status: newStatus,
-                  acknowledged_by: data.incident.acknowledgedBy,
-                  resolved_by: data.incident.resolvedBy
+                  incident_priority: data.incident?.priority || a.incident_priority,
+                  root_cause: data.incident?.root_cause || a.root_cause,
+                  action_taken: data.incident?.action_taken || a.action_taken,
+                  acknowledged_by: data.incident?.acknowledgedBy,
+                  resolved_by: data.incident?.resolvedBy,
+                  incident_notes: data.incident?.notes || a.incident_notes
                 };
               }
               return a;
             })
           };
         });
-        addToast(newStatus === 'RESOLVED' ? 'Đã đánh dấu xử lý xong sự cố' : 'Đã tiếp nhận sự cố', 'success');
+        if (noteModalAnomaly && (noteModalAnomaly.id || noteModalAnomaly.hash_id) === anomalyId) {
+          setNoteModalAnomaly(prev => ({
+            ...prev,
+            incident_status: newStatus,
+            incident_priority: data.incident?.priority || prev.incident_priority,
+            root_cause: data.incident?.root_cause || prev.root_cause,
+            action_taken: data.incident?.action_taken || prev.action_taken,
+            acknowledged_by: data.incident?.acknowledgedBy,
+            resolved_by: data.incident?.resolvedBy,
+            incident_notes: data.incident?.notes || prev.incident_notes
+          }));
+        }
+        addToast(newStatus === 'RESOLVED' ? 'Đã nghiệm thu và đóng sự cố' : 'Đã tiếp nhận xử lý sự cố', 'success');
       } else {
         throw new Error(data.error || 'Không thể cập nhật trạng thái');
       }
@@ -323,7 +345,7 @@ export default function App() {
     }
   };
 
-  const handleAddIncidentNote = async (anomalyId, noteText) => {
+  const handleAddIncidentNote = async (anomalyId, noteText, noteType = 'NOTE') => {
     const token = localStorage.getItem('logpulse_auth_token');
     try {
       const res = await fetch(`${API_BASE}/anomalies/${anomalyId}/notes`, {
@@ -332,7 +354,7 @@ export default function App() {
           'Content-Type': 'application/json',
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
-        body: JSON.stringify({ note: noteText })
+        body: JSON.stringify({ note: noteText, type: noteType })
       });
       const data = await res.json();
       if (res.ok) {
@@ -355,7 +377,7 @@ export default function App() {
             incident_notes: [...(prev.incident_notes || []), data.note]
           }));
         }
-        addToast('Đã thêm ghi chú xử lý sự cố', 'success');
+        addToast('Đã thêm ghi chú điều tra sự cố', 'success');
       } else {
         throw new Error(data.error || 'Không thể lưu ghi chú');
       }
@@ -788,11 +810,11 @@ export default function App() {
   const [searchPage, setSearchPage] = useState(1);
   const [hasMoreSearch, setHasMoreSearch] = useState(false);
 
-  const handleSearch = useCallback(async (isLoadMore = false) => {
+  const handleSearch = useCallback(async (isLoadMore = false, isDebounce = false) => {
     setSearchLoading(true);
     const nextPage = isLoadMore ? searchPage + 1 : 1;
     if (!isLoadMore) {
-      setSearchResults(null);
+      if (!isDebounce) setSearchResults(null);
       setSearchPage(1);
     }
     try {
@@ -816,16 +838,25 @@ export default function App() {
       }
       setSearchPage(nextPage);
       setHasMoreSearch(data.logs.length === 10 && (nextPage * 10) < data.total);
-      if (!isLoadMore) {
+      if (!isLoadMore && !isDebounce) {
         addToast(`Tìm thấy ${data.total.toLocaleString()} kết quả`, 'success');
       }
     } catch (err) {
-      addToast('Tìm kiếm thất bại — Backend chưa sẵn sàng', 'error');
+      if (!isDebounce) addToast('Tìm kiếm thất bại — Backend chưa sẵn sàng', 'error');
       if (!isLoadMore) setSearchResults({ total: 0, logs: [] });
     } finally {
       setSearchLoading(false);
     }
   }, [searchQuery, searchLevel, searchFrom, searchTo, searchPage, searchResults, addToast]);
+
+  // ── Debounce Live Search on Web ──
+  useEffect(() => {
+    if (activeTab !== 'search') return;
+    const timer = setTimeout(() => {
+      handleSearch(false, true);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [searchQuery, searchLevel, searchFrom, searchTo, activeTab, handleSearch]);
 
   useEffect(() => {
     if (activeTab === 'anomalies' && anomalies === null) fetchAnomalies();
@@ -1947,14 +1978,28 @@ export default function App() {
                                         </span>
                                       )}
 
-                                      {/* Action Button */}
-                                      {status !== 'RESOLVED' && (
+                                      {/* Priority Badge */}
+                                      {a.incident_priority && (
+                                        <span className="badge" style={{
+                                          fontSize: '0.66rem',
+                                          padding: '0.1rem 0.35rem',
+                                          fontWeight: 700,
+                                          background: a.incident_priority === 'P1' ? 'rgba(239,68,68,0.15)' : a.incident_priority === 'P2' ? 'rgba(245,158,11,0.15)' : 'rgba(59,130,246,0.15)',
+                                          color: a.incident_priority === 'P1' ? '#ef4444' : a.incident_priority === 'P2' ? '#f59e0b' : '#3b82f6',
+                                          border: `1px solid ${a.incident_priority === 'P1' ? '#ef4444' : a.incident_priority === 'P2' ? '#f59e0b' : '#3b82f6'}40`
+                                        }}>
+                                          {a.incident_priority}
+                                        </span>
+                                      )}
+
+                                      {/* Action Button (Admin only) */}
+                                      {status !== 'RESOLVED' && currentUser?.role === 'admin' && (
                                         status === 'ACKNOWLEDGED' ? (
                                           <button
                                             className="lifecycle-action-btn"
                                             style={{ color: '#10b981', borderColor: 'rgba(16,185,129,0.4)' }}
-                                            onClick={() => handleUpdateAnomalyStatus(a.id || a.hash_id, 'RESOLVED')}
-                                            title="Đánh dấu đã giải quyết sự cố"
+                                            onClick={() => setNoteModalAnomaly(a)}
+                                            title="Hoàn tất biên bản giải quyết sự cố"
                                           >
                                             <Check size={11} /> {t.btnResolve}
                                           </button>
@@ -1962,7 +2007,7 @@ export default function App() {
                                           <button
                                             className="lifecycle-action-btn"
                                             style={{ color: '#f59e0b', borderColor: 'rgba(245,158,11,0.4)' }}
-                                            onClick={() => handleUpdateAnomalyStatus(a.id || a.hash_id, 'ACKNOWLEDGED')}
+                                            onClick={() => setNoteModalAnomaly(a)}
                                             title="Tiếp nhận xử lý sự cố"
                                           >
                                             <Eye size={11} /> {t.btnAck}
@@ -1974,9 +2019,9 @@ export default function App() {
                                       <button
                                         className="lifecycle-note-btn"
                                         onClick={() => setNoteModalAnomaly(a)}
-                                        title="Xem và thêm ghi chú xử lý"
+                                        title="Xem biên bản & ghi chú xử lý"
                                       >
-                                        <FileText size={11} /> {t.btnAddNote} {a.incident_notes?.length > 0 && `(${a.incident_notes.length})`}
+                                        <FileText size={11} /> {currentUser?.role === 'admin' ? t.btnAddNote : 'Biên bản & Ghi chú'} {a.incident_notes?.length > 0 && `(${a.incident_notes.length})`}
                                       </button>
 
                                       {/* Subtitle: Who resolved / acknowledged */}
@@ -3018,12 +3063,14 @@ export default function App() {
         addToast={addToast}
       />
 
-      {/* ── INCIDENT NOTE MODAL ─────────────────────────────────────────────── */}
+      {/* ── INCIDENT NOTE & RESOLUTION AUDIT MODAL ───────────────────────── */}
       <IncidentNoteModal
         isOpen={Boolean(noteModalAnomaly)}
         onClose={() => setNoteModalAnomaly(null)}
         anomaly={noteModalAnomaly}
         onAddNote={handleAddIncidentNote}
+        onUpdateStatus={handleUpdateAnomalyStatus}
+        currentUser={currentUser}
         lang={lang}
       />
 
