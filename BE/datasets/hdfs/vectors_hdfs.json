@@ -1,0 +1,32 @@
+{
+  "dataset": "hdfs",
+  "total_sequences": 11,
+  "anomaly_count": 5,
+  "normal_count": 6,
+  "template_count": 8,
+  "vector_dim": 8,
+  "templates": [
+    { "id": 1, "template": "Receiving block <*> src: <*> dest: <*>", "count": 11 },
+    { "id": 2, "template": "PacketResponder <*> for block <*> terminating", "count": 10 },
+    { "id": 3, "template": "BLOCK* NameSystem.allocateBlock: <*> <*>", "count": 4 },
+    { "id": 4, "template": "Exception in receiveBlock for block <*>", "count": 3 },
+    { "id": 5, "template": "Verification succeeded for block <*>", "count": 4 },
+    { "id": 6, "template": "Received block <*> of size <*> from <*>", "count": 11 },
+    { "id": 7, "template": "BLOCK* NameSystem.addStoredBlock: Redundant addStoredBlock request received for <*>", "count": 2 },
+    { "id": 8, "template": "BLOCK* NameSystem.addStoredBlock: addStoredBlock request received for <*> on <*> size <*> but does not belong to any file", "count": 1 }
+  ],
+  "X": [
+    [1, 1, 1, 1, 0, 0, 0, 0],
+    [1, 1, 0, 0, 1, 1, 0, 0],
+    [1, 1, 0, 0, 0, 0, 1, 0],
+    [1, 0, 0, 1, 0, 1, 0, 0],
+    [1, 1, 1, 0, 1, 1, 0, 0],
+    [1, 1, 0, 0, 0, 1, 0, 0],
+    [1, 1, 0, 0, 0, 1, 0, 1],
+    [1, 1, 0, 0, 0, 1, 1, 0],
+    [1, 1, 1, 0, 1, 2, 0, 0],
+    [1, 1, 0, 1, 0, 1, 0, 0],
+    [1, 1, 1, 0, 1, 2, 0, 0]
+  ],
+  "y": [1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0]
+}

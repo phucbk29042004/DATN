@@ -26,6 +26,7 @@ Format input JSON:
 import argparse
 import json
 import sys
+import tempfile
 from pathlib import Path
 
 import numpy as np
@@ -79,11 +80,17 @@ def evaluate_isolation_forest(X_train, X_test, y_test, contamination=0.1, save_d
 
     # Lưu model để ml_api.py có thể load và serve real-time
     if save_dir and joblib is not None:
-        save_dir = Path(save_dir)
-        save_dir.mkdir(parents=True, exist_ok=True)
-        joblib.dump(model, save_dir / "isolation_forest.pkl")
-        joblib.dump(scaler, save_dir / "if_scaler.pkl")
-        print(f"  → Model Isolation Forest đã lưu tại: {save_dir}")
+        try:
+            save_dir = Path(save_dir)
+            save_dir.mkdir(parents=True, exist_ok=True)
+            joblib.dump(model, save_dir / "isolation_forest.pkl")
+            joblib.dump(scaler, save_dir / "if_scaler.pkl")
+            print(f"  → Model Isolation Forest đã lưu tại: {save_dir}")
+        except OSError:
+            tmp_dir = Path(tempfile.gettempdir())
+            joblib.dump(model, tmp_dir / "isolation_forest.pkl")
+            joblib.dump(scaler, tmp_dir / "if_scaler.pkl")
+            print(f"  → [Fallback Temp] Model Isolation Forest đã lưu tại: {tmp_dir}")
 
     return _build_report("isolation_forest", y_test, y_pred)
 
@@ -110,11 +117,17 @@ def evaluate_logistic_regression(X_train, X_test, y_train, y_test, save_dir=None
 
     # Lưu model để ml_api.py có thể load và serve real-time
     if save_dir and joblib is not None:
-        save_dir = Path(save_dir)
-        save_dir.mkdir(parents=True, exist_ok=True)
-        joblib.dump(model, save_dir / "logistic_regression.pkl")
-        joblib.dump(scaler, save_dir / "lr_scaler.pkl")
-        print(f"  → Model Logistic Regression đã lưu tại: {save_dir}")
+        try:
+            save_dir = Path(save_dir)
+            save_dir.mkdir(parents=True, exist_ok=True)
+            joblib.dump(model, save_dir / "logistic_regression.pkl")
+            joblib.dump(scaler, save_dir / "lr_scaler.pkl")
+            print(f"  → Model Logistic Regression đã lưu tại: {save_dir}")
+        except OSError:
+            tmp_dir = Path(tempfile.gettempdir())
+            joblib.dump(model, tmp_dir / "logistic_regression.pkl")
+            joblib.dump(scaler, tmp_dir / "lr_scaler.pkl")
+            print(f"  → [Fallback Temp] Model Logistic Regression đã lưu tại: {tmp_dir}")
 
     return _build_report("logistic_regression", y_test, y_pred)
 
@@ -209,11 +222,16 @@ def main():
 
     # Lưu kết quả
     output_path = Path(args.output)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(results, f, ensure_ascii=False, indent=2)
-
-    print(f"\n[ML Trainer] Kết quả đã lưu vào: {output_path}")
+    try:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump(results, f, ensure_ascii=False, indent=2)
+        print(f"\n[ML Trainer] Kết quả đã lưu vào: {output_path}")
+    except OSError as e:
+        tmp_output = Path(tempfile.gettempdir()) / output_path.name
+        with open(tmp_output, "w", encoding="utf-8") as f:
+            json.dump(results, f, ensure_ascii=False, indent=2)
+        print(f"\n[ML Trainer] [Fallback Temp] Kết quả đã lưu vào: {tmp_output}")
 
 
 if __name__ == "__main__":

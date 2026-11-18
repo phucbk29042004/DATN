@@ -16,6 +16,7 @@
 
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 import { fileURLToPath } from 'url';
 import { loadHdfsDataset } from './hdfsLoader.js';
 import { vectorizeDataset } from '../../anomaly-engine/template-mining/vectorizer.js';
@@ -70,8 +71,14 @@ async function main() {
     y
   };
 
-  fs.writeFileSync(OUT_FILE, JSON.stringify(output, null, 2), 'utf-8');
-  console.log(`\n✅ Đã lưu: ${OUT_FILE}`);
+  try {
+    fs.writeFileSync(OUT_FILE, JSON.stringify(output, null, 2), 'utf-8');
+    console.log(`\n✅ Đã lưu: ${OUT_FILE}`);
+  } catch (err) {
+    const tmpOut = path.join(os.tmpdir(), 'vectors_hdfs.json');
+    fs.writeFileSync(tmpOut, JSON.stringify(output, null, 2), 'utf-8');
+    console.log(`\n⚠️ Fallback: Đã lưu vào TEMP: ${tmpOut}`);
+  }
   console.log('   → Chạy tiếp: python anomaly-engine/ml-models/train_and_evaluate.py --input datasets/hdfs/vectors_hdfs.json --output anomaly-engine/ml-models/results_hdfs.json --save-model');
 }
 

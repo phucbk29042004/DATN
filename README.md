@@ -131,6 +131,8 @@ python anomaly-engine/ml-models/ml_api.py
 > # Huấn luyện mô hình Isolation Forest & Logistic Regression
 > npm run ml:train-hdfs
 > npm run ml:train-bgl
+> # Chạy toàn bộ Benchmark thông lượng & Đánh giá định lượng (F1-score):
+> npm run benchmark:full
 > ```
 
 ---

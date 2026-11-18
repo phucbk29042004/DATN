@@ -16,6 +16,7 @@
 
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 import { fileURLToPath } from 'url';
 import { loadBglDataset } from './bglLoader.js';
 import { vectorizeDataset } from '../../anomaly-engine/template-mining/vectorizer.js';
@@ -25,8 +26,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LOG_FILE = path.join(__dirname, 'BGL_2k.log');
 const OUT_FILE = path.join(__dirname, 'vectors_bgl.json');
 
-// Kích thước time window: 60 giây (theo PROJECT_CONTEXT.md — BGL dùng fixed time window)
-const WINDOW_SIZE_MS = 60_000;
+// Kích thước time window: 5 phút = 300,000 ms (theo BGL time window)
+const WINDOW_SIZE_MS = 300_000;
 
 async function main() {
   console.log('=======================================================');
@@ -69,8 +70,14 @@ async function main() {
     y
   };
 
-  fs.writeFileSync(OUT_FILE, JSON.stringify(output, null, 2), 'utf-8');
-  console.log(`\n✅ Đã lưu: ${OUT_FILE}`);
+  try {
+    fs.writeFileSync(OUT_FILE, JSON.stringify(output, null, 2), 'utf-8');
+    console.log(`\n✅ Đã lưu: ${OUT_FILE}`);
+  } catch (err) {
+    const tmpOut = path.join(os.tmpdir(), 'vectors_bgl.json');
+    fs.writeFileSync(tmpOut, JSON.stringify(output, null, 2), 'utf-8');
+    console.log(`\n⚠️ Fallback: Đã lưu vào TEMP: ${tmpOut}`);
+  }
   console.log('   → Chạy tiếp: python anomaly-engine/ml-models/train_and_evaluate.py --input datasets/bgl/vectors_bgl.json --output anomaly-engine/ml-models/results_bgl.json --save-model');
 }
 

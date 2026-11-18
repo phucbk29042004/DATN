@@ -54,3 +54,10 @@ graph TD
              (Precision / Recall / F1)
 ```
 
+## 4. Bộ Công Cụ Benchmark & Đánh Giá Định Lượng (Evaluation Suite)
+
+Hệ thống tích hợp sẵn kịch bản kiểm thử toàn diện `npm run benchmark:full` (`BE/benchmark/full_evaluation.js`):
+- **Hiệu năng Pipeline**: Đo thông lượng (log/s) và phân vị độ trễ (Avg, p50, p90, p99) qua `perf_hooks`.
+- **Đánh giá độ chính xác 4 mô hình**: Đo Precision, Recall, F1-Score, Confusion Matrix đối chiếu giữa Rule-based, Z-Score, Isolation Forest và Logistic Regression trên 2 tập dữ liệu chuẩn quốc tế HDFS và BGL (Loghub).
+- **Xuất báo cáo khoa học**: Lưu kết quả tự động ra `BE/benchmark/REPORT_BENCHMARK_EVALUATION.md` và `BE/benchmark/evaluation_summary.json` phục vụ trực tiếp cho báo cáo và slide bảo vệ đồ án tốt nghiệp.
+

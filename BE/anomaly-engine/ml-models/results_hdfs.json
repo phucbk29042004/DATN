@@ -1,0 +1,35 @@
+{
+  "dataset": "hdfs",
+  "total_sequences": 11,
+  "train_size": 8,
+  "test_size": 3,
+  "split_method": "time_based_holdout",
+  "models": [
+    {
+      "method": "isolation_forest",
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "confusion_matrix": [
+        [2, 0],
+        [1, 0]
+      ],
+      "test_size": 3,
+      "anomaly_count_actual": 1,
+      "anomaly_count_predicted": 0
+    },
+    {
+      "method": "logistic_regression",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "confusion_matrix": [
+        [2, 0],
+        [0, 1]
+      ],
+      "test_size": 3,
+      "anomaly_count_actual": 1,
+      "anomaly_count_predicted": 1
+    }
+  ]
+}

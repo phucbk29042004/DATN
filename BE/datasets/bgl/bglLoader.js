@@ -45,7 +45,7 @@ export async function parseBglLogFile(logFilePath) {
       line_id: lineIndex,
       label: rawLabel,           // Nhãn gốc từ dataset (chuỗi alert code hoặc "-")
       is_anomaly: isAnomaly,     // True nếu label !== "-"
-      timestamp: parseInt(timestamp, 10),
+      timestamp: parseInt(timestamp, 10) * 1000, // Chuyển sang milliseconds
       date,
       node,
       time,
@@ -68,7 +68,7 @@ export async function parseBglLogFile(logFilePath) {
  * @param {number} windowSizeMs    - Kích thước time window tính bằng milliseconds (mặc định 60000 = 1 phút)
  * @returns {Array} Danh sách windows với nhãn
  */
-export function buildBglTimeWindows(entries, windowSizeMs = 60_000) {
+export function buildBglTimeWindows(entries, windowSizeMs = 300_000) {
   if (entries.length === 0) return [];
 
   const windows = [];
@@ -81,7 +81,6 @@ export function buildBglTimeWindows(entries, windowSizeMs = 60_000) {
     if (entry.timestamp < windowEnd) {
       currentWindow.push(entry);
     } else {
-      // Đóng window hiện tại
       if (currentWindow.length > 0) {
         const hasAnomaly = currentWindow.some(e => e.is_anomaly);
         windows.push({
@@ -94,8 +93,7 @@ export function buildBglTimeWindows(entries, windowSizeMs = 60_000) {
         });
       }
 
-      // Mở window mới từ entry hiện tại
-      windowStart = windowEnd;
+      windowStart = entry.timestamp;
       windowEnd = windowStart + windowSizeMs;
       currentWindow = [entry];
     }

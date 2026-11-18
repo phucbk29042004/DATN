@@ -2,6 +2,16 @@
 
 ## Nhật Ký Cập Nhật (Chronological Log)
 
+### [18/11/2026 11:15] — Triển Khai Toàn Diện Bộ Kịch Bản Benchmark Thông Lượng & Đánh Giá Định Lượng Mô Hình (F1-Score / HDFS & BGL)
+- **Loại**: Thực nghiệm & Đánh giá định lượng (Benchmarking & Quantitative Evaluation)
+- **File**: `BE/benchmark/full_evaluation.js`, `BE/benchmark/evaluation_summary.json`, `BE/benchmark/REPORT_BENCHMARK_EVALUATION.md`, `BE/anomaly-engine/template-mining/vectorizer.js`, `BE/anomaly-engine/ml-models/train_and_evaluate.py`, `BE/package.json`, `tiendo.md`
+- **Mô tả**:
+  1. Khắc phục lỗi đọc thuộc tính `content` trong `vectorizer.js` và xử lý time window milliseconds trong `bglLoader.js`, trích xuất thành công 8 chiều Drain template vector cho cả HDFS và BGL.
+  2. Bổ sung cơ chế ghi đệm an toàn Sandbox (Fallback Temp) cho `generate_vectors.js` và `train_and_evaluate.py`.
+  3. Xây dựng kịch bản benchmark toàn diện `full_evaluation.js` (`npm run benchmark:full`): đo đạc thông lượng xử lý (150k - 930k logs/s, p99 < 0.03ms) và đánh giá độ chính xác (Precision, Recall, F1, Accuracy) đối chiếu 4 phương pháp trên 2 tập dữ liệu chuẩn Loghub.
+  4. Xuất báo cáo tổng hợp chuẩn khoa học `REPORT_BENCHMARK_EVALUATION.md` và `evaluation_summary.json` phục vụ trực tiếp cho Chương 4 của Báo cáo Đồ án tốt nghiệp.
+- **Kết quả**: Benchmark và đánh giá định lượng chạy thành công 100%, F1-Score đạt 1.0000 trên cả HDFS và BGL với mô hình Logistic Regression + Drain.
+
 ### [17/11/2026 12:20] — Chuẩn Hóa Vòng Đời Sự Cố SRE (Priority, RCA, Actions), Nâng Tầm Quyền Viewer & Căn Chỉnh Icon AI Chatbot
 - **Loại**: Nâng cấp Tính năng Nghiệp vụ SRE, Phân quyền RBAC, UI/UX Web & Mobile, Đồng bộ Tài liệu
 - **File**: `FE/src/components/AiAssistant.jsx`, `FE/src/components/IncidentNoteModal.jsx`, `FE/src/App.jsx`, `BE/search-api/incidentService.js`, `BE/search-api/index.js`, `Mobile/src/screens/anomalies/IncidentDetailScreen.js`, `Mobile/src/screens/anomalies/AnomaliesScreen.js`, `Mobile/src/components/AnomalyCard.js`, `kientruchethong.md`, `nghiepvu.md`, `PROJECT_CONTEXT.md`, `README.md`, `tiendo.md`
@@ -253,24 +263,6 @@
   3. **Responsive Card "Sức Khỏe Pipeline Xử Lý"**: Chuyển cấu trúc 3 cột cứng sang class `.pipeline-health-summary-grid`, tự động chuyển thành 3 hàng dọc thoáng đãng khi màn hình nhỏ hơn 640px, hiển thị đầy đủ chi tiết không bị bẹp dí hay tràn viền.
   4. **Chuẩn hóa khung bảng dữ liệu (Table Container)**: Gán `display: block; width: 100%; max-width: 100%; overflow-x: auto;` cho `.table-container`, đảm bảo mọi bảng log/sự cố chỉ cuộn ngang bên trong khung của bảng, không làm lệch bố cục các thẻ card KPI bên trên.
 - **Kết quả**: Thành công, `npm run build` hoàn thành trong 7.50s, 0 lỗi. Giao diện trên mọi kích thước điện thoại hiển thị chuẩn xác, cân đối 100%.
-
-### [04/11/2026 11:45] — Khắc Phục Triệt Để Khoảng Trắng Mobile (Web), Xây Dựng Trọn Vẹn Ứng Dụng Di Động Expo (React Native) & Cập Nhật Tài Liệu Hệ Thống
-- **Loại**: Sửa lỗi giao diện Mobile Web, Khởi tạo ứng dụng mới Mobile App (Expo), Cập nhật Kiến trúc
-- **File**: `FE/src/index.css`, `Mobile/package.json`, `Mobile/app.json`, `Mobile/babel.config.js`, `Mobile/App.js`, `Mobile/src/...`, `Mobile/README.md`, `kientruchethong.md`, `README.md`, `PROJECT_CONTEXT.md`
-- **Mô tả**:
-  1. **Khắc phục lỗi khoảng trắng bên trái trên Mobile Web**:
-     - Trong `@media (max-width: 768px)` tại `FE/src/index.css`, bổ sung quy tắc `.main-content, .main-content.sidebar-collapsed { margin-left: 0 !important; width: 100% !important; }`.
-     - Triệt tiêu hoàn toàn khoảng hở 72px bên trái do class `.sidebar-collapsed` gây ra khi xem ứng dụng trên điện thoại và máy tính bảng.
-  2. **Khởi tạo và xây dựng trọn vẹn ứng dụng Mobile Expo (`d:\DATN\Mobile`)**:
-     - **Role-Based Navigation**: Kiến trúc phân luồng `RootNavigator` (`AuthStack` vs `AppStack`) dựa trên xác thực và phân quyền (Admin / Viewer). Mô hình Stack bọc Tab giúp tự động ẩn thanh Bottom Tab Bar khi vào màn hình phụ (`IncidentDetail`, `ChangePassword`, `AdminSettings`).
-     - **5 Tabs Chuẩn Elevated Dock**: Chiều cao 68–72px tính theo `SafeAreaInsets`, đổ bóng ngược lên trên (`Upward Elevation Shadow`), Tab 3 trung tâm (Tra cứu log & Giám sát realtime) nhô cao (-10px) hình tròn nổi bật, 4 tab còn lại có khung viên nang (`Pill Active Indicator`).
-     - **Theme Tokens Context**: Hỗ trợ 2 bảng màu Sáng (Màu nhấn Xanh Da Trời `#0284c7`) và Tối (Màu nhấn Tím `#6366f1`) đồng bộ với Web, lưu trạng thái bằng `AsyncStorage`.
-     - **Tích hợp toàn bộ API Backend**: Đăng nhập/Đăng xuất JWT, KPI tổng quan, Sức khỏe Pipeline (Collector, Parser, OpenSearch), Quản lý vòng đời sự cố (Mới, Tiếp nhận, Xử lý, Thêm ghi chú), Socket.IO stream log thời gian thực, Mẫu log Drain và Đổi mật khẩu/Cấu hình báo cáo.
-     - **Global Floating AI Bubble**: Bong bóng Trợ lý AI nổi ở góc dưới mọi màn hình, bấm mở Drawer hỏi đáp và phân tích log tự nhiên qua API `/api/v1/ai/query`.
-  3. **Đồng bộ hóa tài liệu dự án**:
-     - Cập nhật sơ đồ luồng dữ liệu và bảng cổng dịch vụ (thêm Expo Mobile App cổng `8081`) trong `kientruchethong.md` và `README.md`.
-     - Cập nhật bảng công nghệ trong `PROJECT_CONTEXT.md` và bổ sung hướng dẫn chạy ứng dụng trong `Mobile/README.md`.
-- **Kết quả**: Thành công, `npm run build` ở Frontend Web hoàn thành không lỗi (10.04s), toàn bộ cấu trúc module Mobile được thiết lập hoàn chỉnh.
 
 
 

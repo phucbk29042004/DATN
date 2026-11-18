@@ -24,7 +24,7 @@ export function fitDrain(allSequences, drainOptions = {}) {
 
   for (const sequence of allSequences) {
     for (const log of sequence) {
-      const message = typeof log === 'string' ? log : (log.message || '');
+      const message = typeof log === 'string' ? log : (log.message || log.content || '');
       parser.parseMessage(message);
     }
   }
@@ -48,7 +48,7 @@ export function sequenceToVector(sequence, parser, templateIds) {
   const countMap = new Map(templateIds.map(id => [id, 0]));
 
   for (const log of sequence) {
-    const message = typeof log === 'string' ? log : (log.message || '');
+    const message = typeof log === 'string' ? log : (log.message || log.content || '');
     const cluster = parser.parseMessage(message);
     if (countMap.has(cluster.cluster_id)) {
       countMap.set(cluster.cluster_id, countMap.get(cluster.cluster_id) + 1);

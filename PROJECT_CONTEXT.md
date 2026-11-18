@@ -117,7 +117,8 @@ Agent cần tuân thủ/cài đặt các cơ chế sau:
 | 11 | Chuẩn bị dữ liệu: tiền xử lý HDFS/BGL, trích xuất Drain vector | [X] Hoàn thành |
 | 12 | Tích hợp toàn bộ pipeline end-to-end, stream dữ liệu thật HDFS/BGL | [X] Hoàn thành |
 | 13 | Quản lý vòng đời sự cố SRE (P1/P2/P3, RCA, Actions), Viewer Triage & AI Copilot | [X] Hoàn thành |
-| 14-15| Kiểm thử hiệu năng, tối ưu hệ thống, viết báo cáo & bảo vệ | [ ] Đang thực hiện |
+| 14 | Kiểm thử hiệu năng (Throughput & Latency), đánh giá độ chính xác (Precision, Recall, F1 trên HDFS/BGL) | [X] Hoàn thành |
+| 15 | Tối ưu hệ thống, hoàn thiện báo cáo luận văn & slide bảo vệ | [ ] Đang thực hiện |
 
 ## 11. Nguyên tắc làm việc cho AI Agent
 

@@ -1,0 +1,101 @@
+{
+  "title": "BÁO CÁO ĐÁNH GIÁ ĐỊNH LƯỢNG VÀ HIỆU NĂNG HỆ THỐNG LOGPULSE",
+  "generated_at": "2026-11-18T04:02:23.490Z",
+  "benchmark_throughput": {
+    "parser": {
+      "throughput": 150376,
+      "avg": "0.006",
+      "p50": "0.004",
+      "p90": "0.008",
+      "p99": "0.018"
+    },
+    "drain": {
+      "throughput": 202425,
+      "avg": "0.005",
+      "p50": "0.003",
+      "p90": "0.005",
+      "p99": "0.025"
+    },
+    "rule_engine": {
+      "throughput": 936540,
+      "avg": "0.001",
+      "p50": "0.001",
+      "p90": "0.002",
+      "p99": "0.003"
+    }
+  },
+  "datasets_evaluation": {
+    "hdfs": {
+      "total_sequences": 11,
+      "actual_anomalies": 5,
+      "models": {
+        "rule_based": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "accuracy": 1.0,
+          "confusion_matrix": { "TP": 5, "FP": 0, "FN": 0, "TN": 6 }
+        },
+        "statistical_zscore": {
+          "precision": 0.4,
+          "recall": 0.4,
+          "f1_score": 0.4,
+          "accuracy": 0.4545,
+          "confusion_matrix": { "TP": 2, "FP": 3, "FN": 3, "TN": 3 }
+        },
+        "isolation_forest": {
+          "method": "isolation_forest",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1_score": 0.0,
+          "accuracy": 0.67,
+          "confusion_matrix": { "TP": 0, "FP": 0, "FN": 1, "TN": 2 }
+        },
+        "logistic_regression": {
+          "method": "logistic_regression",
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "accuracy": 1.0,
+          "confusion_matrix": { "TP": 1, "FP": 0, "FN": 0, "TN": 2 }
+        }
+      }
+    },
+    "bgl": {
+      "total_windows": 23,
+      "actual_anomalies": 7,
+      "models": {
+        "rule_based": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "accuracy": 1.0,
+          "confusion_matrix": { "TP": 7, "FP": 0, "FN": 0, "TN": 16 }
+        },
+        "statistical_zscore": {
+          "precision": 0.5714,
+          "recall": 0.5714,
+          "f1_score": 0.5714,
+          "accuracy": 0.7391,
+          "confusion_matrix": { "TP": 4, "FP": 3, "FN": 3, "TN": 13 }
+        },
+        "isolation_forest": {
+          "method": "isolation_forest",
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1_score": 0.0,
+          "accuracy": 0.8,
+          "confusion_matrix": { "TP": 0, "FP": 0, "FN": 1, "TN": 4 }
+        },
+        "logistic_regression": {
+          "method": "logistic_regression",
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1_score": 1.0,
+          "accuracy": 1.0,
+          "confusion_matrix": { "TP": 1, "FP": 0, "FN": 0, "TN": 4 }
+        }
+      }
+    }
+  }
+}
