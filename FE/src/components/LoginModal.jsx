@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { LogIn, X, Shield, AlertCircle, Key, User, Eye, EyeOff } from 'lucide-react';
-
-const API_BASE = '/api/v1';
+import { API_BASE } from '../config.js';
 
 export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
   const [username, setUsername] = useState('');

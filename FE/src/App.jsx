@@ -26,10 +26,9 @@ import IncidentNoteModal from './components/IncidentNoteModal.jsx';
 import CustomDateTimePicker from './components/CustomDateTimePicker.jsx';
 import TabHelpModal from './components/TabHelpModal.jsx';
 import CronJobsModal from './components/CronJobsModal.jsx';
+import { API_BASE, SOCKET_URL } from './config.js';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
-const API_BASE = '/api/v1';
-const SOCKET_URL = 'http://localhost:5000';
 const LEVEL_COLORS = {
   INFO: '#3b82f6', WARN: '#f59e0b', ERROR: '#ef4444', FATAL: '#dc2626'
 };

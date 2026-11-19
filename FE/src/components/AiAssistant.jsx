@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { MessageSquare, Send, X, Trash2, Terminal, User, Loader, Zap, AlertTriangle } from 'lucide-react';
-
-const API_BASE = '/api/v1';
+import { API_BASE } from '../config.js';
 
 /**
  * AiAssistant — Floating chatbot + Nút "Phân tích cùng AI" trong Modal log

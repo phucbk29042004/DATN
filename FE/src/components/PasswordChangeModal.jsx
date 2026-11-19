@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { KeyRound, X, AlertCircle, CheckCircle2 } from 'lucide-react';
-
-const API_BASE = '/api/v1';
+import { API_BASE } from '../config.js';
 
 export default function PasswordChangeModal({ isOpen, onClose, currentUser, addToast }) {
   const [currentPassword, setCurrentPassword] = useState('');

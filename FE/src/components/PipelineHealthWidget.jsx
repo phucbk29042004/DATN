@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Activity, RefreshCw, X, Server, Layers, Cpu, CheckCircle2, AlertTriangle, AlertOctagon, Clock, Zap } from 'lucide-react';
-
-const API_BASE = '/api/v1';
+import { API_BASE } from '../config.js';
 
 export default function PipelineHealthWidget({ isOpen, onClose, lang, addToast }) {
   const [data, setData] = useState(null);

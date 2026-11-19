@@ -14,7 +14,8 @@ import {
   getAnomalyAnalytics
 } from './opensearchQueries.js';
 import { chatWithAI, explainLog } from './aiService.js';
-import { alertConfig, dispatchAlerts, sendDiscordAlert, sendEmailAlert, setMaintenanceMode, getMaintenanceMode } from './alertService.js';
+import { alertConfig, dispatchAlerts, sendDiscordAlert, sendEmailAlert, setMaintenanceMode, getMaintenanceMode, saveConfigToSqlite } from './alertService.js';
+import db, { ghiNhatKyHeThong } from '../database/sqlite.js';
 import { loginUser, changePassword, authenticateToken, requireAdmin, optionalAuth } from './authService.js';
 import { getPipelineHealth, recordPipelineLog } from './pipelineMetrics.js';
 import { updateIncidentStatus, addIncidentNote, enrichAnomaliesWithIncidentState } from './incidentService.js';
@@ -115,7 +116,7 @@ app.get('/health', (req, res) => {
 app.post('/api/v1/auth/login', async (req, res) => {
   try {
     const { username, password } = req.body;
-    const result = await loginUser(username, password);
+    const result = await loginUser(username, password, req.ip);
     return res.status(200).json(result);
   } catch (err) {
     return res.status(400).json({ error: err.message });
@@ -282,7 +283,8 @@ app.post('/api/v1/alerts/maintenance', optionalAuth, (req, res) => {
     return res.status(403).json({ error: 'Chỉ tài khoản Admin mới có quyền bật/tắt chế độ bảo trì.' });
   }
   const { enabled, minutes, reason } = req.body;
-  const updated = setMaintenanceMode({ enabled, minutes, reason });
+  const createdBy = req.user ? req.user.displayName || req.user.username : 'Admin';
+  const updated = setMaintenanceMode({ enabled, minutes, reason, createdBy });
   return res.status(200).json({ success: true, maintenance: updated });
 });
 
@@ -354,12 +356,55 @@ app.post('/api/v1/config', optionalAuth, (req, res) => {
     console.warn('[Cron Reload Warning]:', err.message);
   }
 
+  // Lưu cấu hình vào SQLite và ghi nhật ký kiểm toán
+  saveConfigToSqlite({
+    anomalyThreshold,
+    discordEnabled,
+    discordWebhookUrl,
+    emailEnabled,
+    smtpHost,
+    smtpPort,
+    smtpUser,
+    smtpPass,
+    receiverEmail,
+    alertKeywords
+  });
+
+  ghiNhatKyHeThong(
+    req.user ? (req.user.displayName || req.user.username) : 'Admin',
+    'UPDATE_CONFIG',
+    'SystemConfig',
+    { updatedKeys: Object.keys(req.body) },
+    req.ip
+  );
+
   console.log('[Alert Config Updated]:', {
     ...alertConfig,
     ...cronConfig,
     smtpPass: alertConfig.smtpPass ? '********' : '' // Ẩn mật khẩu khi log
   });
   res.status(200).json({ status: 'OK', config: { ...alertConfig, ...cronConfig } });
+});
+
+// ── ENTERPRISE AUDIT & CRON HISTORY ENDPOINTS ───────────────────────────────
+app.get('/api/v1/audit/logs', optionalAuth, (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit || '100', 10), 500);
+    const logs = db.prepare('SELECT * FROM nhat_ky_he_thong ORDER BY id DESC LIMIT ?').all(limit);
+    return res.status(200).json({ total: logs.length, logs });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/v1/cron/history', optionalAuth, (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit || '50', 10), 200);
+    const history = db.prepare('SELECT * FROM lich_su_cron ORDER BY id DESC LIMIT ?').all(limit);
+    return res.status(200).json({ total: history.length, history });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 // ── SCHEDULED REPORTS & RETENTION TRIGGER ENDPOINTS ──────────────────────────

@@ -1,74 +1,57 @@
 /**
- * Incident Lifecycle Management Service
+ * Incident Lifecycle Management Service (Enterprise SRE SQLite Edition)
  * Quản lý vòng đời sự cố (NEW -> ACKNOWLEDGED -> RESOLVED),
- * ghi chú xử lý (Remediation Notes) và lưu trữ bền vững.
+ * ghi chú điều tra (Investigation Notes) và lưu trữ bền vững trong SQLite.
  */
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import db, { ghiNhatKyHeThong } from '../database/sqlite.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// File lưu trữ trạng thái sự cố cục bộ
-const INCIDENTS_FILE = path.resolve(__dirname, '../datasets/incident_states.json');
-
-// In-memory Map: incidentId -> { status, acknowledgedBy, acknowledgedAt, resolvedBy, resolvedAt, notes: [] }
-let incidentMap = new Map();
+const getIncidentStmt = db.prepare('SELECT * FROM su_co WHERE id = ?');
+const getNotesStmt = db.prepare('SELECT * FROM ghi_chu_su_co WHERE su_co_id = ? ORDER BY thoi_gian_tao ASC');
 
 /**
- * Đọc dữ liệu sự cố từ file JSON khi khởi động
- */
-function loadIncidentsFromFile() {
-  try {
-    if (fs.existsSync(INCIDENTS_FILE)) {
-      const raw = fs.readFileSync(INCIDENTS_FILE, 'utf-8');
-      const data = JSON.parse(raw);
-      if (typeof data === 'object' && data !== null) {
-        incidentMap = new Map(Object.entries(data));
-        console.log(`[Incident Service] Đã tải ${incidentMap.size} trạng thái sự cố từ file lưu trữ.`);
-      }
-    }
-  } catch (err) {
-    console.warn('[Incident Service] Không thể đọc file incident_states.json:', err.message);
-  }
-}
-
-/**
- * Lưu trạng thái sự cố ra file JSON
- */
-function saveIncidentsToFile() {
-  try {
-    const dir = path.dirname(INCIDENTS_FILE);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    const obj = Object.fromEntries(incidentMap);
-    fs.writeFileSync(INCIDENTS_FILE, JSON.stringify(obj, null, 2), 'utf-8');
-  } catch (err) {
-    console.warn('[Incident Service] Không thể lưu file incident_states.json:', err.message);
-  }
-}
-
-// Khởi chạy load ban đầu
-loadIncidentsFromFile();
-
-/**
- * Lấy trạng thái của 1 sự cố
+ * Lấy trạng thái của 1 sự cố từ SQLite
  * @param {string} id 
  */
 export function getIncidentState(id) {
   if (!id) return null;
-  return incidentMap.get(id) || {
-    status: 'NEW',
-    priority: 'P2',
-    root_cause: null,
-    action_taken: null,
-    acknowledgedBy: null,
-    acknowledgedAt: null,
-    resolvedBy: null,
-    resolvedAt: null,
-    notes: []
+
+  const incident = getIncidentStmt.get(id);
+  const notes = getNotesStmt.all(id) || [];
+
+  const formattedNotes = notes.map(n => ({
+    id: n.id,
+    author: n.tac_gia,
+    role: n.vai_tro,
+    type: n.loai_ghi_chu,
+    text: n.noi_dung,
+    createdAt: n.thoi_gian_tao
+  }));
+
+  if (!incident) {
+    return {
+      status: 'NEW',
+      priority: 'P2',
+      root_cause: null,
+      action_taken: null,
+      acknowledgedBy: null,
+      acknowledgedAt: null,
+      resolvedBy: null,
+      resolvedAt: null,
+      notes: formattedNotes
+    };
+  }
+
+  return {
+    status: incident.trang_thai,
+    priority: incident.muc_do_uu_tien || 'P2',
+    root_cause: incident.nguyen_nhan_goc,
+    action_taken: incident.bien_phap_xu_ly,
+    acknowledgedBy: incident.nguoi_tiep_nhan,
+    acknowledgedAt: incident.thoi_gian_tiep_nhan,
+    resolvedBy: incident.nguoi_xu_ly,
+    resolvedAt: incident.thoi_gian_xu_ly,
+    updatedAt: incident.ngay_cap_nhat,
+    notes: formattedNotes
   };
 }
 
@@ -87,50 +70,60 @@ export function updateIncidentStatus(id, status, user = {}, noteText = '', meta 
     throw new Error(`Trạng thái không hợp lệ: ${status}`);
   }
 
-  const current = getIncidentState(id);
+  const existing = getIncidentStmt.get(id);
   const now = new Date().toISOString();
   const userName = user.displayName || user.username || 'System Admin';
 
-  const updated = {
-    ...current,
-    status,
-    updatedAt: now
-  };
-
-  if (meta.priority) updated.priority = meta.priority;
-  if (meta.root_cause) updated.root_cause = meta.root_cause;
-  if (meta.action_taken) updated.action_taken = meta.action_taken;
+  const priority = meta.priority || (existing ? existing.muc_do_uu_tien : 'P2');
+  const root_cause = meta.root_cause !== undefined ? meta.root_cause : (existing ? existing.nguyen_nhan_goc : null);
+  const action_taken = meta.action_taken !== undefined ? meta.action_taken : (existing ? existing.bien_phap_xu_ly : null);
+  let acknowledgedBy = existing ? existing.nguoi_tiep_nhan : null;
+  let acknowledgedAt = existing ? existing.thoi_gian_tiep_nhan : null;
+  let resolvedBy = existing ? existing.nguoi_xu_ly : null;
+  let resolvedAt = existing ? existing.thoi_gian_xu_ly : null;
 
   if (status === 'ACKNOWLEDGED') {
-    updated.acknowledgedBy = userName;
-    updated.acknowledgedAt = now;
+    acknowledgedBy = userName;
+    acknowledgedAt = now;
   } else if (status === 'RESOLVED') {
-    updated.resolvedBy = userName;
-    updated.resolvedAt = now;
-    if (!updated.acknowledgedBy) {
-      updated.acknowledgedBy = userName;
-      updated.acknowledgedAt = now;
+    resolvedBy = userName;
+    resolvedAt = now;
+    if (!acknowledgedBy) {
+      acknowledgedBy = userName;
+      acknowledgedAt = now;
     }
   }
 
+  const upsert = db.prepare(`
+    INSERT INTO su_co (
+      id, trang_thai, muc_do_uu_tien, nguyen_nhan_goc, bien_phap_xu_ly,
+      nguoi_tiep_nhan, thoi_gian_tiep_nhan, nguoi_xu_ly, thoi_gian_xu_ly, ngay_cap_nhat
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      trang_thai = excluded.trang_thai,
+      muc_do_uu_tien = excluded.muc_do_uu_tien,
+      nguyen_nhan_goc = excluded.nguyen_nhan_goc,
+      bien_phap_xu_ly = excluded.bien_phap_xu_ly,
+      nguoi_tiep_nhan = excluded.nguoi_tiep_nhan,
+      thoi_gian_tiep_nhan = excluded.thoi_gian_tiep_nhan,
+      nguoi_xu_ly = excluded.nguoi_xu_ly,
+      thoi_gian_xu_ly = excluded.thoi_gian_xu_ly,
+      ngay_cap_nhat = excluded.ngay_cap_nhat
+  `);
+
+  upsert.run(id, status, priority, root_cause, action_taken, acknowledgedBy, acknowledgedAt, resolvedBy, resolvedAt, now);
+
   if (noteText && noteText.trim()) {
-    updated.notes = [
-      ...(updated.notes || []),
-      {
-        id: `note_${Date.now()}`,
-        author: userName,
-        role: user.role || 'admin',
-        type: status === 'RESOLVED' ? 'RESOLUTION' : 'NOTE',
-        text: noteText.trim(),
-        createdAt: now
-      }
-    ];
+    const noteId = `note_${Date.now()}`;
+    const noteType = status === 'RESOLVED' ? 'RESOLUTION' : 'NOTE';
+    db.prepare(`
+      INSERT INTO ghi_chu_su_co (id, su_co_id, tac_gia, vai_tro, loai_ghi_chu, noi_dung, thoi_gian_tao)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(noteId, id, userName, user.role || 'admin', noteType, noteText.trim(), now);
   }
 
-  incidentMap.set(id, updated);
-  saveIncidentsToFile();
-
-  return updated;
+  ghiNhatKyHeThong(userName, 'UPDATE_INCIDENT_STATUS', 'Incident', { id, status, priority });
+  return getIncidentState(id);
 }
 
 /**
@@ -146,29 +139,35 @@ export function addIncidentNote(id, user = {}, noteText = '', noteType = 'NOTE')
     throw new Error('Nội dung ghi chú không được để trống');
   }
 
-  const current = getIncidentState(id);
+  const existing = getIncidentStmt.get(id);
   const now = new Date().toISOString();
   const userName = user.displayName || user.username || 'System Operator';
+  const noteId = `note_${Date.now()}`;
 
-  const newNote = {
-    id: `note_${Date.now()}`,
+  if (!existing) {
+    db.prepare(`
+      INSERT INTO su_co (id, trang_thai, ngay_cap_nhat)
+      VALUES (?, ?, ?)
+    `).run(id, 'NEW', now);
+  } else {
+    db.prepare('UPDATE su_co SET ngay_cap_nhat = ? WHERE id = ?').run(now, id);
+  }
+
+  db.prepare(`
+    INSERT INTO ghi_chu_su_co (id, su_co_id, tac_gia, vai_tro, loai_ghi_chu, noi_dung, thoi_gian_tao)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
+  `).run(noteId, id, userName, user.role || 'viewer', noteType, noteText.trim(), now);
+
+  ghiNhatKyHeThong(userName, 'ADD_INCIDENT_NOTE', 'Incident', { id, noteId, noteType });
+
+  return {
+    id: noteId,
     author: userName,
     role: user.role || 'viewer',
     type: noteType,
     text: noteText.trim(),
     createdAt: now
   };
-
-  const updated = {
-    ...current,
-    notes: [...(current.notes || []), newNote],
-    updatedAt: now
-  };
-
-  incidentMap.set(id, updated);
-  saveIncidentsToFile();
-
-  return newNote;
 }
 
 /**
@@ -196,4 +195,3 @@ export function enrichAnomaliesWithIncidentState(anomalies) {
     };
   });
 }
-

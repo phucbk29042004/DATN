@@ -9,7 +9,8 @@ graph TD
     C -->|Worker Process| D[Parser Service]
     D -->|Index Doc| E[(OpenSearch :9200)]
     D -->|broadcastNewLog| F[Search API / Socket.IO :5000]
-    F -->|WebSocket Event: new_log| G[Vite React Frontend :3000]
+    F -->|Query / Mutate| K[(SQLite Database: sre_enterprise.sqlite)]
+    F -->|WebSocket Event: new_log| G[Vite React Frontend :3000 / Vercel]
     F -->|WebSocket Event: new_log| J[Expo Mobile App :8081]
     F -->|sendDiscordAlert| H[Discord Webhook API]
     F -->|sendEmailAlert| I[Email SMTP / Gmail]
@@ -30,8 +31,9 @@ graph TD
 | **AI Assistant Service** | Groq + Gemini REST API | N/A (tích hợp trong Search API :5000) | Trợ lý AI phân tích log, giải thích nguyên nhân bất thường, hỏi đáp tự do về giám sát hệ thống. Groq (primary) + Gemini (fallback) |
 | **Pipeline Health Service** | BullMQ API + Rolling Metrics | N/A (tích hợp trong Search API :5000) | Giám sát trạng thái hàng đợi BullMQ (waiting/active/failed), tính thông lượng throughput (log/s) & độ trễ pipeline |
 | **Authentication & RBAC** | JWT + bcryptjs | N/A (tích hợp trong Search API :5000) | Quản lý đăng nhập và phân quyền truy cập: Admin (toàn quyền) & Viewer (chỉ xem, khóa lưu cấu hình) |
-| **Incident Lifecycle Service** | In-memory + Persistent JSON Store | N/A (tích hợp trong Search API :5000) | Quản lý vòng đời sự cố SRE chuẩn hóa (NEW ➔ ACK ➔ RESOLVED), phân loại mức độ ưu tiên (P1/P2/P3), lưu vết Root Cause & Action Taken, ghi chú điều tra (Viewer & Admin), deduplication 60s & chế độ bảo trì (Silence) |
-| **Cron & Retention Service** | node-cron + OpenSearch API | N/A (tích hợp trong Search API :5000) | Lập lịch tự động gửi Daily Digest lúc 08:00 (Discord + Email) & dọn dẹp log cũ quá hạn lúc 00:00 (Retention Policy) |
+| **Incident Lifecycle Service** | SQLite Database (`better-sqlite3`) | N/A (tích hợp trong Search API :5000) | Quản lý vòng đời sự cố SRE chuẩn hóa (NEW ➔ ACK ➔ RESOLVED), phân loại mức độ ưu tiên (P1/P2/P3), lưu vết Root Cause & Action Taken, ghi chú điều tra (Viewer & Admin), deduplication 60s & chế độ bảo trì (Silence) |
+| **Enterprise SQLite Database** | SQLite 3 (WAL mode) | File `BE/data/sre_enterprise.sqlite` | Lưu trữ bền vững 7 bảng dữ liệu chuẩn SRE: người dùng RBAC, vòng đời sự cố, ghi chú điều tra, cấu hình hệ thống, lịch bảo trì, nhật ký kiểm toán (Audit Trail) và lịch sử cron |
+| **Cron & Retention Service** | node-cron + OpenSearch + SQLite | N/A (tích hợp trong Search API :5000) | Lập lịch tự động gửi Daily Digest lúc 08:00 (Discord + Email), dọn dẹp log cũ quá hạn lúc 00:00 (Retention Policy) và ghi lịch sử chạy vào bảng `lich_su_cron` |
 
 ## 3. ML Training Pipeline (Offline — chạy 1 lần)
 

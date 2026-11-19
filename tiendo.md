@@ -2,6 +2,17 @@
 
 ## Nhật Ký Cập Nhật (Chronological Log)
 
+### [19/11/2026 19:30] — Tích Hợp SQLite Database 7 Bảng Chuẩn Doanh Nghiệp & Cấu Hình Triển Khai Vercel (FE) + Render (BE)
+- **Loại**: Nâng cấp cơ sở dữ liệu quan hệ & Sẵn sàng triển khai Cloud (SQLite Enterprise Architecture & Cloud Deployment Setup)
+- **File**: `BE/database/sqlite.js`, `BE/search-api/authService.js`, `BE/search-api/incidentService.js`, `BE/search-api/alertService.js`, `BE/search-api/cronService.js`, `BE/search-api/index.js`, `FE/vercel.json`, `FE/src/config.js`, `FE/src/App.jsx`, `FE/src/components/*`, `FE/.env.example`, `tiendo.md`, `kientruchethong.md`
+- **Mô tả**:
+  1. Khởi tạo SQLite database chuẩn SRE doanh nghiệp với 7 bảng trường tiếng Việt không dấu: `nguoi_dung` (RBAC), `su_co` (Incident Lifecycle), `ghi_chu_su_co` (Audit notes), `cau_hinh_he_thong` (Key-value config), `lich_bao_tri` (Maintenance windows), `nhat_ky_he_thong` (Audit trail), `lich_su_cron` (Task logs).
+  2. Tự động di chuyển dữ liệu sự cố cũ từ `incident_states.json` và khởi tạo tài khoản mặc định `admin`/`viewer` (bcrypt băm).
+  3. Chuyển đổi toàn bộ `authService`, `incidentService`, `alertService`, `cronService` sang đọc/ghi trực tiếp SQLite bền vững với chế độ WAL.
+  4. Bổ sung các API endpoint kiểm toán `/api/v1/audit/logs` và lịch sử cron `/api/v1/cron/history`.
+  5. Thiết lập `FE/vercel.json` SPA rewrite và tập trung hóa cấu hình API URL động qua `FE/src/config.js` (`VITE_API_BASE_URL`), tương thích triển khai Vercel và Render.
+- **Kết quả**: Tất cả mã nguồn BE và FE biên dịch đạt 100% không lỗi (`node --check`, `esbuild`), kiểm thử truy vấn tích hợp SQLite và login JWT thành công.
+
 ### [19/11/2026 18:22] — Sửa Lỗi Hiển Thị Thanh Điều Hướng Đáy & Tinh Chỉnh Cỡ Chữ Sidebar Mobile Vừa Vặn
 - **Loại**: Sửa lỗi hiển thị & Tinh chỉnh Responsive (UI Fix & Mobile Viewport Polish)
 - **File**: `FE/src/index.css`, `tiendo.md`

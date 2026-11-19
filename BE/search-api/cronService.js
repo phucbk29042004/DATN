@@ -7,6 +7,7 @@ import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
 import { opensearchClient } from '../storage/opensearch.js';
 import { alertConfig } from './alertService.js';
+import { ghiLichSuCron } from '../database/sqlite.js';
 
 dotenv.config();
 
@@ -247,13 +248,23 @@ async function sendEmailDigest(data) {
  * Thực hiện gửi báo cáo Daily Digest tổng hợp (gọi cả Discord lẫn Email)
  */
 export async function sendDailyDigestReport() {
+  const startTime = Date.now();
   console.log('[Cron Digest] Bắt đầu tổng hợp và phát hành báo cáo Daily Digest 24h...');
-  const data = await generate24hDigestData();
-  await Promise.allSettled([
-    sendDiscordDigest(data),
-    sendEmailDigest(data)
-  ]);
-  return data;
+  try {
+    const data = await generate24hDigestData();
+    await Promise.allSettled([
+      sendDiscordDigest(data),
+      sendEmailDigest(data)
+    ]);
+    ghiLichSuCron('DailyDigestReport', 'SUCCESS', Date.now() - startTime, {
+      totalLogs: data.totalLogs,
+      anomalyCount: data.anomalyCount
+    });
+    return data;
+  } catch (err) {
+    ghiLichSuCron('DailyDigestReport', 'FAILED', Date.now() - startTime, { error: err.message });
+    throw err;
+  }
 }
 
 /**
@@ -261,6 +272,7 @@ export async function sendDailyDigestReport() {
  * @param {number} days 
  */
 export async function runLogRetentionCleanup(days = cronConfig.retentionDays) {
+  const startTime = Date.now();
   const retentionDays = parseInt(days, 10) || 30;
   const cutoffDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000).toISOString();
 
@@ -284,21 +296,25 @@ export async function runLogRetentionCleanup(days = cronConfig.retentionDays) {
     const deletedCount = response.body?.deleted ?? 0;
     console.log(`[Retention Policy] Dọn dẹp hoàn tất: Đã xóa ${deletedCount} logs cũ.`);
 
-    return {
+    const result = {
       success: true,
       deletedCount,
       cutoffDate,
       retentionDays
     };
+    ghiLichSuCron('LogRetentionCleanup', 'SUCCESS', Date.now() - startTime, result);
+    return result;
   } catch (err) {
     console.error('[Retention Policy Error] Lỗi khi dọn dẹp log cũ:', err.message);
-    return {
+    const result = {
       success: false,
       deletedCount: 0,
       error: err.message,
       cutoffDate,
       retentionDays
     };
+    ghiLichSuCron('LogRetentionCleanup', 'FAILED', Date.now() - startTime, result);
+    return result;
   }
 }
 

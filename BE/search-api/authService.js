@@ -1,61 +1,53 @@
 /**
  * Authentication & Authorization Service (JWT + Role-Based Access Control)
- * Quản lý xác thực người dùng và phân quyền (Admin / Viewer).
+ * Quản lý xác thực người dùng và phân quyền (Admin / Viewer) tích hợp SQLite Database.
  */
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import dotenv from 'dotenv';
+import db, { ghiNhatKyHeThong } from '../database/sqlite.js';
+
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'logpulse_default_secret_key_change_in_prod';
 const TOKEN_EXPIRES_IN = '24h';
 
-// Danh sách tài khoản chuẩn demo đồ án (Mật khẩu được băm sẵn bằng bcrypt)
-// admin123  -> $2a$10$7h1d7zFkH5f.3aJ1qM7nK.6kQ9xU8wZ2eR4tY6uI8oP0aS2dF4gH6
-// viewer123 -> $2a$10$8j2e8aGlI6g.4bK2rN8oL.7lR0yV9xZ3fS5uZ7vJ9pQ1bT3eG5hI7
-const USERS = [
-  {
-    id: 'usr_admin',
-    username: 'admin',
-    passwordHash: bcrypt.hashSync('admin123', 10),
-    displayName: 'Quản Trị Viên (Admin)',
-    role: 'admin'
-  },
-  {
-    id: 'usr_viewer',
-    username: 'viewer',
-    passwordHash: bcrypt.hashSync('viewer123', 10),
-    displayName: 'Giám Sát Viên (Viewer)',
-    role: 'viewer'
-  }
-];
-
 /**
- * Xác thực đăng nhập
+ * Xác thực đăng nhập qua cơ sở dữ liệu SQLite (bảng nguoi_dung)
  * @param {string} username 
  * @param {string} password 
- * @returns {Object} { token, user }
+ * @param {string} [ipAddress]
+ * @returns {Promise<Object>} { token, user }
  */
-export async function loginUser(username, password) {
+export async function loginUser(username, password, ipAddress = '') {
   if (!username || !password) {
     throw new Error('Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu');
   }
 
-  const user = USERS.find(u => u.username.toLowerCase() === username.trim().toLowerCase());
+  const cleanUsername = username.trim();
+  const stmt = db.prepare('SELECT * FROM nguoi_dung WHERE LOWER(ten_dang_nhap) = LOWER(?)');
+  const user = stmt.get(cleanUsername);
+
   if (!user) {
+    ghiNhatKyHeThong(cleanUsername, 'LOGIN_FAILED', 'Auth', { reason: 'Tài khoản không tồn tại' }, ipAddress);
     throw new Error('Tài khoản không tồn tại trên hệ thống');
   }
 
-  const isMatch = await bcrypt.compare(password, user.passwordHash);
+  const isMatch = await bcrypt.compare(password, user.mat_khau_hash);
   if (!isMatch) {
+    ghiNhatKyHeThong(user.ten_dang_nhap, 'LOGIN_FAILED', 'Auth', { reason: 'Sai mật khẩu' }, ipAddress);
     throw new Error('Mật khẩu không chính xác');
   }
 
+  // Cập nhật mốc thời gian đăng nhập gần nhất
+  db.prepare('UPDATE nguoi_dung SET lan_cuoi_dang_nhap = CURRENT_TIMESTAMP WHERE id = ?').run(user.id);
+  ghiNhatKyHeThong(user.ten_dang_nhap, 'LOGIN_SUCCESS', 'Auth', { vai_tro: user.vai_tro }, ipAddress);
+
   const payload = {
     id: user.id,
-    username: user.username,
-    role: user.role,
-    displayName: user.displayName
+    username: user.ten_dang_nhap,
+    role: user.vai_tro,
+    displayName: user.ten_hien_thi
   };
 
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: TOKEN_EXPIRES_IN });
@@ -67,7 +59,7 @@ export async function loginUser(username, password) {
 }
 
 /**
- * Đổi mật khẩu người dùng
+ * Đổi mật khẩu người dùng trong SQLite
  * @param {string} userId 
  * @param {string} currentPassword 
  * @param {string} newPassword 
@@ -81,17 +73,20 @@ export async function changePassword(userId, currentPassword, newPassword) {
     throw new Error('Mật khẩu mới phải có ít nhất 6 ký tự');
   }
 
-  const user = USERS.find(u => u.id === userId);
+  const user = db.prepare('SELECT * FROM nguoi_dung WHERE id = ?').get(userId);
   if (!user) {
     throw new Error('Không tìm thấy tài khoản người dùng');
   }
 
-  const isMatch = await bcrypt.compare(currentPassword, user.passwordHash);
+  const isMatch = await bcrypt.compare(currentPassword, user.mat_khau_hash);
   if (!isMatch) {
     throw new Error('Mật khẩu hiện tại không chính xác');
   }
 
-  user.passwordHash = bcrypt.hashSync(newPassword, 10);
+  const newHash = bcrypt.hashSync(newPassword, 10);
+  db.prepare('UPDATE nguoi_dung SET mat_khau_hash = ? WHERE id = ?').run(newHash, userId);
+
+  ghiNhatKyHeThong(user.ten_dang_nhap, 'CHANGE_PASSWORD', 'Auth', { userId, status: 'SUCCESS' });
   return { success: true, message: 'Đổi mật khẩu thành công' };
 }
 
@@ -145,4 +140,3 @@ export function optionalAuth(req, res, next) {
     next();
   }
 }
-
