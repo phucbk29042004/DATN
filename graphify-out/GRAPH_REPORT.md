@@ -6,12 +6,12 @@
 - Unclassified: 12 file(s) not represented in the graph (top: (none) 2, .example 2, .log 2)
 
 ## Summary
-- 680 nodes · 1289 edges · 25 communities (23 shown, 2 thin omitted)
+- 680 nodes · 1284 edges · 25 communities (23 shown, 2 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 14 edges (avg confidence: 0.87)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c8958aa1`
+- Built from commit: `d174da89`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -60,10 +60,10 @@
   tiendo.md → FE/src/components/LoginModal.jsx
 - `[09/11/2026 18:42] — Khởi Tạo Auth Gate Buộc Đăng Nhập Trước, Thêm Bảng Điều Khiển Cron Job Trên Submenu, Thiết Kế Lại Email/Discord Notification & Tối Ưu UX Đồ Thị` --references--> `reloadCronJobs()`  [INFERRED]
   tiendo.md → BE/search-api/cronService.js
-- `flushBuffer()` --calls--> `runAnomalyDetection()`  [EXTRACTED]
-  BE/parser/index.js → BE/anomaly-engine/index.js
-- `exportVectorsForML()` --calls--> `vectorizeDataset()`  [EXTRACTED]
-  BE/anomaly-engine/index.js → BE/anomaly-engine/template-mining/vectorizer.js
+- `App()` --calls--> `AdminSettingsModal()`  [EXTRACTED]
+  FE/src/App.jsx → FE/src/components/AdminSettingsModal.jsx
+- `App()` --calls--> `CronJobsModal()`  [EXTRACTED]
+  FE/src/App.jsx → FE/src/components/CronJobsModal.jsx
 
 ## Import Cycles
 - None detected.
@@ -87,7 +87,7 @@ Cohesion: 0.07
 Nodes (12): health(), lifespan(), _load_models(), predict(), PredictRequest, PredictResponse, reload_model(), _build_report() (+4 more)
 
 ### Community 4 - "App.jsx"
-Cohesion: 0.10
+Cohesion: 0.09
 Nodes (29): App(), formatVnDateTime(), KpiSkeleton(), LEVEL_COLORS, Skeleton(), ToastContainer(), toLocalDatetimeInputString(), useToast() (+21 more)
 
 ### Community 5 - "Mobile/package.json"
