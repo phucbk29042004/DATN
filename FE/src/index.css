@@ -1051,6 +1051,11 @@ body {
   }
 }
 
+/* Ẩn Mobile Bottom Nav ở giao diện Desktop */
+.mobile-bottom-nav {
+  display: none;
+}
+
 /* ── Mobile Large 600px–768px ───────────────────────────────────────────────── */
 @media (max-width: 768px) {
   /* Show hamburger, hide sidebar by default */
@@ -1062,13 +1067,54 @@ body {
     display: flex;
   }
 
+  /* Ẩn nút thu gọn trên mobile vì sidebar là drawer */
+  .sidebar-collapse-btn {
+    display: none !important;
+  }
+
   .sidebar {
     transform: translateX(-100%);
+    width: 240px !important;
+    padding: 1rem 0.75rem !important;
   }
 
   .sidebar.sidebar-open {
     transform: translateX(0);
     box-shadow: 4px 0 32px rgba(0, 0, 0, 0.4);
+  }
+
+  .sidebar .brand {
+    padding: 0 0 0.75rem 0 !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .sidebar .brand span {
+    font-size: 0.85rem !important;
+  }
+
+  .sidebar .nav-menu {
+    gap: 0.25rem !important;
+  }
+
+  .sidebar .nav-item {
+    font-size: 0.78rem !important;
+    padding: 0.45rem 0.65rem !important;
+    gap: 0.5rem !important;
+    border-radius: 8px !important;
+  }
+
+  .sidebar .nav-item svg {
+    width: 15px !important;
+    height: 15px !important;
+  }
+
+  .sidebar-footer {
+    padding-top: 0.4rem !important;
+  }
+
+  .sidebar-footer .header-admin-btn {
+    padding: 0.35rem 0.5rem !important;
+    font-size: 0.76rem !important;
   }
 
   .sidebar-overlay {
@@ -1155,6 +1201,95 @@ body {
   .log-table th:nth-child(4),
   .log-table td:nth-child(4) {
     max-width: 160px;
+  }
+
+  /* Đệm khoảng trống ở đáy để thanh Bottom Nav không che nội dung */
+  .main-content,
+  .dashboard-container {
+    padding-bottom: 76px !important;
+  }
+
+  /* Hiển thị Mobile Bottom Navigation Bar chuẩn App */
+  .mobile-bottom-nav {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 60px !important;
+    background: var(--bg-header) !important;
+    border-top: 1px solid var(--border-color) !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    z-index: 9999 !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    padding: 0 0.4rem !important;
+    box-shadow: 0 -2px 14px rgba(0, 0, 0, 0.25) !important;
+  }
+
+  .mobile-tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.68rem;
+    font-weight: 500;
+    padding: 4px 6px;
+    gap: 3px;
+    cursor: pointer;
+    flex: 1;
+    transition: color 0.18s ease, transform 0.15s ease;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-tab-item:active {
+    transform: scale(0.92);
+  }
+
+  .mobile-tab-item.active {
+    color: var(--accent-primary);
+    font-weight: 700;
+  }
+
+  .mobile-tab-item .mobile-tab-icon {
+    transition: transform 0.18s ease;
+  }
+
+  .mobile-tab-item.active .mobile-tab-icon {
+    transform: scale(1.1);
+  }
+
+  /* Nút Trung Tâm (Tra cứu log - Search) nhô cao tương tự Mobile App */
+  .mobile-tab-item.center-tab .mobile-tab-center-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--accent-primary);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: -16px;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+    border: 3px solid var(--bg-secondary);
+    transition: transform 0.18s ease;
+  }
+
+  .mobile-tab-item.center-tab:active .mobile-tab-center-icon {
+    transform: scale(0.92);
+  }
+
+  .mobile-tab-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 60px;
+    font-size: 0.65rem;
   }
 }
 

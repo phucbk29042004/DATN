@@ -2,6 +2,23 @@
 
 ## Nhật Ký Cập Nhật (Chronological Log)
 
+### [19/11/2026 18:22] — Sửa Lỗi Hiển Thị Thanh Điều Hướng Đáy & Tinh Chỉnh Cỡ Chữ Sidebar Mobile Vừa Vặn
+- **Loại**: Sửa lỗi hiển thị & Tinh chỉnh Responsive (UI Fix & Mobile Viewport Polish)
+- **File**: `FE/src/index.css`, `tiendo.md`
+- **Mô tả**:
+  1. Đảo vị trí quy tắc CSS `.mobile-bottom-nav { display: none; }` lên trước media query, kích hoạt hiển thị thanh điều hướng đáy 5 tab `z-index: 9999` trên mobile.
+  2. Tinh chỉnh sidebar drawer mobile: thu gọn chiều rộng còn 240px, ẩn nút collapse thừa, giảm cỡ chữ (`0.78rem`) và padding (`0.45rem`), tránh tràn viền tiêu đề brand.
+- **Kết quả**: Thanh điều hướng đáy hiển thị rõ ràng trên mobile, menu trượt ra gọn gàng, chữ vừa vặn không còn to thô.
+
+### [19/11/2026 18:08] — Thiết Kế Lại 3 Nút Trạng Thái, Khắc Phục Lỗi Nhấp Nháy Nút Truy Vấn & Bổ Sung Bottom Nav Mobile Trên Web
+- **Loại**: Cải tiến giao diện & Sửa lỗi tương tác (UI Refinement, Bug Fix & Responsive Mobile App Layout)
+- **File**: `FE/src/App.jsx`, `FE/src/index.css`, `tiendo.md`
+- **Mô tả**:
+  1. Thiết kế lại 3 nút lọc trạng thái sự cố (Mới, Đã tiếp nhận, Đã xử lý) theo phong cách Soft Pill hiện đại, loại bỏ màu nền sẫm bầm gây mỏi mắt.
+  2. Khắc phục triệt để lỗi nút "Truy vấn ngay" bị nhấp nháy liên tục do vòng lặp re-render vô tận trong `handleSearch` và debounce `useEffect`.
+  3. Bổ sung thanh điều hướng đáy (Mobile Bottom Navigation Bar) 5 tab có nút giữa nhô cao khi thu nhỏ màn hình (`<= 768px`), đệm cuộn 76px tránh che khuất, giữ nguyên 100% desktop codebase.
+- **Kết quả**: Nút truy vấn ổn định không còn nhấp nháy, giao diện chuyển đổi mượt mà giữa desktop và chế độ mobile.
+
 ### [19/11/2026 17:20] — Chuẩn Hóa Bảng Màu Light Mode, Tái Thiết Kế Login Mobile & Dọn Dẹp Toàn Bộ Icon AI / Emoji Console Logs
 - **Loại**: Cải tiến giao diện & Chuẩn hóa mã nguồn (UI/UX Refinement, Mobile Redesign, Clean Console Logs)
 - **File**: `Mobile/src/theme/colors.js`, `FE/src/index.css`, `Mobile/src/screens/auth/LoginScreen.js`, `FE/src/components/AiAssistant.jsx`, `Mobile/src/components/FloatingAiAssistant.js`, `FE/src/components/TabHelpModal.jsx`, `BE/log_generator.js`, `BE/benchmark/full_evaluation.js`, `BE/benchmark/pipeline_benchmark.js`, `BE/datasets/stream_real_hdfs.js`, `BE/datasets/bgl/generate_vectors.js`, `BE/datasets/hdfs/generate_vectors.js`, `BE/parser/index.js`, `BE/search-api/alertService.js`, `tiendo.md`

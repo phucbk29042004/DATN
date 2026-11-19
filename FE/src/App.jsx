@@ -808,14 +808,17 @@ export default function App() {
 
   // ── Search Tab: Execute Search (Support Infinite Scroll / Load More) ──────
   const [searchPage, setSearchPage] = useState(1);
+  const searchPageRef = useRef(1);
   const [hasMoreSearch, setHasMoreSearch] = useState(false);
 
   const handleSearch = useCallback(async (isLoadMore = false, isDebounce = false) => {
     setSearchLoading(true);
-    const nextPage = isLoadMore ? searchPage + 1 : 1;
+    const nextPage = isLoadMore ? searchPageRef.current + 1 : 1;
+    searchPageRef.current = nextPage;
+    setSearchPage(nextPage);
+
     if (!isLoadMore) {
       if (!isDebounce) setSearchResults(null);
-      setSearchPage(1);
     }
     try {
       const params = new URLSearchParams({ size: 10, page: nextPage });
@@ -828,15 +831,14 @@ export default function App() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
 
-      if (isLoadMore && searchResults) {
+      if (isLoadMore) {
         setSearchResults(prev => ({
           ...data,
-          logs: [...prev.logs, ...data.logs]
+          logs: prev?.logs ? [...prev.logs, ...data.logs] : data.logs
         }));
       } else {
         setSearchResults(data);
       }
-      setSearchPage(nextPage);
       setHasMoreSearch(data.logs.length === 10 && (nextPage * 10) < data.total);
       if (!isLoadMore && !isDebounce) {
         addToast(`Tìm thấy ${data.total.toLocaleString()} kết quả`, 'success');
@@ -847,16 +849,26 @@ export default function App() {
     } finally {
       setSearchLoading(false);
     }
-  }, [searchQuery, searchLevel, searchFrom, searchTo, searchPage, searchResults, addToast]);
+  }, [searchQuery, searchLevel, searchFrom, searchTo, addToast]);
 
-  // ── Debounce Live Search on Web ──
+  const handleSearchRef = useRef();
+  handleSearchRef.current = handleSearch;
+
+  // ── Debounce Live Search on Web (chỉ khi người dùng gõ / đổi filter) ──
+  const isSearchMountedRef = useRef(false);
   useEffect(() => {
     if (activeTab !== 'search') return;
+    if (!isSearchMountedRef.current) {
+      isSearchMountedRef.current = true;
+      return;
+    }
     const timer = setTimeout(() => {
-      handleSearch(false, true);
-    }, 350);
+      if (handleSearchRef.current) {
+        handleSearchRef.current(false, true);
+      }
+    }, 400);
     return () => clearTimeout(timer);
-  }, [searchQuery, searchLevel, searchFrom, searchTo, activeTab, handleSearch]);
+  }, [searchQuery, searchLevel, searchFrom, searchTo, activeTab]);
 
   useEffect(() => {
     if (activeTab === 'anomalies' && anomalies === null) fetchAnomalies();
@@ -1874,12 +1886,21 @@ export default function App() {
                   ].map(btn => {
                     const Icon = btn.icon;
                     const isActive = anomalyStatusFilter === btn.id;
+                    const isDark = theme === 'dark';
                     const solidStyles = {
-                      ALL: { activeBg: '#312e81', activeBorder: '#4338ca', activeText: '#c7d2fe' },
-                      NEW: { activeBg: '#7f1d1d', activeBorder: '#991b1b', activeText: '#fca5a5' },
-                      ACKNOWLEDGED: { activeBg: '#78350f', activeBorder: '#92400e', activeText: '#fde68a' },
-                      RESOLVED: { activeBg: '#064e3b', activeBorder: '#065f46', activeText: '#a7f3d0' }
-                    }[btn.id] || { activeBg: '#312e81', activeBorder: '#4338ca', activeText: '#c7d2fe' };
+                      ALL: isDark
+                        ? { activeBg: 'rgba(99, 102, 241, 0.22)', activeBorder: 'rgba(99, 102, 241, 0.5)', activeText: '#a5b4fc' }
+                        : { activeBg: 'rgba(79, 70, 229, 0.1)', activeBorder: 'rgba(79, 70, 229, 0.35)', activeText: '#4338ca' },
+                      NEW: isDark
+                        ? { activeBg: 'rgba(239, 68, 68, 0.22)', activeBorder: 'rgba(239, 68, 68, 0.5)', activeText: '#fca5a5' }
+                        : { activeBg: 'rgba(239, 68, 68, 0.12)', activeBorder: 'rgba(239, 68, 68, 0.4)', activeText: '#dc2626' },
+                      ACKNOWLEDGED: isDark
+                        ? { activeBg: 'rgba(245, 158, 11, 0.22)', activeBorder: 'rgba(245, 158, 11, 0.5)', activeText: '#fde68a' }
+                        : { activeBg: 'rgba(245, 158, 11, 0.12)', activeBorder: 'rgba(245, 158, 11, 0.4)', activeText: '#b45309' },
+                      RESOLVED: isDark
+                        ? { activeBg: 'rgba(16, 185, 129, 0.22)', activeBorder: 'rgba(16, 185, 129, 0.5)', activeText: '#6ee7b7' }
+                        : { activeBg: 'rgba(16, 185, 129, 0.12)', activeBorder: 'rgba(16, 185, 129, 0.4)', activeText: '#047857' }
+                    }[btn.id] || { activeBg: 'rgba(99, 102, 241, 0.2)', activeBorder: 'rgba(99, 102, 241, 0.4)', activeText: '#a5b4fc' };
 
                     return (
                       <button
@@ -3124,6 +3145,36 @@ export default function App() {
         activeTab={activeTab}
         lang={lang}
       />
+
+      {/* ── MOBILE BOTTOM NAVIGATION BAR (CHUẨN GIAO DIỆN MOBILE APP) ── */}
+      <nav className="mobile-bottom-nav" aria-label="Thanh điều hướng di động">
+        {navItems.map(({ id, icon: Icon, label }) => {
+          const isActive = activeTab === id;
+          const isCenter = id === 'search';
+          return (
+            <button
+              key={id}
+              type="button"
+              className={`mobile-tab-item ${isActive ? 'active' : ''} ${isCenter ? 'center-tab' : ''}`}
+              onClick={() => {
+                handleNavClick(id);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              aria-label={label}
+              title={label}
+            >
+              {isCenter ? (
+                <div className="mobile-tab-center-icon">
+                  <Icon size={20} />
+                </div>
+              ) : (
+                <Icon size={19} className="mobile-tab-icon" />
+              )}
+              <span className="mobile-tab-label">{label}</span>
+            </button>
+          );
+        })}
+      </nav>
     </div>
   );
 }
