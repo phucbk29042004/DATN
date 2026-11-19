@@ -27,21 +27,28 @@ dotenv.config();
 const app = express();
 const httpServer = http.createServer(app);
 
-// --- CORS cho FE dev server (port 3000) & Mobile (ngrok tunnel) ---
+// --- CORS cho FE dev server (port 3000), Vercel & Mobile (ngrok tunnel) ---
 const allowedOrigins = [
   'http://localhost:3000',
   'http://127.0.0.1:3000',
+  'https://fedatn-xi.vercel.app',
   'https://job-observing-corporal.ngrok-free.dev'
 ];
 
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.ngrok-free.dev') || origin.endsWith('.ngrok-free.app')) {
+    if (
+      !origin ||
+      allowedOrigins.includes(origin) ||
+      origin.endsWith('.vercel.app') ||
+      origin.endsWith('.ngrok-free.dev') ||
+      origin.endsWith('.ngrok-free.app')
+    ) {
       return callback(null, true);
     }
     return callback(null, true);
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   credentials: true
 };
 app.use(cors(corsOptions));
@@ -105,7 +112,7 @@ io.on('connection', (socket) => {
   });
 });
 
-const PORT = process.env.SEARCH_API_PORT || 5000;
+const PORT = process.env.PORT || process.env.SEARCH_API_PORT || 5000;
 
 // ── Health check ──────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => {

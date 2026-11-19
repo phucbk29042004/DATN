@@ -4,30 +4,44 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+export const REDIS_URL = process.env.REDIS_URL;
 export const REDIS_HOST = process.env.REDIS_HOST || '127.0.0.1';
 export const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379', 10);
 
-export const redisConnection = new Redis({
-  host: REDIS_HOST,
-  port: REDIS_PORT,
+const redisOptions = {
   maxRetriesPerRequest: null,
-});
+  enableOfflineQueue: false,
+  retryStrategy(times) {
+    if (times > 5) return null; // Dừng retry nếu không có Redis trên cloud
+    return Math.min(times * 1000, 5000);
+  }
+};
+
+export const redisConnection = REDIS_URL 
+  ? new Redis(REDIS_URL, redisOptions) 
+  : new Redis({ host: REDIS_HOST, port: REDIS_PORT, ...redisOptions });
 
 export const LOG_QUEUE_NAME = 'raw-logs-queue';
 export const REALTIME_LOG_CHANNEL = 'realtime-log-channel';
 
 // Kết nối Redis riêng biệt phục vụ Pub/Sub (tránh xung đột với BullMQ connection)
-export const redisPub = new Redis({
-  host: REDIS_HOST,
-  port: REDIS_PORT,
-  maxRetriesPerRequest: null,
-});
+export const redisPub = REDIS_URL 
+  ? new Redis(REDIS_URL, redisOptions) 
+  : new Redis({ host: REDIS_HOST, port: REDIS_PORT, ...redisOptions });
 
-export const redisSub = new Redis({
-  host: REDIS_HOST,
-  port: REDIS_PORT,
-  maxRetriesPerRequest: null,
-});
+export const redisSub = REDIS_URL 
+  ? new Redis(REDIS_URL, redisOptions) 
+  : new Redis({ host: REDIS_HOST, port: REDIS_PORT, ...redisOptions });
+
+// Ngăn chặn unhandled error event làm crash tiến trình Node.js trên cloud
+const handleRedisError = (name) => (err) => {
+  // Chỉ cảnh báo nhẹ, không làm gián đoạn API
+  console.warn(`[Redis ${name} Warning] Không thể kết nối: ${err.message}`);
+};
+
+redisConnection.on('error', handleRedisError('Connection'));
+redisPub.on('error', handleRedisError('Pub'));
+redisSub.on('error', handleRedisError('Sub'));
 
 export const rawLogsQueue = new Queue(LOG_QUEUE_NAME, {
   connection: redisConnection,

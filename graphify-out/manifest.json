@@ -162,9 +162,9 @@
     "semantic_hash": ""
   },
   "BE/queue/config.js": {
-    "mtime": 1794229899.2540066,
-    "seen": 1795084038.362323,
-    "ast_hash": "7fb8891a65dffa4125e10a47e4333203",
+    "mtime": 1795093341.6799145,
+    "seen": 1795093492.4765434,
+    "ast_hash": "20cc6292601f6c21d0458250ed88b465",
     "semantic_hash": ""
   },
   "BE/search-api/aiService.js": {
@@ -198,9 +198,9 @@
     "semantic_hash": ""
   },
   "BE/search-api/index.js": {
-    "mtime": 1795091732.6637273,
-    "seen": 1795091842.2275717,
-    "ast_hash": "7cae7913c5b5172761281820e0ab6098",
+    "mtime": 1795093326.701099,
+    "seen": 1795093492.4765682,
+    "ast_hash": "34b88d9e04d5ca3a4039e9a79686718f",
     "semantic_hash": ""
   },
   "BE/search-api/opensearchQueries.js": {
@@ -228,9 +228,9 @@
     "semantic_hash": ""
   },
   "FE/src/App.jsx": {
-    "mtime": 1795091733.2073202,
-    "seen": 1795091842.22758,
-    "ast_hash": "80a963e5944219126e5d64d471641d8c",
+    "mtime": 1795093377.337902,
+    "seen": 1795093492.476583,
+    "ast_hash": "a2203cc8c1c1a095261a67948f2d710e",
     "semantic_hash": ""
   },
   "FE/src/components/AdminSettingsModal.jsx": {
@@ -264,9 +264,9 @@
     "semantic_hash": ""
   },
   "FE/src/components/LoginModal.jsx": {
-    "mtime": 1795091733.7606637,
-    "seen": 1795091842.2275903,
-    "ast_hash": "54de810e08d53e34a40a08a6623cede4",
+    "mtime": 1795093415.83636,
+    "seen": 1795093492.4765995,
+    "ast_hash": "2915b5014ee6f4116970f0f6e428aab0",
     "semantic_hash": ""
   },
   "FE/src/components/PasswordChangeModal.jsx": {
@@ -534,9 +534,9 @@
     "semantic_hash": ""
   },
   "tiendo.md": {
-    "mtime": 1795091495.4830914,
-    "seen": 1795091687.664988,
-    "ast_hash": "ce1c394cfdf7383d3bc20986a6cd7b16",
+    "mtime": 1795093444.2807226,
+    "seen": 1795093492.4767413,
+    "ast_hash": "c7ea13d203ebc0eaa5e07d486fe0210d",
     "semantic_hash": ""
   },
   "BE/database/sqlite.js": {
@@ -546,9 +546,9 @@
     "semantic_hash": ""
   },
   "FE/src/config.js": {
-    "mtime": 1795091703.8247433,
-    "seen": 1795091842.227597,
-    "ast_hash": "018550ca0fb693804c27581ab1fd466a",
+    "mtime": 1795093363.433561,
+    "seen": 1795093492.4766111,
+    "ast_hash": "8e946b0d2155e67c063a96070440deed",
     "semantic_hash": ""
   },
   "FE/vercel.json": {

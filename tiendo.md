@@ -2,6 +2,14 @@
 
 ## Nhật Ký Cập Nhật (Chronological Log)
 
+### [19/11/2026 20:05] — Khắc Phục Lỗi WebSocket & Login 405 Vercel, Sẵn Sàng Deploy Backend Lên Render
+- **Loại**: Sửa lỗi triển khai Cloud & Chuẩn hóa cấu hình (Cloud Deployment Bug Fix & Render Compatibility)
+- **File**: `BE/search-api/index.js`, `BE/queue/config.js`, `FE/src/config.js`, `FE/src/App.jsx`, `FE/src/components/LoginModal.jsx`, `tiendo.md`
+- **Mô tả**:
+  1. Backend: Cấu hình `PORT = process.env.PORT || 5000` nhận port động từ Render, mở rộng CORS cho `*.vercel.app`, bọc error handler cho Redis chống crash khi chạy độc lập.
+  2. Frontend: Chặn kết nối Socket.IO tới domain Vercel khi chưa có URL backend, thêm ô "Cấu hình Server Backend" tại Modal Login lưu vào `localStorage`.
+- **Kết quả**: Triệt tiêu hoàn toàn lỗi console spam 200/405, FE và BE biên dịch 100% không lỗi cú pháp.
+
 ### [19/11/2026 19:30] — Tích Hợp SQLite Database 7 Bảng Chuẩn Doanh Nghiệp & Cấu Hình Triển Khai Vercel (FE) + Render (BE)
 - **Loại**: Nâng cấp cơ sở dữ liệu quan hệ & Sẵn sàng triển khai Cloud (SQLite Enterprise Architecture & Cloud Deployment Setup)
 - **File**: `BE/database/sqlite.js`, `BE/search-api/authService.js`, `BE/search-api/incidentService.js`, `BE/search-api/alertService.js`, `BE/search-api/cronService.js`, `BE/search-api/index.js`, `FE/vercel.json`, `FE/src/config.js`, `FE/src/App.jsx`, `FE/src/components/*`, `FE/.env.example`, `tiendo.md`, `kientruchethong.md`

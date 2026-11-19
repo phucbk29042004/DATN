@@ -634,7 +634,16 @@ export default function App() {
 
   // ── Socket.IO Connection ──────────────────────────────────────────────────
   useEffect(() => {
-    const socket = io(SOCKET_URL, { transports: ['websocket', 'polling'] });
+    if (!SOCKET_URL) {
+      console.warn('[Socket.IO] Chưa cấu hình URL Backend, tạm dừng kết nối WebSocket.');
+      return;
+    }
+
+    const socket = io(SOCKET_URL, {
+      transports: ['websocket', 'polling'],
+      reconnectionAttempts: 5,
+      timeout: 5000
+    });
     socketRef.current = socket;
 
     socket.on('connect', () => {

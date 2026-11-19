@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { LogIn, X, Shield, AlertCircle, Key, User, Eye, EyeOff } from 'lucide-react';
-import { API_BASE } from '../config.js';
+import { LogIn, X, Shield, AlertCircle, Key, User, Eye, EyeOff, Settings, Check } from 'lucide-react';
+import { API_BASE, BACKEND_URL, setCustomBackendUrl } from '../config.js';
 
 export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
   const [username, setUsername] = useState('');
@@ -8,10 +8,16 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showServerConfig, setShowServerConfig] = useState(false);
+  const [serverUrlInput, setServerUrlInput] = useState(BACKEND_URL);
 
   if (!isOpen) return null;
 
   const isVi = lang === 'vi';
+
+  const handleSaveServerUrl = () => {
+    setCustomBackendUrl(serverUrlInput);
+  };
 
   const handleLogin = async (e) => {
     if (e) e.preventDefault();
@@ -27,6 +33,12 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
         body: JSON.stringify({ username, password })
       });
 
+      if (res.status === 405) {
+        throw new Error(isVi 
+          ? 'Chưa kết nối Backend: Vui lòng nhấn biểu tượng cài đặt phía dưới để cấu hình URL Backend (Render/ngrok).' 
+          : 'Backend not connected: Please click the settings icon below to configure Backend URL.');
+      }
+
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || (isVi ? 'Đăng nhập không thành công' : 'Login failed'));
@@ -41,7 +53,13 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
       onLoginSuccess(data.user);
       if (onClose) onClose();
     } catch (err) {
-      setError(err.message);
+      if (err.message.includes('Failed to fetch')) {
+        setError(isVi 
+          ? 'Không thể kết nối đến máy chủ Backend. Vui lòng kiểm tra lại URL Backend.' 
+          : 'Cannot connect to Backend server. Please check Backend URL.');
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -214,7 +232,79 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
             </div>
           </form>
 
-          <div style={{ marginTop: 'auto', paddingTop: '1.2rem', textAlign: 'center', fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+          {/* Cấu hình URL Backend nhanh cho bản Cloud Vercel */}
+          <div style={{ marginTop: '0.8rem', textAlign: 'center' }}>
+            <button
+              type="button"
+              onClick={() => setShowServerConfig(!showServerConfig)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--text-muted)',
+                fontSize: '0.74rem',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '4px 8px',
+                borderRadius: '6px',
+                transition: 'color 0.2s'
+              }}
+              title="Cấu hình URL Backend (Render / ngrok)"
+            >
+              <Settings size={13} />
+              <span>{isVi ? 'Cấu hình Server Backend' : 'Backend Server Settings'}</span>
+              {BACKEND_URL && <span style={{ color: '#10b981', fontWeight: 600 }}>•</span>}
+            </button>
+
+            {showServerConfig && (
+              <div style={{
+                marginTop: '0.5rem',
+                padding: '0.6rem',
+                background: 'rgba(255, 255, 255, 0.04)',
+                borderRadius: '8px',
+                border: '1px solid var(--border-color)',
+                display: 'flex',
+                gap: '6px',
+                alignItems: 'center'
+              }}>
+                <input
+                  type="text"
+                  placeholder="https://your-backend.onrender.com"
+                  value={serverUrlInput}
+                  onChange={(e) => setServerUrlInput(e.target.value)}
+                  style={{
+                    flex: 1,
+                    fontSize: '0.76rem',
+                    padding: '6px 8px',
+                    borderRadius: '6px',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-input, rgba(0,0,0,0.2))',
+                    color: 'var(--text-primary)'
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={handleSaveServerUrl}
+                  className="btn-primary"
+                  style={{
+                    height: '28px',
+                    padding: '0 10px',
+                    fontSize: '0.74rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    borderRadius: '6px'
+                  }}
+                >
+                  <Check size={12} />
+                  <span>{isVi ? 'Lưu' : 'Save'}</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginTop: 'auto', paddingTop: '1rem', textAlign: 'center', fontSize: '0.76rem', color: 'var(--text-muted)' }}>
             {isVi ? 'Hệ Thống Giám Sát Log & Cảnh Báo Bất Thường Thời Gian Thực' : 'Real-time Log Monitoring & Anomaly Detection'}
           </div>
         </div>
