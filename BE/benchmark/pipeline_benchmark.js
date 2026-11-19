@@ -80,8 +80,8 @@ async function runBenchmark() {
   const parseThroughput = Math.round((NUM_LOGS / totalParseTimeMs) * 1000);
   const parseStats = calculatePercentiles(parseLatencies);
 
-  console.log(`   ✅ Ingestion Throughput: ${parseThroughput.toLocaleString()} logs/sec`);
-  console.log(`   ⏱️ Latency per log: Avg=${parseStats.avg}ms, p50=${parseStats.p50}ms, p90=${parseStats.p90}ms, p99=${parseStats.p99}ms\n`);
+  console.log(`   [METRIC] Ingestion Throughput: ${parseThroughput.toLocaleString()} logs/sec`);
+  console.log(`   [LATENCY] Latency per log: Avg=${parseStats.avg}ms, p50=${parseStats.p50}ms, p90=${parseStats.p90}ms, p99=${parseStats.p99}ms\n`);
 
   // 2. Benchmark Drain Log Template Mining
   console.log(`[2/3] Benchmarking Drain Mining (Fixed Depth Tree)...`);
@@ -99,9 +99,9 @@ async function runBenchmark() {
   const drainThroughput = Math.round((NUM_LOGS / totalDrainTimeMs) * 1000);
   const drainStats = calculatePercentiles(drainLatencies);
 
-  console.log(`   ✅ Drain Throughput: ${drainThroughput.toLocaleString()} logs/sec`);
-  console.log(`   ⏱️ Drain Latency: Avg=${drainStats.avg}ms, p50=${drainStats.p50}ms, p90=${drainStats.p90}ms, p99=${drainStats.p99}ms`);
-  console.log(`   📊 Discovered Templates Count: ${drain.clusters.length}\n`);
+  console.log(`   [METRIC] Drain Throughput: ${drainThroughput.toLocaleString()} logs/sec`);
+  console.log(`   [LATENCY] Drain Latency: Avg=${drainStats.avg}ms, p50=${drainStats.p50}ms, p90=${drainStats.p90}ms, p99=${drainStats.p99}ms`);
+  console.log(`   [METRIC] Discovered Templates Count: ${drain.clusters.length}\n`);
 
   // 3. Benchmark Rule-Based Anomaly Detection Engine
   console.log(`[3/3] Benchmarking Rule-Based Anomaly Detector...`);
@@ -118,12 +118,12 @@ async function runBenchmark() {
   const ruleThroughput = Math.round((NUM_LOGS / totalRuleTimeMs) * 1000);
   const ruleStats = calculatePercentiles(ruleLatencies);
 
-  console.log(`   Rule Engine Throughput: ${ruleThroughput.toLocaleString()} logs/sec`);
-  console.log(`   ⏱Rule Engine Latency: Avg=${ruleStats.avg}ms, p50=${ruleStats.p50}ms, p90=${ruleStats.p90}ms, p99=${ruleStats.p99}ms\n`);
+  console.log(`   [METRIC] Rule Engine Throughput: ${ruleThroughput.toLocaleString()} logs/sec`);
+  console.log(`   [LATENCY] Rule Engine Latency: Avg=${ruleStats.avg}ms, p50=${ruleStats.p50}ms, p90=${ruleStats.p90}ms, p99=${ruleStats.p99}ms\n`);
 
   // Summary Report
   console.log(`=======================================================`);
-  console.log(`🏆 TỔNG KẾT BENCHMARK PIPELINE THROUGHPUT & LATENCY`);
+  console.log(`[SUMMARY] TỔNG KẾT BENCHMARK PIPELINE THROUGHPUT & LATENCY`);
   console.log(`=======================================================`);
   console.table({
     'Log Parser & Normalizer': { 'Throughput (logs/s)': parseThroughput.toLocaleString(), 'Avg Latency (ms)': parseStats.avg, 'p99 Latency (ms)': parseStats.p99 },

@@ -246,7 +246,7 @@ export function dispatchAlerts(logEntry) {
   // 1. Kiểm tra chế độ bảo trì (Silence)
   const currentMaint = getMaintenanceMode();
   if (currentMaint.enabled) {
-    console.log(`[Alert Dispatcher] 🔇 Đang trong chế độ bảo trì (${currentMaint.reason || 'Silence'}), bỏ qua phát cảnh báo.`);
+    console.log(`[Alert Dispatcher] [MAINTENANCE] Đang trong chế độ bảo trì (${currentMaint.reason || 'Silence'}), bỏ qua phát cảnh báo.`);
     return;
   }
 
@@ -255,7 +255,7 @@ export function dispatchAlerts(logEntry) {
     // 2. Chống bão tin nhắn (Deduplication)
     const dedup = checkDeduplication(logEntry);
     if (dedup.isDuplicate) {
-      console.log(`[Alert Dispatcher] 🔄 Phát hiện cảnh báo trùng lặp (Lần thứ ${dedup.occurrences}), bỏ qua gửi tin nhắn lặp.`);
+      console.log(`[Alert Dispatcher] [DEDUPLICATE] Phát hiện cảnh báo trùng lặp (Lần thứ ${dedup.occurrences}), bỏ qua gửi tin nhắn lặp.`);
       return;
     }
 

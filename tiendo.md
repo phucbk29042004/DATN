@@ -2,6 +2,33 @@
 
 ## Nhật Ký Cập Nhật (Chronological Log)
 
+### [19/11/2026 17:20] — Chuẩn Hóa Bảng Màu Light Mode, Tái Thiết Kế Login Mobile & Dọn Dẹp Toàn Bộ Icon AI / Emoji Console Logs
+- **Loại**: Cải tiến giao diện & Chuẩn hóa mã nguồn (UI/UX Refinement, Mobile Redesign, Clean Console Logs)
+- **File**: `Mobile/src/theme/colors.js`, `FE/src/index.css`, `Mobile/src/screens/auth/LoginScreen.js`, `FE/src/components/AiAssistant.jsx`, `Mobile/src/components/FloatingAiAssistant.js`, `FE/src/components/TabHelpModal.jsx`, `BE/log_generator.js`, `BE/benchmark/full_evaluation.js`, `BE/benchmark/pipeline_benchmark.js`, `BE/datasets/stream_real_hdfs.js`, `BE/datasets/bgl/generate_vectors.js`, `BE/datasets/hdfs/generate_vectors.js`, `BE/parser/index.js`, `BE/search-api/alertService.js`, `tiendo.md`
+- **Mô tả**:
+  1. Cải tiến bảng màu Light mode: Thay đỏ thẫm `#dc2626` bằng đỏ san hô tươi `#ef4444`, chuẩn hóa vàng `#f59e0b` và xanh `#4f46e5`, triệt tiêu độ tương phản gắt trên nền trắng.
+  2. Tái thiết kế màn hình Login Mobile: Chuyển sang bố cục phẳng edge-to-edge, đưa cấu hình IP server lên header modal, loại bỏ thẻ card và logo to thô cứng.
+  3. Thay thế icon AI generic (`Bot`, `Sparkles`) bằng icon chức năng chuyên dụng (`Terminal`, `Zap`), đổi nhãn nút sang phân tích nguyên nhân sự cố (RCA).
+  4. Quét sạch 100% emoji trong console logs Backend/Benchmark sang tiền tố log Enterprise (`[INFO]`, `[SUCCESS]`, `[WARN]`, `[ERROR]`, `[METRIC]`, `[ALERT]`).
+- **Kết quả**: Kiểm tra regex Unicode đạt 0 emoji tồn đọng, tất cả mã nguồn FE, Mobile và BE biên dịch 100% không lỗi cú pháp.
+
+### [18/11/2026 12:42] — Khắc Phục Lỗi Hiển Thị Trắng Màn Hình & Hoàn Thiện Giao Diện Trực Quan Graphify (graph.html)
+- **Loại**: Sửa lỗi giao diện & Hoàn thiện Trực quan hóa Kiến trúc (UI Bug Fix & Interactive Graph Explorer)
+- **File**: `graphify-out/graph.html`, `tiendo.md`
+- **Mô tả**:
+  1. Thay thế bản `graph.html` bằng giao diện đầy đủ tính năng: nhúng sẵn toàn bộ 510 nodes và 1092 edges, loại trừ triệt để lỗi CORS khi mở bằng trình duyệt.
+  2. Kích hoạt solver `forceAtlas2Based` cùng thuật toán hạt nhân Fermat spiral giúp 510 nodes bung tỏa đều, triệt tiêu lỗi layout và hiện tượng trắng màn hình.
+  3. Bổ sung trọn vẹn thanh tìm kiếm node theo thời gian thực, bảng phân cụm cộng đồng (17 Communities) có checkbox lọc hiển thị và bộ chuyển đổi Light/Dark/System theme.
+- **Kết quả**: Giao diện `graph.html` hiển thị sắc nét, mượt mà, hỗ trợ tương tác zoom, pan, click xem chi tiết node và kiểm tra các liên kết lân cận.
+
+### [18/11/2026 12:28] — Xây Dựng Đồ Thị Tri Thức Codebase (Graphify) & Trích Xuất Dữ Liệu graph.json
+- **Loại**: Đồ thị tri thức & Trích xuất cấu trúc (Knowledge Graph Extraction)
+- **File**: `graphify-out/GRAPH_REPORT.md`, `graphify-out/graph.json`, `tiendo.md`
+- **Mô tả**:
+  1. Trích xuất thành công toàn bộ đồ thị tri thức mã nguồn: 510 nodes, 1092 links, 17 communities.
+  2. Xuất báo cáo cấu trúc `GRAPH_REPORT.md` phân tích god nodes và các liên kết bất ngờ.
+- **Kết quả**: Graphify CLI (`query`, `path`, `explain`) và cấu trúc dữ liệu đồ thị hoạt động chính xác 100%.
+
 ### [18/11/2026 11:15] — Triển Khai Toàn Diện Bộ Kịch Bản Benchmark Thông Lượng & Đánh Giá Định Lượng Mô Hình (F1-Score / HDFS & BGL)
 - **Loại**: Thực nghiệm & Đánh giá định lượng (Benchmarking & Quantitative Evaluation)
 - **File**: `BE/benchmark/full_evaluation.js`, `BE/benchmark/evaluation_summary.json`, `BE/benchmark/REPORT_BENCHMARK_EVALUATION.md`, `BE/anomaly-engine/template-mining/vectorizer.js`, `BE/anomaly-engine/ml-models/train_and_evaluate.py`, `BE/package.json`, `tiendo.md`

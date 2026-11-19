@@ -9,8 +9,11 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Modal,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
-import { Shield, Lock, User, Server, Eye, EyeOff } from 'lucide-react-native';
+import { Lock, User, Eye, EyeOff, Settings, Activity, X, Server } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -26,20 +29,20 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  // Config Server IP
-  const [showServerConfig, setShowServerConfig] = useState(false);
+  // Config Server IP Modal
+  const [showServerModal, setShowServerModal] = useState(false);
   const [serverInput, setServerInput] = useState('');
 
   const handleOpenServerConfig = async () => {
     const current = await getServerUrl();
     setServerInput(current);
-    setShowServerConfig(true);
+    setShowServerModal(true);
   };
 
   const handleSaveServerConfig = async () => {
     if (serverInput.trim()) {
       await setServerUrl(serverInput.trim());
-      setShowServerConfig(false);
+      setShowServerModal(false);
       Alert.alert('Thành công', `Đã lưu địa chỉ máy chủ: ${serverInput.trim()}`);
     }
   };
@@ -59,65 +62,87 @@ export default function LoginScreen() {
     }
   };
 
+  const fillQuickAccount = (user, pass) => {
+    setUsername(user);
+    setPassword(pass);
+  };
+
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top + 20 }]}
-    >
-      <View style={styles.content}>
-        {/* Logo & Brand Header */}
-        <View style={styles.brandContainer}>
-          <View style={[styles.logoBadge, { backgroundColor: colors.primaryLight, borderColor: colors.primary }]}>
-            <Shield size={36} color={colors.primary} />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={[styles.container, { backgroundColor: colors.background }]}
+      >
+        {/* Top Bar Header with Settings */}
+        <View style={[styles.topBar, { paddingTop: insets.top + 8 }]}>
+          <View style={[styles.badgeBrand, { backgroundColor: colors.primaryLight }]}>
+            <Activity size={14} color={colors.primary} />
+            <Text style={[styles.badgeText, { color: colors.primary }]}>LOGPULSE SRE</Text>
           </View>
-          <Text style={[styles.brandTitle, { color: colors.text }]}>Hệ Thống Giám Sát Log</Text>
-          <Text style={[styles.brandSubtitle, { color: colors.textSecondary }]}>
-            Phân Tích & Cảnh Báo Sự Cố Thời Gian Thực
-          </Text>
+          <TouchableOpacity
+            onPress={handleOpenServerConfig}
+            style={[styles.btnSettings, { backgroundColor: colors.surfaceVariant, borderColor: colors.borderSubtle }]}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            accessibilityLabel="Cấu hình máy chủ"
+          >
+            <Settings size={18} color={colors.textSecondary} />
+          </TouchableOpacity>
         </View>
 
-        {/* Login Form Card */}
-        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Text style={[styles.formTitle, { color: colors.text }]}>Đăng Nhập Hệ Thống</Text>
-
-          {/* Username Input */}
-          <View style={[styles.inputWrapper, { backgroundColor: colors.surfaceVariant, borderColor: colors.borderSubtle }]}>
-            <User size={18} color={colors.textMuted} style={styles.inputIcon} />
-            <TextInput
-              style={[styles.input, { color: colors.text }]}
-              placeholder="Tài khoản (admin hoặc viewer)"
-              placeholderTextColor={colors.textMuted}
-              value={username}
-              onChangeText={setUsername}
-              autoCapitalize="none"
-            />
+        <View style={styles.content}>
+          {/* Main Title */}
+          <View style={styles.titleSection}>
+            <Text style={[styles.mainTitle, { color: colors.text }]}>Đăng nhập</Text>
+            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+              Hệ thống giám sát log & cảnh báo sự cố thời gian thực
+            </Text>
           </View>
 
-          {/* Password Input With Eye Toggle */}
-          <View style={[styles.inputWrapper, { backgroundColor: colors.surfaceVariant, borderColor: colors.borderSubtle, paddingRight: 12 }]}>
-            <Lock size={18} color={colors.textMuted} style={styles.inputIcon} />
-            <TextInput
-              style={[styles.input, { color: colors.text, flex: 1 }]}
-              placeholder="Mật khẩu"
-              placeholderTextColor={colors.textMuted}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-            />
-            <TouchableOpacity 
-              onPress={() => setShowPassword(p => !p)} 
-              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-              activeOpacity={0.7}
-            >
-              {showPassword ? (
-                <EyeOff size={18} color={colors.primary} />
-              ) : (
-                <Eye size={18} color={colors.textMuted} />
-              )}
-            </TouchableOpacity>
+          {/* Flat Form Fields */}
+          <View style={styles.formGroup}>
+            <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Tên tài khoản</Text>
+            <View style={[styles.inputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <User size={18} color={colors.textMuted} style={styles.fieldIcon} />
+              <TextInput
+                style={[styles.textInput, { color: colors.text }]}
+                placeholder="Tài khoản (admin hoặc viewer)"
+                placeholderTextColor={colors.textMuted}
+                value={username}
+                onChangeText={setUsername}
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </View>
           </View>
 
-          {/* Login Button */}
+          <View style={styles.formGroup}>
+            <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>Mật khẩu</Text>
+            <View style={[styles.inputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <Lock size={18} color={colors.textMuted} style={styles.fieldIcon} />
+              <TextInput
+                style={[styles.textInput, { color: colors.text }]}
+                placeholder="Mật khẩu truy cập"
+                placeholderTextColor={colors.textMuted}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword(p => !p)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                activeOpacity={0.7}
+              >
+                {showPassword ? (
+                  <EyeOff size={18} color={colors.primary} />
+                ) : (
+                  <Eye size={18} color={colors.textMuted} />
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Submit Action */}
           <TouchableOpacity
             style={[styles.loginBtn, { backgroundColor: colors.primary }]}
             onPress={handleLogin}
@@ -125,44 +150,90 @@ export default function LoginScreen() {
             activeOpacity={0.88}
           >
             {loading ? (
-              <ActivityIndicator color="#ffffff" />
+              <ActivityIndicator color="#ffffff" size="small" />
             ) : (
-              <Text style={styles.loginBtnText}>Đăng Nhập</Text>
+              <Text style={styles.loginBtnText}>Truy cập hệ thống</Text>
             )}
           </TouchableOpacity>
 
-          {/* Server Config Toggle */}
-          <TouchableOpacity onPress={handleOpenServerConfig} style={styles.serverConfigToggle}>
-            <Server size={14} color={colors.textSecondary} />
-            <Text style={[styles.serverConfigToggleText, { color: colors.textSecondary }]}>
-              Cấu hình địa chỉ IP máy chủ API
+          {/* Quick Demo Credentials */}
+          <View style={styles.quickAccessSection}>
+            <Text style={[styles.quickAccessLabel, { color: colors.textMuted }]}>
+              Môi trường thử nghiệm nhanh
             </Text>
-          </TouchableOpacity>
+            <View style={styles.chipsRow}>
+              <TouchableOpacity
+                style={[styles.accountChip, { backgroundColor: colors.surfaceVariant, borderColor: colors.borderSubtle }]}
+                onPress={() => fillQuickAccount('admin', 'admin123')}
+                activeOpacity={0.75}
+              >
+                <Text style={[styles.chipRole, { color: colors.primary }]}>Quản trị viên</Text>
+                <Text style={[styles.chipUser, { color: colors.textSecondary }]}>admin</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.accountChip, { backgroundColor: colors.surfaceVariant, borderColor: colors.borderSubtle }]}
+                onPress={() => fillQuickAccount('viewer', 'viewer123')}
+                activeOpacity={0.75}
+              >
+                <Text style={[styles.chipRole, { color: colors.secondary }]}>Điều tra viên</Text>
+                <Text style={[styles.chipUser, { color: colors.textSecondary }]}>viewer</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
 
-          {showServerConfig && (
-            <View style={[styles.serverBox, { borderColor: colors.borderSubtle, backgroundColor: colors.surfaceVariant }]}>
-              <Text style={[styles.serverBoxLabel, { color: colors.textSecondary }]}>
-                Địa chỉ IP Backend (VD: http://192.168.1.10:5000):
+        {/* Modal Cấu hình Server IP */}
+        <Modal
+          visible={showServerModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowServerModal(false)}
+        >
+          <View style={styles.modalBackdrop}>
+            <View style={[styles.modalCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <View style={styles.modalHeader}>
+                <View style={styles.modalTitleRow}>
+                  <Server size={18} color={colors.primary} />
+                  <Text style={[styles.modalTitle, { color: colors.text }]}>Địa Chỉ Máy Chủ API</Text>
+                </View>
+                <TouchableOpacity onPress={() => setShowServerModal(false)}>
+                  <X size={18} color={colors.textMuted} />
+                </TouchableOpacity>
+              </View>
+
+              <Text style={[styles.modalDesc, { color: colors.textSecondary }]}>
+                Nhập địa chỉ máy chủ Backend (Ví dụ: http://192.168.1.10:5000)
               </Text>
+
               <TextInput
-                style={[styles.serverInput, { color: colors.text, borderColor: colors.border }]}
+                style={[styles.modalInput, { color: colors.text, borderColor: colors.border, backgroundColor: colors.surfaceVariant }]}
                 value={serverInput}
                 onChangeText={setServerInput}
                 placeholder="http://192.168.x.x:5000"
                 placeholderTextColor={colors.textMuted}
                 autoCapitalize="none"
+                autoCorrect={false}
               />
-              <TouchableOpacity
-                style={[styles.btnSaveServer, { backgroundColor: colors.primary }]}
-                onPress={handleSaveServerConfig}
-              >
-                <Text style={styles.btnSaveServerText}>Lưu Địa Chỉ</Text>
-              </TouchableOpacity>
+
+              <View style={styles.modalActions}>
+                <TouchableOpacity
+                  style={[styles.btnModalCancel, { borderColor: colors.borderSubtle }]}
+                  onPress={() => setShowServerModal(false)}
+                >
+                  <Text style={[styles.btnModalCancelText, { color: colors.textSecondary }]}>Hủy</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.btnModalSave, { backgroundColor: colors.primary }]}
+                  onPress={handleSaveServerConfig}
+                >
+                  <Text style={styles.btnModalSaveText}>Lưu Cấu Hình</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          )}
-        </View>
-      </View>
-    </KeyboardAvoidingView>
+          </View>
+        </Modal>
+      </KeyboardAvoidingView>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -170,117 +241,190 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-    justifyContent: 'center',
-  },
-  brandContainer: {
+  topBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
+    paddingHorizontal: 24,
+    paddingBottom: 12,
   },
-  logoBadge: {
-    width: 64,
-    height: 64,
+  badgeBrand: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 20,
-    borderWidth: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
   },
-  brandTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    letterSpacing: -0.5,
+  badgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
-  brandSubtitle: {
-    fontSize: 12.5,
-    textAlign: 'center',
-    marginTop: 4,
-    paddingHorizontal: 20,
-  },
-  card: {
-    padding: 20,
+  btnSettings: {
+    width: 36,
+    height: 36,
     borderRadius: 18,
     borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  formTitle: {
-    fontSize: 16,
-    fontWeight: '700',
+  content: {
+    flex: 1,
+    paddingHorizontal: 24,
+    justifyContent: 'center',
+  },
+  titleSection: {
+    marginBottom: 28,
+  },
+  mainTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: -0.6,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  formGroup: {
     marginBottom: 16,
-    textAlign: 'center',
   },
-  inputWrapper: {
+  inputLabel: {
+    fontSize: 12.5,
+    fontWeight: '600',
+    marginBottom: 6,
+    letterSpacing: 0.2,
+  },
+  inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     height: 48,
     borderRadius: 12,
     borderWidth: 1,
-    paddingHorizontal: 12,
-    marginBottom: 12,
+    paddingHorizontal: 14,
   },
-  inputIcon: {
+  fieldIcon: {
     marginRight: 10,
   },
-  input: {
+  textInput: {
     flex: 1,
     height: '100%',
-    fontSize: 13.5,
+    fontSize: 14,
   },
   loginBtn: {
-    height: 44,
+    height: 48,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 8,
-    alignSelf: 'center',
-    minWidth: 160,
-    paddingHorizontal: 28,
+    marginTop: 12,
+    shadowColor: '#4f46e5',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
   },
   loginBtnText: {
     color: '#ffffff',
-    fontSize: 14.5,
+    fontSize: 15,
     fontWeight: '700',
+    letterSpacing: 0.2,
   },
-  serverConfigToggle: {
+  quickAccessSection: {
+    marginTop: 36,
+    alignItems: 'center',
+  },
+  quickAccessLabel: {
+    fontSize: 11.5,
+    fontWeight: '500',
+    marginBottom: 12,
+  },
+  chipsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  accountChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
     gap: 6,
-    marginTop: 18,
-    paddingVertical: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
   },
-  serverConfigToggleText: {
+  chipRole: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  chipUser: {
     fontSize: 12,
     fontWeight: '500',
   },
-  serverBox: {
-    marginTop: 12,
-    padding: 12,
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 360,
+    borderRadius: 16,
+    borderWidth: 1,
+    padding: 20,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  modalTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  modalTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  modalDesc: {
+    fontSize: 12.5,
+    lineHeight: 18,
+    marginBottom: 14,
+  },
+  modalInput: {
+    height: 42,
     borderRadius: 10,
     borderWidth: 1,
+    paddingHorizontal: 12,
+    fontSize: 13,
+    marginBottom: 18,
   },
-  serverBoxLabel: {
-    fontSize: 11,
-    marginBottom: 6,
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
   },
-  serverInput: {
-    height: 38,
-    borderRadius: 8,
-    borderWidth: 1,
-    paddingHorizontal: 10,
-    fontSize: 12.5,
-    marginBottom: 8,
-  },
-  btnSaveServer: {
+  btnModalCancel: {
+    paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 8,
-    alignItems: 'center',
+    borderWidth: 1,
   },
-  btnSaveServerText: {
+  btnModalCancelText: {
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  btnModalSave: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  btnModalSaveText: {
     color: '#ffffff',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
   },
 });
-

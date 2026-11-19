@@ -41,5 +41,79 @@
     "resolvedAt": null,
     "notes": [],
     "updatedAt": "2026-11-04T03:22:12.315Z"
+  },
+  "8d5a41dfdcf1cef3f887f9d9136944d6": {
+    "status": "RESOLVED",
+    "priority": "P2",
+    "root_cause": "Lỗi Code / Ứng Dụng (Application Bug)",
+    "action_taken": "Đã Vá Lỗi Nóng (Applied Hotfix)",
+    "acknowledgedBy": "Quản Trị Viên",
+    "acknowledgedAt": "2026-11-18T05:36:55.340Z",
+    "resolvedBy": "Quản Trị Viên",
+    "resolvedAt": "2026-11-18T05:37:31.801Z",
+    "notes": [
+      {
+        "id": "note_1794980204287",
+        "author": "Giám Sát Viên",
+        "role": "viewer",
+        "type": "ADMIN_NOTE",
+        "text": "có lỗi",
+        "createdAt": "2026-11-18T05:36:44.287Z"
+      },
+      {
+        "id": "note_1794980215340",
+        "author": "Quản Trị Viên",
+        "role": "admin",
+        "type": "NOTE",
+        "text": "Tiếp nhận sự cố mức P2",
+        "createdAt": "2026-11-18T05:36:55.340Z"
+      },
+      {
+        "id": "note_1794980251801",
+        "author": "Quản Trị Viên",
+        "role": "admin",
+        "type": "RESOLUTION",
+        "text": "Xử lý hoàn tất: Đã Vá Lỗi Nóng (Applied Hotfix)",
+        "createdAt": "2026-11-18T05:37:31.801Z"
+      }
+    ],
+    "updatedAt": "2026-11-18T05:37:31.801Z"
+  },
+  "b3b16ac4ad733b88987ec48bea46c466": {
+    "status": "RESOLVED",
+    "priority": "P2",
+    "root_cause": "Lỗi Code / Ứng Dụng (Application Bug)",
+    "action_taken": "Đã Vá Lỗi Nóng (Applied Hotfix)",
+    "acknowledgedBy": "Quản Trị Viên",
+    "acknowledgedAt": "2026-11-18T05:38:09.578Z",
+    "resolvedBy": "Quản Trị Viên",
+    "resolvedAt": "2026-11-18T05:38:25.786Z",
+    "notes": [
+      {
+        "id": "note_1794980289578",
+        "author": "Quản Trị Viên",
+        "role": "admin",
+        "type": "NOTE",
+        "text": "Tiếp nhận sự cố mức P2",
+        "createdAt": "2026-11-18T05:38:09.578Z"
+      },
+      {
+        "id": "note_1794980305786",
+        "author": "Quản Trị Viên",
+        "role": "admin",
+        "type": "RESOLUTION",
+        "text": "Xử lý hoàn tất: Đã Vá Lỗi Nóng (Applied Hotfix)",
+        "createdAt": "2026-11-18T05:38:25.786Z"
+      },
+      {
+        "id": "note_1794980311107",
+        "author": "Giám Sát Viên",
+        "role": "viewer",
+        "type": "ADMIN_NOTE",
+        "text": "hello",
+        "createdAt": "2026-11-18T05:38:31.107Z"
+      }
+    ],
+    "updatedAt": "2026-11-18T05:38:31.107Z"
   }
 }

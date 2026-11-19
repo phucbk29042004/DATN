@@ -44,7 +44,7 @@ const TAB_INFO = {
       },
       {
         heading: 'Vòng Đời Xử Lý Sự Cố (Incident Lifecycle)',
-        content: 'Hỗ trợ đổi trạng thái (Mới ➔ Tiếp nhận ➔ Đã xử lý) kèm ghi chú phương án khắc phục (Remediation Notes).'
+        content: 'Hỗ trợ đổi trạng thái (Mới → Tiếp nhận → Đã xử lý) kèm ghi chú phương án khắc phục (Remediation Notes).'
       }
     ]
   },
@@ -86,7 +86,7 @@ const TAB_INFO = {
       },
       {
         heading: 'Kiểm Thử Nhanh Trên UI',
-        content: 'Bạn chỉ cần bấm nút "⚡ Nạp Log Thử Nghiệm" ngay trên giao diện để hệ thống tự động sinh log và trích xuất template tức thì.'
+        content: 'Bạn chỉ cần bấm nút "Nạp Log Thử Nghiệm" ngay trên giao diện để hệ thống tự động sinh log và trích xuất template tức thì.'
       }
     ]
   }

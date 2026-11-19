@@ -360,11 +360,11 @@ async function runFullEvaluation() {
   const reportPath = path.join(__dirname, 'evaluation_summary.json');
   try {
     fs.writeFileSync(reportPath, JSON.stringify(summaryReport, null, 2), 'utf-8');
-    console.log(`\n✅ Báo cáo tổng hợp đã lưu vào: ${reportPath}`);
+    console.log(`\n[SUCCESS] Báo cáo tổng hợp đã lưu vào: ${reportPath}`);
   } catch (err) {
     const tmpReport = path.join(os.tmpdir(), 'evaluation_summary.json');
     fs.writeFileSync(tmpReport, JSON.stringify(summaryReport, null, 2), 'utf-8');
-    console.log(`\n⚠️ Fallback: Báo cáo tổng hợp đã lưu vào TEMP: ${tmpReport}`);
+    console.log(`\n[FALLBACK] Báo cáo tổng hợp đã lưu vào TEMP: ${tmpReport}`);
   }
 }
 

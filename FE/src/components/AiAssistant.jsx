@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { MessageSquare, Send, X, Trash2, Bot, User, Loader, Sparkles, AlertTriangle } from 'lucide-react';
+import { MessageSquare, Send, X, Trash2, Terminal, User, Loader, Zap, AlertTriangle } from 'lucide-react';
 
 const API_BASE = '/api/v1';
 
@@ -300,10 +300,10 @@ export default function AiAssistant({ lang, t, theme, currentUser, kpiStats }) {
             }
             setIsOpen(true);
           }}
-          title={isVi ? 'Trợ lý cá nhân LogPulse (Kéo để di chuyển)' : 'LogPulse Assistant (Drag to move)'}
-          aria-label="Open AI Assistant"
+          title={isVi ? 'Trợ lý vận hành LogPulse (Kéo để di chuyển)' : 'LogPulse Operations Assistant (Drag to move)'}
+          aria-label="Open Operations Assistant"
         >
-          <Bot size={22} />
+          <Terminal size={20} />
         </button>
       )}
 
@@ -313,8 +313,8 @@ export default function AiAssistant({ lang, t, theme, currentUser, kpiStats }) {
           {/* Header */}
           <div className="ai-drawer-header">
             <div className="ai-drawer-title">
-              <Sparkles size={18} />
-              <span>{isVi ? 'Trợ lý cá nhân LogPulse' : 'LogPulse Assistant'}</span>
+              <Terminal size={18} />
+              <span>{isVi ? 'Trợ lý vận hành LogPulse' : 'LogPulse Assistant'}</span>
             </div>
             <div style={{ display: 'flex', gap: '0.25rem' }}>
               <button
@@ -340,9 +340,9 @@ export default function AiAssistant({ lang, t, theme, currentUser, kpiStats }) {
           <div className="ai-messages">
             {messages.length === 0 && (
               <div className="ai-welcome">
-                <Bot size={36} />
+                <Terminal size={32} />
                 <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>
-                  {isVi ? 'Xin chào! Tôi là Trợ lý cá nhân LogPulse.' : 'Hello! I\'m LogPulse Assistant.'}
+                  {isVi ? 'Xin chào! Tôi là Trợ lý vận hành LogPulse.' : 'Hello! I\'m LogPulse Assistant.'}
                 </p>
                 <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)' }}>
                   {isVi
@@ -377,7 +377,7 @@ export default function AiAssistant({ lang, t, theme, currentUser, kpiStats }) {
             {messages.map((msg, idx) => (
               <div key={idx} className={`ai-msg ai-msg-${msg.role}`}>
                 <div className="ai-msg-avatar">
-                  {msg.role === 'user' ? <User size={14} /> : <Bot size={14} />}
+                  {msg.role === 'user' ? <User size={14} /> : <Terminal size={14} />}
                 </div>
                 <div className={`ai-msg-bubble ${msg.isError ? 'ai-msg-error' : ''}`}>
                   <div className="ai-msg-text" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.55 }}>
@@ -392,7 +392,7 @@ export default function AiAssistant({ lang, t, theme, currentUser, kpiStats }) {
 
             {loading && (
               <div className="ai-msg ai-msg-assistant">
-                <div className="ai-msg-avatar"><Bot size={14} /></div>
+                <div className="ai-msg-avatar"><Terminal size={14} /></div>
                 <div className="ai-msg-bubble ai-msg-typing">
                   <Loader size={14} className="spin" />
                   <span>{isVi ? 'Đang phân tích...' : 'Analyzing...'}</span>
@@ -479,9 +479,9 @@ export function AiExplainButton({ logEntry, lang }) {
         disabled={loading}
       >
         {loading ? (
-          <><Loader size={14} className="spin" /> {isVi ? 'AI đang phân tích...' : 'AI analyzing...'}</>
+          <><Loader size={14} className="spin" /> {isVi ? 'Đang phân tích...' : 'Analyzing...'}</>
         ) : (
-          <><Sparkles size={14} /> {isVi ? 'Phân tích cùng AI' : 'Analyze with AI'}</>
+          <><Zap size={14} /> {isVi ? 'Phân tích nguyên nhân (RCA)' : 'Analyze Root Cause (RCA)'}</>
         )}
       </button>
 
@@ -495,8 +495,8 @@ export function AiExplainButton({ logEntry, lang }) {
       {explanation && (
         <div className="ai-explain-result">
           <div className="ai-explain-header">
-            <Bot size={16} />
-            <span>{isVi ? 'Kết quả phân tích AI' : 'AI Analysis Result'}</span>
+            <Terminal size={16} />
+            <span>{isVi ? 'Kết quả phân tích nguyên nhân' : 'Root Cause Analysis Result'}</span>
           </div>
           <div className="ai-explain-text" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.55 }}>
             {cleanAsterisks(explanation)}

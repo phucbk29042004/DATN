@@ -28,7 +28,7 @@ const BATCH_SIZE = 5;
 async function readLogFile(filePath) {
   const lines = [];
   if (!fs.existsSync(filePath)) {
-    console.warn(`[Real Streamer] ⚠️  Không tìm thấy file: ${filePath}`);
+    console.warn(`[Real Streamer] [WARN] Không tìm thấy file: ${filePath}`);
     return lines;
   }
 
@@ -41,7 +41,7 @@ async function readLogFile(filePath) {
     if (line.trim()) lines.push(line.trim());
   }
 
-  console.log(`[Real Streamer] ✅ Đọc xong ${lines.length} dòng từ ${path.basename(filePath)}`);
+  console.log(`[Real Streamer] [SUCCESS] Đọc xong ${lines.length} dòng từ ${path.basename(filePath)}`);
   return lines;
 }
 
@@ -93,12 +93,12 @@ function sendBatch(logs) {
   }, (res) => {
     res.resume();
     res.on('end', () => {
-      console.log(`[Real Streamer] 🚀 Gửi ${logs.length} dòng log thực tế → Collector (HTTP ${res.statusCode})`);
+      console.log(`[Real Streamer] [STREAM] Gửi ${logs.length} dòng log thực tế → Collector (HTTP ${res.statusCode})`);
     });
   });
 
   req.on('error', (err) => {
-    console.log(`[Real Streamer] ⏳ Đang chờ Collector... (${err.message})`);
+    console.log(`[Real Streamer] [WAIT] Đang chờ Collector... (${err.message})`);
   });
 
   req.write(data);
@@ -108,7 +108,7 @@ function sendBatch(logs) {
 // ── Main: Khởi động stream ─────────────────────────────────────────────────
 async function main() {
   console.log('=============================================================');
-  console.log('⚡  PHÁT DỮ LIỆU LOG THẬT TỪ BỘ DỮ LIỆU CHUẨN HDFS / BGL');
+  console.log('[START] PHÁT DỮ LIỆU LOG THẬT TỪ BỘ DỮ LIỆU CHUẨN HDFS / BGL');
   console.log('=============================================================\n');
 
   const hdfsPath = path.join(__dirname, 'hdfs', 'HDFS_2k.log');
@@ -126,12 +126,12 @@ async function main() {
   const allLogs = [...hdfsParsed, ...bglParsed];
 
   if (allLogs.length === 0) {
-    console.error('[Real Streamer] ❌ Không có dữ liệu để stream. Kiểm tra lại file dataset.');
+    console.error('[Real Streamer] [ERROR] Không có dữ liệu để stream. Kiểm tra lại file dataset.');
     process.exit(1);
   }
 
-  console.log(`[Real Streamer] 📊 Tổng: ${allLogs.length} entries (HDFS: ${hdfsParsed.length} | BGL: ${bglParsed.length})`);
-  console.log(`[Real Streamer] 📡 Stream ${BATCH_SIZE} logs mỗi ${SEND_INTERVAL_MS}ms...\n`);
+  console.log(`[Real Streamer] [METRIC] Tổng: ${allLogs.length} entries (HDFS: ${hdfsParsed.length} | BGL: ${bglParsed.length})`);
+  console.log(`[Real Streamer] [DISPATCH] Stream ${BATCH_SIZE} logs mỗi ${SEND_INTERVAL_MS}ms...\n`);
 
   let idx = 0;
   setInterval(() => {

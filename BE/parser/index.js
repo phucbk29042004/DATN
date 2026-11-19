@@ -43,7 +43,7 @@ async function flushBuffer() {
   // Fire-and-forget: chạy đầy đủ 3 tầng Anomaly Detection trên batch (không block pipeline)
   runAnomalyDetection(batch).then(result => {
     if (result.is_anomaly) {
-      console.log(`[Anomaly Engine] 🚨 Batch anomaly detected | Rule: ${result.detections.rule_based?.is_anomaly} | Stat: ${result.detections.statistical?.is_anomaly} | ML: ${result.detections.template_mining?.ml_prediction?.is_anomaly}`);
+      console.log(`[Anomaly Engine] [ALERT] Batch anomaly detected | Rule: ${result.detections.rule_based?.is_anomaly} | Stat: ${result.detections.statistical?.is_anomaly} | ML: ${result.detections.template_mining?.ml_prediction?.is_anomaly}`);
     }
   }).catch(err => {
     console.warn(`[Anomaly Engine] Batch detection error: ${err.message}`);

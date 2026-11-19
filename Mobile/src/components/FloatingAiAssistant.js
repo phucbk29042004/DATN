@@ -11,7 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { Bot, X, Send, Sparkles } from 'lucide-react-native';
+import { Terminal, X, Send, Activity } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -88,7 +88,7 @@ export default function FloatingAiAssistant() {
           },
         ]}
       >
-        <Bot size={22} color="#ffffff" />
+        <Terminal size={20} color="#ffffff" />
       </TouchableOpacity>
 
       {/* AI Assistant Modal */}
@@ -111,10 +111,10 @@ export default function FloatingAiAssistant() {
             <View style={[styles.drawerHeader, { borderBottomColor: colors.borderSubtle }]}>
               <View style={styles.headerTitleRow}>
                 <View style={[styles.aiBadge, { backgroundColor: colors.primaryLight }]}>
-                  <Bot size={18} color={colors.primary} />
+                  <Terminal size={16} color={colors.primary} />
                 </View>
                 <View>
-                  <Text style={[styles.headerTitle, { color: colors.text }]}>Trợ Lý AI Phân Tích</Text>
+                  <Text style={[styles.headerTitle, { color: colors.text }]}>Trợ Lý Vận Hành Hệ Thống</Text>
                   <Text style={[styles.headerSub, { color: colors.textMuted }]}>
                     Quyền hạn: {currentUser?.role === 'admin' ? 'Quản Trị Viên' : 'Giám Sát Viên'}
                   </Text>

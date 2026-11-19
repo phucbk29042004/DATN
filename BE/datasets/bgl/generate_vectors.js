@@ -72,11 +72,11 @@ async function main() {
 
   try {
     fs.writeFileSync(OUT_FILE, JSON.stringify(output, null, 2), 'utf-8');
-    console.log(`\n✅ Đã lưu: ${OUT_FILE}`);
+    console.log(`\n[SUCCESS] Đã lưu: ${OUT_FILE}`);
   } catch (err) {
     const tmpOut = path.join(os.tmpdir(), 'vectors_bgl.json');
     fs.writeFileSync(tmpOut, JSON.stringify(output, null, 2), 'utf-8');
-    console.log(`\n⚠️ Fallback: Đã lưu vào TEMP: ${tmpOut}`);
+    console.log(`\n[FALLBACK] Đã lưu vào TEMP: ${tmpOut}`);
   }
   console.log('   → Chạy tiếp: python anomaly-engine/ml-models/train_and_evaluate.py --input datasets/bgl/vectors_bgl.json --output anomaly-engine/ml-models/results_bgl.json --save-model');
 }

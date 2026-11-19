@@ -70,12 +70,12 @@ function sendLogsToCollector() {
     let body = '';
     res.on('data', chunk => body += chunk);
     res.on('end', () => {
-      console.log(`[Log Generator] 🚀 Đã phát sinh & gửi ${batch.length} logs thật tới Collector (HTTP ${res.statusCode})`);
+      console.log(`[Log Generator] [INFO] Đã phát sinh & gửi ${batch.length} logs thật tới Collector (HTTP ${res.statusCode})`);
     });
   });
 
   req.on('error', (err) => {
-    console.log(`[Log Generator] ⏳ Đang chờ Collector Service trên cổng 4000... (${err.message})`);
+    console.log(`[Log Generator] [WAIT] Đang chờ Collector Service trên cổng 4000... (${err.message})`);
   });
 
   req.write(data);
@@ -83,7 +83,7 @@ function sendLogsToCollector() {
 }
 
 console.log('=======================================================');
-console.log('⚡ BẮT ĐẦU PHÁT SINH DỮ LIỆU LOG THẬT TIME-SERIES (REALTIME STREAM)');
+console.log('[START] BẮT ĐẦU PHÁT SINH DỮ LIỆU LOG THẬT TIME-SERIES (REALTIME STREAM)');
 console.log('=======================================================\n');
 
 // Gửi ngẫu nhiên 5-10 log mỗi 2 giây
