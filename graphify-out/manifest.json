@@ -198,14 +198,14 @@
     "semantic_hash": ""
   },
   "BE/search-api/index.js": {
-    "mtime": 1795093539.1493618,
-    "seen": 1795093604.964496,
-    "ast_hash": "34b88d9e04d5ca3a4039e9a79686718f",
+    "mtime": 1795179547.7286496,
+    "seen": 1795179595.011995,
+    "ast_hash": "f1be3fc1e9ab7751ce612e1a1b21e3b7",
     "semantic_hash": ""
   },
   "BE/search-api/opensearchQueries.js": {
-    "mtime": 1795177856.5808697,
-    "seen": 1795177913.1639547,
+    "mtime": 1795178090.5017064,
+    "seen": 1795178100.5129192,
     "ast_hash": "97283731babc214bc3535187757979a7",
     "semantic_hash": ""
   },
@@ -228,9 +228,9 @@
     "semantic_hash": ""
   },
   "FE/src/App.jsx": {
-    "mtime": 1795093539.9440966,
-    "seen": 1795093604.964513,
-    "ast_hash": "a2203cc8c1c1a095261a67948f2d710e",
+    "mtime": 1795179488.993599,
+    "seen": 1795179595.0120165,
+    "ast_hash": "44d875e1def13a5b9b9cc5a1e3352f84",
     "semantic_hash": ""
   },
   "FE/src/components/AdminSettingsModal.jsx": {
@@ -264,8 +264,8 @@
     "semantic_hash": ""
   },
   "FE/src/components/LoginModal.jsx": {
-    "mtime": 1795177782.6374352,
-    "seen": 1795177913.1639853,
+    "mtime": 1795178090.8435845,
+    "seen": 1795178100.512935,
     "ast_hash": "fdceea3cb3e79284b0ab889701d7c350",
     "semantic_hash": ""
   },
@@ -534,9 +534,9 @@
     "semantic_hash": ""
   },
   "tiendo.md": {
-    "mtime": 1795177894.673525,
-    "seen": 1795177913.1641335,
-    "ast_hash": "ef95a872e91c65db2e84fd2de8e7be6b",
+    "mtime": 1795179572.6087348,
+    "seen": 1795179595.0121646,
+    "ast_hash": "cc482bf351c39b5d1e2cbc23359d0146",
     "semantic_hash": ""
   },
   "BE/database/sqlite.js": {
@@ -558,9 +558,9 @@
     "semantic_hash": ""
   },
   "BE/datasets/export_real_dataset.js": {
-    "mtime": 1795177698.9716442,
-    "seen": 1795177913.1638937,
-    "ast_hash": "0174e6b71707e34a419d4f9bd12e857d",
+    "mtime": 1795177920.6621053,
+    "seen": 1795178100.5128891,
+    "ast_hash": "a99846990222c3c290e007ceafb0604c",
     "semantic_hash": ""
   },
   "BE/datasets/real_logs_dataset.json": {

@@ -1,6 +1,7 @@
 import express from 'express';
 import http from 'http';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { Server as SocketIOServer } from 'socket.io';
 import cors from 'cors';
@@ -23,6 +24,51 @@ import { cronConfig, sendDailyDigestReport, runLogRetentionCleanup, initCronJobs
 import { redisSub, REALTIME_LOG_CHANNEL } from '../queue/config.js';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const REAL_DATASET_FILE = path.resolve(__dirname, '../datasets/real_logs_dataset.json');
+
+let realLogsPool = [];
+function getRealLogsPool() {
+  if (realLogsPool.length > 0) return realLogsPool;
+  try {
+    if (fs.existsSync(REAL_DATASET_FILE)) {
+      realLogsPool = JSON.parse(fs.readFileSync(REAL_DATASET_FILE, 'utf-8'));
+    }
+  } catch (e) {
+    realLogsPool = [];
+  }
+  return realLogsPool;
+}
+
+let streamInterval = null;
+let currentLogIndex = 0;
+
+function startCloudLogStreamer() {
+  const pool = getRealLogsPool();
+  if (streamInterval || pool.length === 0) return;
+  console.log('[Realtime Streamer] Bắt đầu phát sóng log HDFS/BGL định kỳ cho client trực tuyến.');
+  streamInterval = setInterval(() => {
+    if (io.engine.clientsCount === 0) {
+      console.log('[Realtime Streamer] Không còn client kết nối, tạm dừng phát sóng để tiết kiệm tài nguyên.');
+      clearInterval(streamInterval);
+      streamInterval = null;
+      return;
+    }
+
+    const templateLog = pool[currentLogIndex % pool.length];
+    currentLogIndex++;
+
+    const dynamicLog = {
+      ...templateLog,
+      id: `realtime_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+      timestamp: new Date().toISOString()
+    };
+
+    broadcastNewLog(dynamicLog);
+  }, 3500);
+}
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -101,6 +147,9 @@ redisSub.on('message', (channel, message) => {
 
 io.on('connection', (socket) => {
   console.log(`[Socket.IO] Client kết nối: ${socket.id}`);
+
+  // Tự động kích hoạt luồng phát log Realtime cho client trực tuyến
+  startCloudLogStreamer();
 
   // Gửi ngay buffer log gần nhất cho client mới kết nối
   if (recentLogBuffer.length > 0) {

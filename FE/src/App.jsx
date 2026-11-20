@@ -680,6 +680,18 @@ export default function App() {
     // Nhận log mới realtime
     socket.on('new_log', (log) => {
       setRealtimeLogs(prev => [log, ...prev].slice(0, 200));
+      // Tự động cộng dồn số lượng log trên thẻ KPI Realtime
+      setKpiStats(prev => {
+        if (!prev) return prev;
+        const isAnomaly = (log.anomaly_score || 0) >= 0.7;
+        const isFatal = log.level === 'FATAL';
+        return {
+          ...prev,
+          total_logs_24h: (prev.total_logs_24h || 0) + 1,
+          anomaly_count_1h: isAnomaly ? (prev.anomaly_count_1h || 0) + 1 : prev.anomaly_count_1h,
+          fatal_count_1h: isFatal ? (prev.fatal_count_1h || 0) + 1 : prev.fatal_count_1h
+        };
+      });
     });
 
     return () => socket.disconnect();

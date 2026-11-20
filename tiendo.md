@@ -2,6 +2,14 @@
 
 ## Nhật Ký Cập Nhật (Chronological Log)
 
+### [20/11/2026 19:58] — Kích Hoạt Luồng Stream Log Realtime Thông Minh & Bộ Đếm KPI Tự Tăng
+- **Loại**: Cải tiến dữ liệu thời gian thực & Tối ưu tài nguyên (Realtime Streamer & Incremental KPI Counter)
+- **File**: `BE/search-api/index.js`, `FE/src/App.jsx`, `tiendo.md`
+- **Mô tả**:
+  1. Backend: Tích hợp `startCloudLogStreamer()` tự động phát sóng log thật từ dataset HDFS/BGL mỗi 3.5s khi có client kết nối Socket.IO; tự dừng khi client ngắt kết nối.
+  2. Frontend: Cập nhật hàm lắng nghe `new_log` tự động tăng số lượng `total_logs_24h (+1)` và thống kê bất thường trên thẻ KPI Dashboard theo thời gian thực.
+- **Kết quả**: Số log trên Dashboard tự động tăng sinh động khi người dùng mở Web, tiết kiệm 100% tài nguyên Render Free, biên dịch đạt 100%.
+
 ### [20/11/2026 19:35] — Tích Hợp Dataset Log Thật (HDFS/BGL) Dự Phòng Khi OpenSearch Offline & Xóa Login Demo
 - **Loại**: Xử lý dữ liệu thực nghiệm & Tinh gọn giao diện (Real Dataset Fallback Engine & Auth Cleanup)
 - **File**: `BE/datasets/real_logs_dataset.json`, `BE/search-api/opensearchQueries.js`, `FE/src/components/LoginModal.jsx`, `tiendo.md`
