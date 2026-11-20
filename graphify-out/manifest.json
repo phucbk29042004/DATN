@@ -204,9 +204,9 @@
     "semantic_hash": ""
   },
   "BE/search-api/opensearchQueries.js": {
-    "mtime": 1794829834.637436,
-    "seen": 1795084038.362344,
-    "ast_hash": "c884337accd4d4d0cc701319688ad6c7",
+    "mtime": 1795177856.5808697,
+    "seen": 1795177913.1639547,
+    "ast_hash": "97283731babc214bc3535187757979a7",
     "semantic_hash": ""
   },
   "BE/search-api/pipelineMetrics.js": {
@@ -264,9 +264,9 @@
     "semantic_hash": ""
   },
   "FE/src/components/LoginModal.jsx": {
-    "mtime": 1795176410.7776513,
-    "seen": 1795176463.8682132,
-    "ast_hash": "2eae56d547fcce16b2d567ca292e8986",
+    "mtime": 1795177782.6374352,
+    "seen": 1795177913.1639853,
+    "ast_hash": "fdceea3cb3e79284b0ab889701d7c350",
     "semantic_hash": ""
   },
   "FE/src/components/PasswordChangeModal.jsx": {
@@ -534,9 +534,9 @@
     "semantic_hash": ""
   },
   "tiendo.md": {
-    "mtime": 1795176449.0959375,
-    "seen": 1795176463.868349,
-    "ast_hash": "9d578b785af616c28d2de968cf0a9a55",
+    "mtime": 1795177894.673525,
+    "seen": 1795177913.1641335,
+    "ast_hash": "ef95a872e91c65db2e84fd2de8e7be6b",
     "semantic_hash": ""
   },
   "BE/database/sqlite.js": {
@@ -546,8 +546,8 @@
     "semantic_hash": ""
   },
   "FE/src/config.js": {
-    "mtime": 1795176380.1892166,
-    "seen": 1795176463.8682284,
+    "mtime": 1795176552.3962843,
+    "seen": 1795176576.941563,
     "ast_hash": "4db73c5a8ba193ec54096ccce7372582",
     "semantic_hash": ""
   },
@@ -555,6 +555,18 @@
     "mtime": 1795091704.00143,
     "seen": 1795091842.227602,
     "ast_hash": "3a2a70394c7b438a6c99ea799e60f5a8",
+    "semantic_hash": ""
+  },
+  "BE/datasets/export_real_dataset.js": {
+    "mtime": 1795177698.9716442,
+    "seen": 1795177913.1638937,
+    "ast_hash": "0174e6b71707e34a419d4f9bd12e857d",
+    "semantic_hash": ""
+  },
+  "BE/datasets/real_logs_dataset.json": {
+    "mtime": 1795177713.3266165,
+    "seen": 1795177913.1639104,
+    "ast_hash": "5f4b78078a81a8a5334e02eeba78aa06",
     "semantic_hash": ""
   },
   "BE/package-lock.json": {

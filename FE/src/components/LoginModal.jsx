@@ -59,11 +59,6 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
     }
   };
 
-  const handleQuickLogin = (u, p) => {
-    setUsername(u);
-    setPassword(p);
-  };
-
   return (
     <div className="login-portal-wrapper">
       <div className="login-portal-card" onClick={e => e.stopPropagation()}>
@@ -111,66 +106,8 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
                 {isVi ? 'Đăng Nhập Cổng Giám Sát' : 'Sign In to Portal'}
               </h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>
-                {isVi ? 'Chọn tài khoản mẫu hoặc nhập thông tin quản trị' : 'Choose demo account or enter your credentials'}
+                {isVi ? 'Vui lòng nhập thông tin tài khoản quản trị' : 'Please enter your administrator credentials'}
               </p>
-            </div>
-          </div>
-
-          {/* Quick Demo Accounts */}
-          <div style={{ marginBottom: '1rem' }}>
-            <div style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>
-              {isVi ? 'Tài khoản demo mẫu' : 'Quick Demo Profiles'}
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('admin', 'admin123')}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '7px 10px',
-                  background: username === 'admin' ? 'rgba(99, 102, 241, 0.15)' : 'var(--bg-card)',
-                  border: `1px solid ${username === 'admin' ? 'var(--accent-primary)' : 'var(--border-color)'}`,
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'all 0.2s'
-                }}
-              >
-                <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(239, 68, 68, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Shield size={14} color="#ef4444" />
-                </div>
-                <div style={{ minWidth: 0, overflow: 'hidden' }}>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>Admin</div>
-                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Toàn quyền</div>
-                </div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('viewer', 'viewer123')}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '7px 10px',
-                  background: username === 'viewer' ? 'rgba(99, 102, 241, 0.15)' : 'var(--bg-card)',
-                  border: `1px solid ${username === 'viewer' ? 'var(--accent-primary)' : 'var(--border-color)'}`,
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  transition: 'all 0.2s'
-                }}
-              >
-                <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(59, 130, 246, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <User size={14} color="#3b82f6" />
-                </div>
-                <div style={{ minWidth: 0, overflow: 'hidden' }}>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>Viewer</div>
-                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Chỉ xem</div>
-                </div>
-              </button>
             </div>
           </div>
 

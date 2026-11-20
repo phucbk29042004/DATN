@@ -2,6 +2,15 @@
 
 ## Nhật Ký Cập Nhật (Chronological Log)
 
+### [20/11/2026 19:35] — Tích Hợp Dataset Log Thật (HDFS/BGL) Dự Phòng Khi OpenSearch Offline & Xóa Login Demo
+- **Loại**: Xử lý dữ liệu thực nghiệm & Tinh gọn giao diện (Real Dataset Fallback Engine & Auth Cleanup)
+- **File**: `BE/datasets/real_logs_dataset.json`, `BE/search-api/opensearchQueries.js`, `FE/src/components/LoginModal.jsx`, `tiendo.md`
+- **Mô tả**:
+  1. Trích xuất 100% dữ liệu log thật từ dataset quốc tế HDFS và BGL (`real_logs_dataset.json`) kèm đầy đủ timestamp, Drain template và Anomaly score.
+  2. Cập nhật `opensearchQueries.js`: Ưu tiên OpenSearch local khi chạy máy cá nhân; tự động chuyển sang tập log thật để tính KPI, biểu đồ và bảng log khi chạy trên Render.
+  3. Xóa bỏ hoàn toàn 2 nút chọn tài khoản mẫu (Admin/Viewer) tại Modal Login, khôi phục giao diện đăng nhập chuẩn doanh nghiệp.
+- **Kết quả**: Web Cloud luôn có đầy đủ số liệu và biểu đồ log thật 100%, chạy local vẫn mượt mà với OpenSearch thật, biên dịch 100% không lỗi.
+
 ### [20/11/2026 19:10] — Cố Định URL Backend Render (datn-juwa) & Tinh Gọn Modal Login
 - **Loại**: Cấu hình môi trường & Tối ưu giao diện (Production Config & UI Cleanup)
 - **File**: `FE/src/config.js`, `FE/src/components/LoginModal.jsx`, `FE/.env.example`, `tiendo.md`
