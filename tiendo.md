@@ -2,6 +2,14 @@
 
 ## Nhật Ký Cập Nhật (Chronological Log)
 
+### [20/11/2026 19:10] — Cố Định URL Backend Render (datn-juwa) & Tinh Gọn Modal Login
+- **Loại**: Cấu hình môi trường & Tối ưu giao diện (Production Config & UI Cleanup)
+- **File**: `FE/src/config.js`, `FE/src/components/LoginModal.jsx`, `FE/.env.example`, `tiendo.md`
+- **Mô tả**:
+  1. Cấu hình Backend URL mặc định trỏ thẳng tới Render `https://datn-juwa.onrender.com` khi chạy trên Cloud / Vercel.
+  2. Xóa bỏ nút và ô nhập URL tạm thời tại Modal Login, khôi phục giao diện đăng nhập doanh nghiệp tinh gọn.
+- **Kết quả**: Frontend sẵn sàng kết nối tự động với Backend Render, biên dịch esbuild 100% không lỗi.
+
 ### [19/11/2026 20:05] — Khắc Phục Lỗi WebSocket & Login 405 Vercel, Sẵn Sàng Deploy Backend Lên Render
 - **Loại**: Sửa lỗi triển khai Cloud & Chuẩn hóa cấu hình (Cloud Deployment Bug Fix & Render Compatibility)
 - **File**: `BE/search-api/index.js`, `BE/queue/config.js`, `FE/src/config.js`, `FE/src/App.jsx`, `FE/src/components/LoginModal.jsx`, `tiendo.md`

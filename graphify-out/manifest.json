@@ -162,9 +162,9 @@
     "semantic_hash": ""
   },
   "BE/queue/config.js": {
-    "mtime": 1795093538.8527074,
-    "seen": 1795093604.9644735,
-    "ast_hash": "20cc6292601f6c21d0458250ed88b465",
+    "mtime": 1795176077.4096856,
+    "seen": 1795176107.3718445,
+    "ast_hash": "341919e71a4f3761609e430e7b49a5aa",
     "semantic_hash": ""
   },
   "BE/search-api/aiService.js": {
@@ -264,9 +264,9 @@
     "semantic_hash": ""
   },
   "FE/src/components/LoginModal.jsx": {
-    "mtime": 1795093540.2817793,
-    "seen": 1795093604.9645345,
-    "ast_hash": "2915b5014ee6f4116970f0f6e428aab0",
+    "mtime": 1795176410.7776513,
+    "seen": 1795176463.8682132,
+    "ast_hash": "2eae56d547fcce16b2d567ca292e8986",
     "semantic_hash": ""
   },
   "FE/src/components/PasswordChangeModal.jsx": {
@@ -534,9 +534,9 @@
     "semantic_hash": ""
   },
   "tiendo.md": {
-    "mtime": 1795093444.2807226,
-    "seen": 1795093492.4767413,
-    "ast_hash": "c7ea13d203ebc0eaa5e07d486fe0210d",
+    "mtime": 1795176449.0959375,
+    "seen": 1795176463.868349,
+    "ast_hash": "9d578b785af616c28d2de968cf0a9a55",
     "semantic_hash": ""
   },
   "BE/database/sqlite.js": {
@@ -546,9 +546,9 @@
     "semantic_hash": ""
   },
   "FE/src/config.js": {
-    "mtime": 1795093540.4123137,
-    "seen": 1795093604.9645486,
-    "ast_hash": "8e946b0d2155e67c063a96070440deed",
+    "mtime": 1795176380.1892166,
+    "seen": 1795176463.8682284,
+    "ast_hash": "4db73c5a8ba193ec54096ccce7372582",
     "semantic_hash": ""
   },
   "FE/vercel.json": {

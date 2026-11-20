@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { LogIn, X, Shield, AlertCircle, Key, User, Eye, EyeOff, Settings, Check } from 'lucide-react';
-import { API_BASE, BACKEND_URL, setCustomBackendUrl } from '../config.js';
+import { LogIn, X, Shield, AlertCircle, Key, User, Eye, EyeOff } from 'lucide-react';
+import { API_BASE } from '../config.js';
 
 export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
   const [username, setUsername] = useState('');
@@ -8,16 +8,10 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [showServerConfig, setShowServerConfig] = useState(false);
-  const [serverUrlInput, setServerUrlInput] = useState(BACKEND_URL);
 
   if (!isOpen) return null;
 
   const isVi = lang === 'vi';
-
-  const handleSaveServerUrl = () => {
-    setCustomBackendUrl(serverUrlInput);
-  };
 
   const handleLogin = async (e) => {
     if (e) e.preventDefault();
@@ -35,8 +29,8 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
 
       if (res.status === 405) {
         throw new Error(isVi 
-          ? 'Chưa kết nối Backend: Vui lòng nhấn biểu tượng cài đặt phía dưới để cấu hình URL Backend (Render/ngrok).' 
-          : 'Backend not connected: Please click the settings icon below to configure Backend URL.');
+          ? 'Không thể kết nối đến máy chủ Backend (405 Method Not Allowed).' 
+          : 'Cannot connect to Backend server (405 Method Not Allowed).');
       }
 
       const data = await res.json();
@@ -55,8 +49,8 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
     } catch (err) {
       if (err.message.includes('Failed to fetch')) {
         setError(isVi 
-          ? 'Không thể kết nối đến máy chủ Backend. Vui lòng kiểm tra lại URL Backend.' 
-          : 'Cannot connect to Backend server. Please check Backend URL.');
+          ? 'Không thể kết nối đến máy chủ Backend. Vui lòng kiểm tra lại dịch vụ.' 
+          : 'Cannot connect to Backend server. Please check service status.');
       } else {
         setError(err.message);
       }
@@ -65,10 +59,15 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
     }
   };
 
+  const handleQuickLogin = (u, p) => {
+    setUsername(u);
+    setPassword(p);
+  };
+
   return (
     <div className="login-portal-wrapper">
       <div className="login-portal-card" onClick={e => e.stopPropagation()}>
-        {/* Left Column: Bức ảnh trung tâm dữ liệu giám sát cao cấp, không văn bản rườm rà */}
+        {/* Left Column: Bức ảnh trung tâm dữ liệu giám sát cao cấp */}
         <div 
           className="login-banner-side"
           style={{
@@ -78,121 +77,179 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
-            padding: '2.5rem 2rem',
-            position: 'relative'
+            padding: '2rem',
+            color: '#ffffff'
           }}
         >
-          {/* Logo & Tên nền tảng tiếng Việt */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-            <div style={{
-              width: '42px', height: '42px', borderRadius: '12px',
-              background: 'linear-gradient(135deg, #0284c7 0%, #6366f1 100%)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 14px rgba(2, 132, 199, 0.4)',
-              color: '#ffffff'
-            }}>
-              <Shield size={22} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ background: 'rgba(255, 255, 255, 0.15)', padding: '6px', borderRadius: '8px', backdropFilter: 'blur(4px)' }}>
+              <Shield size={20} color="#60a5fa" />
             </div>
-            <div>
-              <div style={{ fontSize: '1.12rem', fontWeight: 700, color: '#ffffff', letterSpacing: '-0.01em' }}>
-                {isVi ? 'Hệ Thống Giám Sát Log' : 'Log Monitoring System'}
-              </div>
-              <div style={{ fontSize: '0.75rem', color: '#cbd5e1', fontWeight: 500 }}>
-                {isVi ? 'Phân Tích & Cảnh Báo Sự Cố' : 'Incident Analysis & Alerting'}
-              </div>
-            </div>
+            <span style={{ fontWeight: 700, fontSize: '1rem', letterSpacing: '0.5px' }}>LOGPULSE SRE</span>
           </div>
 
-          {/* Slogan & Giới thiệu ngắn gọn tinh tế ở góc dưới bức ảnh */}
-          <div style={{
-            background: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(8px)',
-            borderRadius: '12px',
-            padding: '1rem 1.25rem',
-            border: '1px solid rgba(255, 255, 255, 0.12)'
-          }}>
-            <div style={{ fontSize: '0.95rem', fontWeight: 700, color: '#ffffff', marginBottom: '0.25rem' }}>
-              {isVi ? 'Giám Sát & Phân Tích Log Thời Gian Thực' : 'Real-time Log Analytics Platform'}
+          <div>
+            <div style={{ display: 'inline-block', background: 'rgba(59, 130, 246, 0.3)', border: '1px solid rgba(96, 165, 250, 0.4)', borderRadius: '20px', padding: '2px 10px', fontSize: '0.72rem', fontWeight: 600, color: '#93c5fd', marginBottom: '8px' }}>
+              Enterprise Edition
             </div>
-            <div style={{ fontSize: '0.78rem', color: '#94a3b8', lineHeight: 1.5 }}>
-              {isVi ? 'Phát hiện sự cố và phân tích mẫu log tự động ứng dụng thuật toán Drain Mining' : 'Automated log template extraction & anomaly detection'}
-            </div>
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 700, margin: '0 0 6px 0', lineHeight: 1.3 }}>
+              {isVi ? 'Hạ Tầng Giám Sát Phân Tán' : 'Distributed Monitoring Platform'}
+            </h2>
+            <p style={{ fontSize: '0.82rem', margin: 0, opacity: 0.8, lineHeight: 1.5 }}>
+              {isVi 
+                ? 'Hệ thống AIOps phát hiện bất thường và giám sát tập trung chuẩn doanh nghiệp.'
+                : 'Enterprise AIOps anomaly detection and centralized monitoring system.'}
+            </p>
           </div>
         </div>
 
-        {/* Right Column: Clean Authentication Form */}
-        <div className="login-form-side" style={{ padding: '2.5rem 2.25rem', display: 'flex', flexDirection: 'column' }}>
-          <div className="login-form-header" style={{ marginBottom: '1.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <div className="login-icon-circle" style={{
-                width: '36px', height: '36px', borderRadius: '10px',
-                background: 'var(--bg-input)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'var(--accent-primary)', border: '1px solid var(--border-color)'
-              }}>
-                <LogIn size={18} />
-              </div>
-              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                {isVi ? 'Đăng Nhập' : 'Sign In'}
+        {/* Right Column: Form Đăng Nhập */}
+        <div className="login-form-side">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.2rem' }}>
+            <div>
+              <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
+                {isVi ? 'Đăng Nhập Cổng Giám Sát' : 'Sign In to Portal'}
               </h3>
+              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>
+                {isVi ? 'Chọn tài khoản mẫu hoặc nhập thông tin quản trị' : 'Choose demo account or enter your credentials'}
+              </p>
             </div>
-            <p style={{ margin: '0.45rem 0 0 0', fontSize: '0.84rem', color: 'var(--text-secondary)' }}>
-              {isVi ? 'Nhập thông tin tài khoản để truy cập bảng điều khiển' : 'Enter your credentials to access the workspace'}
-            </p>
+          </div>
+
+          {/* Quick Demo Accounts */}
+          <div style={{ marginBottom: '1rem' }}>
+            <div style={{ fontSize: '0.74rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px' }}>
+              {isVi ? 'Tài khoản demo mẫu' : 'Quick Demo Profiles'}
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <button
+                type="button"
+                onClick={() => handleQuickLogin('admin', 'admin123')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '7px 10px',
+                  background: username === 'admin' ? 'rgba(99, 102, 241, 0.15)' : 'var(--bg-card)',
+                  border: `1px solid ${username === 'admin' ? 'var(--accent-primary)' : 'var(--border-color)'}`,
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(239, 68, 68, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <Shield size={14} color="#ef4444" />
+                </div>
+                <div style={{ minWidth: 0, overflow: 'hidden' }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>Admin</div>
+                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Toàn quyền</div>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleQuickLogin('viewer', 'viewer123')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '7px 10px',
+                  background: username === 'viewer' ? 'rgba(99, 102, 241, 0.15)' : 'var(--bg-card)',
+                  border: `1px solid ${username === 'viewer' ? 'var(--accent-primary)' : 'var(--border-color)'}`,
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <div style={{ width: '28px', height: '28px', borderRadius: '6px', background: 'rgba(59, 130, 246, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <User size={14} color="#3b82f6" />
+                </div>
+                <div style={{ minWidth: 0, overflow: 'hidden' }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>Viewer</div>
+                  <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>Chỉ xem</div>
+                </div>
+              </button>
+            </div>
           </div>
 
           {error && (
-            <div className="login-error-alert" style={{ marginBottom: '1.2rem' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '8px 12px',
+              background: 'rgba(239, 68, 68, 0.12)',
+              border: '1px solid rgba(239, 68, 68, 0.3)',
+              borderRadius: '8px',
+              color: '#ef4444',
+              fontSize: '0.78rem',
+              marginBottom: '1rem'
+            }}>
               <AlertCircle size={15} style={{ flexShrink: 0 }} />
               <span>{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleLogin} className="login-form-body">
-            {/* Username Input */}
-            <div className="form-group" style={{ marginBottom: '1.1rem' }}>
-              <label className="form-label" style={{ fontSize: '0.82rem', fontWeight: 600, marginBottom: '0.4rem' }}>
-                {isVi ? 'Tài khoản' : 'Username'}
+          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                {isVi ? 'Tên đăng nhập' : 'Username'}
               </label>
               <div style={{ position: 'relative' }}>
                 <input
                   type="text"
-                  className="search-input"
-                  style={{ width: '100%', paddingLeft: '2.4rem', height: '42px', fontSize: '0.88rem' }}
-                  placeholder={isVi ? 'Nhập tài khoản (vd: admin)' : 'Enter username'}
                   value={username}
                   onChange={e => setUsername(e.target.value)}
-                  autoFocus
+                  placeholder={isVi ? 'Nhập tên tài khoản...' : 'Enter username...'}
+                  style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    padding: '8px 12px 8px 34px',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-input, rgba(0,0,0,0.2))',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.82rem',
+                    outline: 'none'
+                  }}
                   required
                 />
-                <User size={16} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                <User size={15} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
               </div>
             </div>
 
-            {/* Password Input With Eye Toggle */}
-            <div className="form-group" style={{ marginBottom: '1.4rem' }}>
-              <label className="form-label" style={{ fontSize: '0.82rem', fontWeight: 600, marginBottom: '0.4rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '4px' }}>
                 {isVi ? 'Mật khẩu' : 'Password'}
               </label>
               <div style={{ position: 'relative' }}>
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  className="search-input"
-                  style={{ width: '100%', paddingLeft: '2.4rem', paddingRight: '2.6rem', height: '42px', fontSize: '0.88rem' }}
-                  placeholder="••••••••"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
+                  placeholder={isVi ? 'Nhập mật khẩu...' : 'Enter password...'}
+                  style={{
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    padding: '8px 36px 8px 34px',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-color)',
+                    background: 'var(--bg-input, rgba(0,0,0,0.2))',
+                    color: 'var(--text-primary)',
+                    fontSize: '0.82rem',
+                    outline: 'none'
+                  }}
                   required
                 />
-                <Key size={16} style={{ position: 'absolute', left: '0.85rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                
-                {/* Nút bấm ẩn / hiện mật khẩu */}
+                <Key size={15} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(prev => !prev)}
-                  tabIndex={-1}
+                  onClick={() => setShowPassword(!showPassword)}
                   style={{
                     position: 'absolute',
-                    right: '0.75rem',
+                    right: '10px',
                     top: '50%',
                     transform: 'translateY(-50%)',
                     background: 'none',
@@ -232,79 +289,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
             </div>
           </form>
 
-          {/* Cấu hình URL Backend nhanh cho bản Cloud Vercel */}
-          <div style={{ marginTop: '0.8rem', textAlign: 'center' }}>
-            <button
-              type="button"
-              onClick={() => setShowServerConfig(!showServerConfig)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: 'var(--text-muted)',
-                fontSize: '0.74rem',
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                padding: '4px 8px',
-                borderRadius: '6px',
-                transition: 'color 0.2s'
-              }}
-              title="Cấu hình URL Backend (Render / ngrok)"
-            >
-              <Settings size={13} />
-              <span>{isVi ? 'Cấu hình Server Backend' : 'Backend Server Settings'}</span>
-              {BACKEND_URL && <span style={{ color: '#10b981', fontWeight: 600 }}>•</span>}
-            </button>
-
-            {showServerConfig && (
-              <div style={{
-                marginTop: '0.5rem',
-                padding: '0.6rem',
-                background: 'rgba(255, 255, 255, 0.04)',
-                borderRadius: '8px',
-                border: '1px solid var(--border-color)',
-                display: 'flex',
-                gap: '6px',
-                alignItems: 'center'
-              }}>
-                <input
-                  type="text"
-                  placeholder="https://your-backend.onrender.com"
-                  value={serverUrlInput}
-                  onChange={(e) => setServerUrlInput(e.target.value)}
-                  style={{
-                    flex: 1,
-                    fontSize: '0.76rem',
-                    padding: '6px 8px',
-                    borderRadius: '6px',
-                    border: '1px solid var(--border-color)',
-                    background: 'var(--bg-input, rgba(0,0,0,0.2))',
-                    color: 'var(--text-primary)'
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={handleSaveServerUrl}
-                  className="btn-primary"
-                  style={{
-                    height: '28px',
-                    padding: '0 10px',
-                    fontSize: '0.74rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    borderRadius: '6px'
-                  }}
-                >
-                  <Check size={12} />
-                  <span>{isVi ? 'Lưu' : 'Save'}</span>
-                </button>
-              </div>
-            )}
-          </div>
-
-          <div style={{ marginTop: 'auto', paddingTop: '1rem', textAlign: 'center', fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+          <div style={{ marginTop: 'auto', paddingTop: '1.2rem', textAlign: 'center', fontSize: '0.76rem', color: 'var(--text-muted)' }}>
             {isVi ? 'Hệ Thống Giám Sát Log & Cảnh Báo Bất Thường Thời Gian Thực' : 'Real-time Log Monitoring & Anomaly Detection'}
           </div>
         </div>
