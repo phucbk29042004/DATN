@@ -4,18 +4,34 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-export const REDIS_URL = process.env.REDIS_URL;
+function cleanRedisUrl(url) {
+  if (!url) return '';
+  let clean = url.trim();
+  if (clean.includes('-u ')) {
+    clean = clean.split('-u ')[1].trim();
+  }
+  clean = clean.replace(/^['"]|['"]$/g, '');
+  if (clean.startsWith('redis://') && clean.includes('upstash.io')) {
+    clean = clean.replace('redis://', 'rediss://');
+  }
+  return clean;
+}
+
+export const REDIS_URL = cleanRedisUrl(process.env.REDIS_URL);
 export const REDIS_HOST = process.env.REDIS_HOST || '127.0.0.1';
 export const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379', 10);
 
 const redisOptions = {
   maxRetriesPerRequest: null,
-  enableOfflineQueue: false,
   retryStrategy(times) {
-    if (times > 5) return null; // Dừng retry nếu không có Redis trên cloud
-    return Math.min(times * 1000, 5000);
+    if (times > 10) return null; // Dừng retry nếu không kết nối được
+    return Math.min(times * 1000, 3000);
   }
 };
+
+if (REDIS_URL && REDIS_URL.startsWith('rediss://')) {
+  redisOptions.tls = { rejectUnauthorized: false };
+}
 
 export const redisConnection = REDIS_URL 
   ? new Redis(REDIS_URL, redisOptions) 
@@ -35,7 +51,6 @@ export const redisSub = REDIS_URL
 
 // Ngăn chặn unhandled error event làm crash tiến trình Node.js trên cloud
 const handleRedisError = (name) => (err) => {
-  // Chỉ cảnh báo nhẹ, không làm gián đoạn API
   console.warn(`[Redis ${name} Warning] Không thể kết nối: ${err.message}`);
 };
 
