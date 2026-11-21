@@ -198,15 +198,15 @@
     "semantic_hash": ""
   },
   "BE/search-api/index.js": {
-    "mtime": 1795179547.7286496,
-    "seen": 1795179595.011995,
-    "ast_hash": "f1be3fc1e9ab7751ce612e1a1b21e3b7",
+    "mtime": 1795235213.3610637,
+    "seen": 1795235810.6045518,
+    "ast_hash": "4663b69868fb322c0a9a7dd759f7eaa6",
     "semantic_hash": ""
   },
   "BE/search-api/opensearchQueries.js": {
-    "mtime": 1795178090.5017064,
-    "seen": 1795178100.5129192,
-    "ast_hash": "97283731babc214bc3535187757979a7",
+    "mtime": 1795235197.8948617,
+    "seen": 1795235810.604555,
+    "ast_hash": "54a07e9cea346449a1dbda157f6a332a",
     "semantic_hash": ""
   },
   "BE/search-api/pipelineMetrics.js": {
@@ -228,9 +228,9 @@
     "semantic_hash": ""
   },
   "FE/src/App.jsx": {
-    "mtime": 1795179488.993599,
-    "seen": 1795179595.0120165,
-    "ast_hash": "44d875e1def13a5b9b9cc5a1e3352f84",
+    "mtime": 1795235218.174254,
+    "seen": 1795235810.6045668,
+    "ast_hash": "a08131b368dbd72b2d5a83bdaf828c65",
     "semantic_hash": ""
   },
   "FE/src/components/AdminSettingsModal.jsx": {
@@ -264,9 +264,9 @@
     "semantic_hash": ""
   },
   "FE/src/components/LoginModal.jsx": {
-    "mtime": 1795178090.8435845,
-    "seen": 1795178100.512935,
-    "ast_hash": "fdceea3cb3e79284b0ab889701d7c350",
+    "mtime": 1795235248.0842905,
+    "seen": 1795235810.6045837,
+    "ast_hash": "0ab2b4c9957af067e73bd41e4f511ff3",
     "semantic_hash": ""
   },
   "FE/src/components/PasswordChangeModal.jsx": {
@@ -534,9 +534,9 @@
     "semantic_hash": ""
   },
   "tiendo.md": {
-    "mtime": 1795179572.6087348,
-    "seen": 1795179595.0121646,
-    "ast_hash": "cc482bf351c39b5d1e2cbc23359d0146",
+    "mtime": 1795235486.714322,
+    "seen": 1795235810.6047204,
+    "ast_hash": "e4cc52a7cec0cfe7641115d563eb9ea7",
     "semantic_hash": ""
   },
   "BE/database/sqlite.js": {

@@ -1,6 +1,24 @@
 import React, { useState } from 'react';
-import { LogIn, X, Shield, AlertCircle, Key, User, Eye, EyeOff } from 'lucide-react';
+import { LogIn, X, AlertCircle, Key, User, Eye, EyeOff } from 'lucide-react';
 import { API_BASE } from '../config.js';
+
+function SreSentinelLogo({ size = 26 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="sreSentinelGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#06b6d4" />
+          <stop offset="100%" stopColor="#3b82f6" />
+        </linearGradient>
+      </defs>
+      <circle cx="16" cy="16" r="14" stroke="#0ea5e9" strokeWidth="1.2" strokeDasharray="3 2" opacity="0.6" />
+      <path d="M16 2 V6 M16 26 V30 M2 16 H6 M26 16 H30" stroke="#38bdf8" strokeWidth="1.5" strokeLinecap="round" />
+      <polygon points="16,7 23.5,11.3 23.5,20.7 16,25 8.5,20.7 8.5,11.3" stroke="url(#sreSentinelGrad)" strokeWidth="1.8" fill="rgba(6, 182, 212, 0.12)" />
+      <circle cx="16" cy="16" r="3" fill="#10b981" />
+      <circle cx="16" cy="16" r="5.5" stroke="#10b981" strokeWidth="0.8" strokeDasharray="2 1.5" opacity="0.8" />
+    </svg>
+  );
+}
 
 export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
   const [username, setUsername] = useState('');
@@ -76,11 +94,26 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
             color: '#ffffff'
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ background: 'rgba(255, 255, 255, 0.15)', padding: '6px', borderRadius: '8px', backdropFilter: 'blur(4px)' }}>
-              <Shield size={20} color="#60a5fa" />
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{
+              background: 'rgba(15, 23, 42, 0.75)',
+              border: '1px solid rgba(14, 165, 233, 0.4)',
+              padding: '6px',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 0 12px rgba(6, 182, 212, 0.2)'
+            }}>
+              <SreSentinelLogo size={24} />
             </div>
-            <span style={{ fontWeight: 700, fontSize: '1rem', letterSpacing: '0.5px' }}>LOGPULSE SRE</span>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: '0.98rem', letterSpacing: '0.8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span>LOGPULSE</span>
+                <span style={{ fontSize: '0.62rem', padding: '1px 5px', borderRadius: '4px', background: 'rgba(6, 182, 212, 0.25)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.4)', fontWeight: 700 }}>SRE</span>
+              </div>
+              <div style={{ fontSize: '0.65rem', color: '#94a3b8', letterSpacing: '0.5px', textTransform: 'uppercase' }}>OBSERVABILITY SENTINEL</div>
+            </div>
           </div>
 
           <div>

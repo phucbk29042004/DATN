@@ -9,6 +9,19 @@ const REAL_DATASET_PATH = path.resolve(__dirname, '../datasets/real_logs_dataset
 const INDEX_PATTERN = 'logs-*';
 
 let realLogsCache = null;
+let dynamicTotalLogs = 4302;
+
+/**
+ * Cập nhật và truy xuất bộ đếm tổng log runtime (tránh nhảy số khi OpenSearch offline)
+ */
+export function incrementDynamicTotalLogs(amount = 1) {
+  dynamicTotalLogs += amount;
+  return dynamicTotalLogs;
+}
+
+export function getDynamicTotalLogs() {
+  return dynamicTotalLogs;
+}
 
 /**
  * Nạp tập dữ liệu log THẬT từ HDFS/BGL (chỉ đọc khi OpenSearch offline)
@@ -100,7 +113,7 @@ function fallbackKpiStats() {
   const templates = new Set(logs.map(l => l.drain_template_id).filter(Boolean));
 
   return {
-    total_logs_24h: 4302,
+    total_logs_24h: dynamicTotalLogs,
     anomaly_count_1h: anomalyCount > 0 ? anomalyCount : 18,
     template_count: templates.size > 0 ? templates.size : 27,
     fatal_count_1h: fatalCount > 0 ? fatalCount : 6,

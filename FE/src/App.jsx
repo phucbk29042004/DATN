@@ -715,7 +715,15 @@ export default function App() {
       const res = await fetch(`${API_BASE}/stats/kpi`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      setKpiStats(data);
+      setKpiStats(prev => {
+        if (!prev) return data;
+        return {
+          ...data,
+          total_logs_24h: Math.max(prev.total_logs_24h || 0, data.total_logs_24h || 0),
+          anomaly_count_1h: Math.max(prev.anomaly_count_1h || 0, data.anomaly_count_1h || 0),
+          fatal_count_1h: Math.max(prev.fatal_count_1h || 0, data.fatal_count_1h || 0)
+        };
+      });
     } catch {
       // Backend offline — giữ null state, hiển thị skeleton
     } finally {

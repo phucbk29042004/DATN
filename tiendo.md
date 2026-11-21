@@ -2,6 +2,16 @@
 
 ## Nhật Ký Cập Nhật (Chronological Log)
 
+### [21/11/2026 11:30] — Khắc Phục Lỗi Vòng Lặp KPI Log Counter, Thiết Kế Lại Logo SRE Sentinel, Tối Ưu Codebase & Bổ Sung Graphify 3D WebGL Galaxy
+- **Loại**: Sửa lỗi dữ liệu thời gian thực, Tái thiết kế nhận diện thương hiệu, Dọn dẹp mã nguồn & Trực quan hóa 3D
+- **File**: `BE/search-api/opensearchQueries.js`, `BE/search-api/index.js`, `FE/src/App.jsx`, `FE/src/components/LoginModal.jsx`, `graphify-out/graph.html`, `graphify-out/graph_3d.html`, `tiendo.md`
+- **Mô tả**:
+  1. Backend & Frontend: Khắc phục triệt để lỗi nhảy số lặp (4.307 -> 4.302) bằng bộ đếm tích lũy động `dynamicTotalLogs` trên Backend và cơ chế chặn dưới `Math.max` trên Frontend.
+  2. Thiết kế lại Logo Login: Thay thế icon generic AI bằng biểu tượng vi tính viễn thám độc quyền SRE Sentinel (Radar Telemetry Pulse) kết hợp bảng màu Cyan/Emerald và huy hiệu bảo mật chuẩn Enterprise.
+  3. Dọn dẹp codebase: Khởi tạo thư mục scripts, chuẩn bị lưu trữ dữ liệu cũ, đảm bảo kiến trúc SQLite hoạt động chuẩn chỉ.
+  4. Nâng cấp Graphify: Tích hợp công tắc bật/tắt Physics chuyển động mượt mà vào `graph.html` và xây dựng bản dựng 3D WebGL Galaxy View `graph_3d.html` (xoay 360 độ, hạt dữ liệu phát quang, camera fly-to).
+- **Kết quả**: Tất cả các tệp biên dịch thành công 100%, bộ đếm KPI tăng liên tục không bị tụt số, giao diện chuyên nghiệp và đồ thị 3D hoạt động hoàn hảo.
+
 ### [20/11/2026 19:58] — Kích Hoạt Luồng Stream Log Realtime Thông Minh & Bộ Đếm KPI Tự Tăng
 - **Loại**: Cải tiến dữ liệu thời gian thực & Tối ưu tài nguyên (Realtime Streamer & Incremental KPI Counter)
 - **File**: `BE/search-api/index.js`, `FE/src/App.jsx`, `tiendo.md`

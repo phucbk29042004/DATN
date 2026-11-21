@@ -12,7 +12,8 @@ import {
   getKpiStats,
   getRecentAnomalies,
   getDrainTemplates,
-  getAnomalyAnalytics
+  getAnomalyAnalytics,
+  incrementDynamicTotalLogs
 } from './opensearchQueries.js';
 import { chatWithAI, explainLog } from './aiService.js';
 import { alertConfig, dispatchAlerts, sendDiscordAlert, sendEmailAlert, setMaintenanceMode, getMaintenanceMode, saveConfigToSqlite } from './alertService.js';
@@ -116,6 +117,7 @@ const MAX_BUFFER = 200;
 export function broadcastNewLog(logEntry) {
   recentLogBuffer.unshift(logEntry);
   if (recentLogBuffer.length > MAX_BUFFER) recentLogBuffer.pop();
+  incrementDynamicTotalLogs(1);
   io.emit('new_log', logEntry);
 
   // Ghi nhận số liệu thông lượng và độ trễ pipeline
