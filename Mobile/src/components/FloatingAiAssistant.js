@@ -10,8 +10,10 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
-import { Terminal, X, Send, Activity } from 'lucide-react-native';
+import { Terminal, X, Send, Activity, Image as ImageIcon } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
@@ -32,13 +34,38 @@ export default function FloatingAiAssistant() {
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  const pickImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        quality: 0.7,
+        base64: true,
+      });
+
+      if (!result.canceled && result.assets && result.assets[0]) {
+        const asset = result.assets[0];
+        setSelectedImage({
+          uri: asset.uri,
+          base64: asset.base64 ? `data:image/jpeg;base64,${asset.base64}` : null,
+        });
+      }
+    } catch (err) {
+      console.warn('Lỗi chọn ảnh:', err);
+    }
+  };
 
   const handleSend = async () => {
-    if (!input.trim() || loading) return;
-    const userQuery = input.trim();
+    if ((!input.trim() && !selectedImage) || loading) return;
+    const userQuery = input.trim() || 'Hãy phân tích hình ảnh lỗi hệ thống này giúp tôi.';
+    const imgBase64 = selectedImage?.base64 || null;
+    const imgUri = selectedImage?.uri || null;
+    setSelectedImage(null);
     setInput('');
 
-    const newMsgs = [...messages, { id: Date.now().toString(), role: 'user', text: userQuery }];
+    const newMsgs = [...messages, { id: Date.now().toString(), role: 'user', text: userQuery, imageUri: imgUri }];
     setMessages(newMsgs);
     setLoading(true);
 
@@ -47,6 +74,7 @@ export default function FloatingAiAssistant() {
         method: 'POST',
         body: JSON.stringify({
           messages: [{ role: 'user', content: userQuery }],
+          image: imgBase64,
           systemContext: `Người dùng: ${currentUser?.displayName || 'Ẩn danh'} (${currentUser?.role || 'viewer'})`,
         }),
       });
@@ -137,6 +165,9 @@ export default function FloatingAiAssistant() {
                       : [styles.assistantBubble, { backgroundColor: colors.surfaceVariant, borderColor: colors.borderSubtle }],
                   ]}
                 >
+                  {m.imageUri && (
+                    <Image source={{ uri: m.imageUri }} style={styles.msgImage} resizeMode="cover" />
+                  )}
                   <Text
                     style={[
                       styles.messageText,
@@ -157,8 +188,31 @@ export default function FloatingAiAssistant() {
               )}
             </ScrollView>
 
+            {/* Image Preview Row if selected */}
+            {selectedImage && (
+              <View style={[styles.imagePreviewRow, { backgroundColor: colors.surfaceVariant, borderTopColor: colors.borderSubtle }]}>
+                <Image source={{ uri: selectedImage.uri }} style={styles.imageThumb} />
+                <Text style={[styles.imagePreviewText, { color: colors.textSecondary }]}>Đã đính kèm ảnh để AI phân tích</Text>
+                <TouchableOpacity onPress={() => setSelectedImage(null)} style={styles.removeImageBtn}>
+                  <X size={15} color={colors.textMuted} />
+                </TouchableOpacity>
+              </View>
+            )}
+
             {/* Input Bar */}
             <View style={[styles.inputRow, { borderTopColor: colors.borderSubtle, backgroundColor: colors.surface }]}>
+              <TouchableOpacity
+                onPress={pickImage}
+                style={[
+                  styles.pickImageBtn,
+                  {
+                    backgroundColor: selectedImage ? 'rgba(6, 182, 212, 0.15)' : colors.surfaceVariant,
+                    borderColor: selectedImage ? colors.primary : colors.border,
+                  },
+                ]}
+              >
+                <ImageIcon size={18} color={selectedImage ? colors.primary : colors.textMuted} />
+              </TouchableOpacity>
               <TextInput
                 style={[
                   styles.input,
@@ -168,7 +222,7 @@ export default function FloatingAiAssistant() {
                     color: colors.text,
                   },
                 ]}
-                placeholder="Hỏi AI về log, sự cố, chỉ số KPI..."
+                placeholder={selectedImage ? "Nhập câu hỏi kèm ảnh..." : "Hỏi AI về log, sự cố, chỉ số KPI..."}
                 placeholderTextColor={colors.textMuted}
                 value={input}
                 onChangeText={setInput}
@@ -177,15 +231,15 @@ export default function FloatingAiAssistant() {
               />
               <TouchableOpacity
                 onPress={handleSend}
-                disabled={!input.trim() || loading}
+                disabled={(!input.trim() && !selectedImage) || loading}
                 style={[
                   styles.sendBtn,
                   {
-                    backgroundColor: input.trim() && !loading ? colors.primary : colors.surfaceVariant,
+                    backgroundColor: (input.trim() || selectedImage) && !loading ? colors.primary : colors.surfaceVariant,
                   },
                 ]}
               >
-                <Send size={18} color={input.trim() && !loading ? '#ffffff' : colors.textMuted} />
+                <Send size={18} color={(input.trim() || selectedImage) && !loading ? '#ffffff' : colors.textMuted} />
               </TouchableOpacity>
             </View>
           </View>
@@ -317,6 +371,40 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  pickImageBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  msgImage: {
+    width: '100%',
+    height: 140,
+    borderRadius: 10,
+    marginBottom: 8,
+  },
+  imagePreviewRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    gap: 10,
+  },
+  imageThumb: {
+    width: 34,
+    height: 34,
+    borderRadius: 6,
+  },
+  imagePreviewText: {
+    fontSize: 12,
+    flex: 1,
+  },
+  removeImageBtn: {
+    padding: 4,
   },
 });
 

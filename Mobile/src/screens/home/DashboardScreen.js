@@ -21,6 +21,7 @@ import {
   Clock,
   ShieldCheck,
   User,
+  MessageSquare,
 } from 'lucide-react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
@@ -28,6 +29,7 @@ import { useToast } from '../../context/ToastContext';
 import { apiClient } from '../../api/client';
 import KpiCard from '../../components/KpiCard';
 import PipelineHealthCard from '../../components/PipelineHealthCard';
+import SreMessengerModal from '../../components/SreMessengerModal';
 
 export default function DashboardScreen({ navigation }) {
   const insets = useSafeAreaInsets();
@@ -43,6 +45,7 @@ export default function DashboardScreen({ navigation }) {
   const [recentLogs, setRecentLogs] = useState([]);
   const [healthModalOpen, setHealthModalOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState(null);
+  const [messengerOpen, setMessengerOpen] = useState(false);
 
   const fetchDashboardData = useCallback(async (isUserAction = false) => {
     try {
@@ -143,13 +146,22 @@ export default function DashboardScreen({ navigation }) {
             </Text>
           </View>
         </View>
-        <TouchableOpacity
-          style={[styles.reloadBtn, { backgroundColor: colors.surfaceVariant, borderColor: colors.borderSubtle }]}
-          onPress={() => fetchDashboardData(true)}
-          activeOpacity={0.7}
-        >
-          <RefreshCw size={15} color={colors.textSecondary} />
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <TouchableOpacity
+            style={[styles.reloadBtn, { backgroundColor: 'rgba(6, 182, 212, 0.15)', borderColor: 'rgba(6, 182, 212, 0.4)' }]}
+            onPress={() => setMessengerOpen(true)}
+            activeOpacity={0.7}
+          >
+            <MessageSquare size={16} color="#06b6d4" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.reloadBtn, { backgroundColor: colors.surfaceVariant, borderColor: colors.borderSubtle }]}
+            onPress={() => fetchDashboardData(true)}
+            activeOpacity={0.7}
+          >
+            <RefreshCw size={15} color={colors.textSecondary} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView
@@ -399,6 +411,12 @@ export default function DashboardScreen({ navigation }) {
           </View>
         </View>
       </Modal>
+
+      <SreMessengerModal
+        visible={messengerOpen}
+        onClose={() => setMessengerOpen(false)}
+        onInspectLog={(log) => setSelectedLog(log)}
+      />
     </View>
   );
 }

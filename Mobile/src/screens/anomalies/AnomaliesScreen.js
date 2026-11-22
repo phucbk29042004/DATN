@@ -78,6 +78,7 @@ export default function AnomaliesScreen({ navigation }) {
   const [analyticsLevel, setAnalyticsLevel] = useState('');
   const [analyticsData, setAnalyticsData] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [selectedHeatmapCell, setSelectedHeatmapCell] = useState(null);
 
   // ── Fetch Anomalies List ──
   const fetchAnomalies = useCallback(async () => {
@@ -694,11 +695,17 @@ export default function AnomaliesScreen({ navigation }) {
                                 else bg = 'rgba(220,38,38,0.85)';
                               }
                               return (
-                                <View key={h} style={[styles.heatmapCellCompact, { backgroundColor: bg }]}>
+                                <TouchableOpacity
+                                  key={h}
+                                  style={[styles.heatmapCellCompact, { backgroundColor: bg }]}
+                                  onPress={() => setSelectedHeatmapCell({ date, hour: h, count })}
+                                  disabled={count === 0}
+                                  activeOpacity={0.7}
+                                >
                                   <Text style={{ fontSize: 8, fontWeight: '700', color: count > 0 ? '#ffffff' : colors.textMuted }}>
                                     {count > 0 ? count : ''}
                                   </Text>
-                                </View>
+                                </TouchableOpacity>
                               );
                             })}
                           </View>
@@ -788,6 +795,80 @@ export default function AnomaliesScreen({ navigation }) {
               ) : (
                 <Text style={styles.btnSubmitNoteText}>Lưu Ghi Chú</Text>
               )}
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal Chi Tiết Khung Giờ Heatmap */}
+      <Modal visible={!!selectedHeatmapCell} transparent animationType="fade" onRequestClose={() => setSelectedHeatmapCell(null)}>
+        <View style={styles.modalBackdrop}>
+          <View style={[styles.modalCard, { backgroundColor: colors.surface, borderColor: colors.border, maxHeight: '80%' }]}>
+            <View style={styles.modalHeaderRow}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <Clock size={16} color={colors.primary} />
+                <Text style={[styles.modalTitle, { color: colors.text }]}>
+                  {selectedHeatmapCell ? `${selectedHeatmapCell.date} (${String(selectedHeatmapCell.hour).padStart(2, '0')}:00 - ${String(selectedHeatmapCell.hour).padStart(2, '0')}:59)` : ''}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setSelectedHeatmapCell(null)} style={{ padding: 4 }}>
+                <X size={18} color={colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={{ paddingVertical: 10 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+                <View style={[styles.roleBadgeSmall, { backgroundColor: 'rgba(239,68,68,0.15)' }]}>
+                  <Text style={{ color: '#ef4444', fontWeight: '800', fontSize: 11 }}>
+                    {selectedHeatmapCell?.count || 0} Sự Cố / Lỗi
+                  </Text>
+                </View>
+                <Text style={{ fontSize: 11, color: colors.textMuted }}>ghi nhận trong khung giờ này</Text>
+              </View>
+
+              <ScrollView style={{ maxHeight: 300 }}>
+                {(() => {
+                  if (!selectedHeatmapCell) return null;
+                  const matchingAnomalies = anomalies.filter(a => {
+                    if (!a.timestamp) return false;
+                    const d = new Date(a.timestamp);
+                    const pad = n => String(n).padStart(2, '0');
+                    const dateStr = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+                    return dateStr === selectedHeatmapCell.date && d.getHours() === selectedHeatmapCell.hour;
+                  });
+
+                  if (matchingAnomalies.length === 0) {
+                    return (
+                      <View style={{ padding: 16, alignItems: 'center' }}>
+                        <Text style={{ fontSize: 12, color: colors.textMuted, textAlign: 'center' }}>
+                          Cụm OpenSearch ghi nhận {selectedHeatmapCell.count} lỗi trong khung giờ này.
+                        </Text>
+                      </View>
+                    );
+                  }
+
+                  return matchingAnomalies.map((anom, idx) => (
+                    <View key={idx} style={{ padding: 10, borderRadius: 8, backgroundColor: colors.surfaceVariant, marginBottom: 8, borderWidth: 1, borderColor: colors.borderSubtle }}>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                        <Text style={{ fontSize: 11, fontWeight: '700', color: colors.primary }}>{anom.service || 'Hệ thống'}</Text>
+                        <View style={{ paddingHorizontal: 5, paddingVertical: 1, borderRadius: 4, backgroundColor: '#ef4444' }}>
+                          <Text style={{ fontSize: 9, fontWeight: '800', color: '#fff' }}>{anom.level || 'ERROR'}</Text>
+                        </View>
+                      </View>
+                      <Text style={{ fontSize: 11, color: colors.text, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' }} numberOfLines={2}>
+                        {anom.message || anom.template}
+                      </Text>
+                    </View>
+                  ));
+                })()}
+              </ScrollView>
+            </View>
+
+            <TouchableOpacity
+              style={[styles.btnSubmitNote, { backgroundColor: colors.primary, marginTop: 10 }]}
+              onPress={() => setSelectedHeatmapCell(null)}
+            >
+              <Text style={styles.btnSubmitNoteText}>Đóng</Text>
             </TouchableOpacity>
           </View>
         </View>

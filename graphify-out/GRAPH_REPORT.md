@@ -1,17 +1,17 @@
 # Graph Report - DATN  (2026-11-22)
 
 ## Corpus Check
-- 96 files · ~98,473 words
+- 97 files · ~100,529 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 12 file(s) not represented in the graph (top: (none) 2, .example 2, .log 2)
 
 ## Summary
-- 716 nodes · 1356 edges · 30 communities (28 shown, 2 thin omitted)
+- 721 nodes · 1398 edges · 30 communities (28 shown, 2 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 17 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `dc479f79`
+- Built from commit: `4845a6c6`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -47,28 +47,28 @@
 - parser/index.js
 
 ## God Nodes (most connected - your core abstractions)
-1. `useTheme()` - 35 edges
-2. `apiClient()` - 21 edges
-3. `Nhật Ký Cập Nhật (Chronological Log)` - 21 edges
-4. `App()` - 20 edges
-5. `react-native` - 20 edges
-6. `useAuth()` - 17 edges
-7. `lucide-react-native` - 16 edges
+1. `useTheme()` - 37 edges
+2. `apiClient()` - 23 edges
+3. `react-native` - 21 edges
+4. `Nhật Ký Cập Nhật (Chronological Log)` - 21 edges
+5. `App()` - 20 edges
+6. `useAuth()` - 19 edges
+7. `lucide-react-native` - 17 edges
 8. `scripts` - 16 edges
-9. `react-native-safe-area-context` - 15 edges
-10. `lucide-react` - 14 edges
+9. `react-native-safe-area-context` - 16 edges
+10. `useToast()` - 15 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `[22/11/2026 12:28] — Đồng Bộ Kích Thước Nút Select & Sửa Lỗi Z-Index Dropdown Đè Lên Card` --references--> `CustomSelect()`  [INFERRED]
   tiendo.md → FE/src/components/CustomSelect.jsx
 - `[20/11/2026 19:58] — Kích Hoạt Luồng Stream Log Realtime Thông Minh & Bộ Đếm KPI Tự Tăng` --references--> `startCloudLogStreamer()`  [INFERRED]
   tiendo.md → BE/search-api/index.js
-- `runFullEvaluation()` --calls--> `loadBglDataset()`  [EXTRACTED]
-  BE/benchmark/full_evaluation.js → BE/datasets/bgl/bglLoader.js
-- `main()` --calls--> `vectorizeDataset()`  [EXTRACTED]
-  BE/datasets/bgl/generate_vectors.js → BE/anomaly-engine/template-mining/vectorizer.js
-- `main()` --calls--> `vectorizeDataset()`  [EXTRACTED]
-  BE/datasets/hdfs/generate_vectors.js → BE/anomaly-engine/template-mining/vectorizer.js
+- `flushBuffer()` --calls--> `runAnomalyDetection()`  [EXTRACTED]
+  BE/parser/index.js → BE/anomaly-engine/index.js
+- `exportVectorsForML()` --calls--> `vectorizeDataset()`  [EXTRACTED]
+  BE/anomaly-engine/index.js → BE/anomaly-engine/template-mining/vectorizer.js
+- `logParserWorker` --calls--> `checkLogLineSingle()`  [EXTRACTED]
+  BE/parser/index.js → BE/anomaly-engine/rule-based/detector.js
 
 ## Import Cycles
 - None detected.
@@ -77,7 +77,7 @@
 
 ### Community 0 - "useTheme"
 Cohesion: 0.07
-Nodes (72): App(), MainApp(), apiClient(), getAuthToken(), setAuthToken(), CURRENT_LAN_IP, DEFAULT_API_BASE, DEFAULT_COLLECTOR_BASE (+64 more)
+Nodes (74): App(), MainApp(), apiClient(), getAuthToken(), setAuthToken(), CURRENT_LAN_IP, DEFAULT_API_BASE, DEFAULT_COLLECTOR_BASE (+66 more)
 
 ### Community 1 - "scripts"
 Cohesion: 0.12
@@ -93,11 +93,11 @@ Nodes (12): health(), lifespan(), _load_models(), predict(), PredictRequest, Pre
 
 ### Community 4 - "App.jsx"
 Cohesion: 0.08
-Nodes (33): App(), formatVnDateTime(), KpiSkeleton(), LEVEL_COLORS, Skeleton(), ToastContainer(), toLocalDatetimeInputString(), useToast() (+25 more)
+Nodes (34): App(), formatVnDateTime(), KpiSkeleton(), LEVEL_COLORS, Skeleton(), ToastContainer(), toLocalDatetimeInputString(), useToast() (+26 more)
 
 ### Community 5 - "Mobile/package.json"
 Cohesion: 0.07
-Nodes (36): dependencies, expo@^58.0.25, expo-status-bar@~58.0.5, lucide-react-native@^1.73.0, react@19.3.0, react-native@0.88.1, @react-native-async-storage/async-storage@2.2.0, react-native-safe-area-context@~5.11.1 (+28 more)
+Nodes (38): dependencies, expo@^58.0.25, expo-image-picker@^58.0.10, expo-status-bar@~58.0.5, lucide-react-native@^1.73.0, react@19.3.0, react-native@0.88.1, @react-native-async-storage/async-storage@2.2.0 (+30 more)
 
 ### Community 6 - "FE/package.json"
 Cohesion: 0.09
@@ -128,8 +128,8 @@ Cohesion: 0.06
 Nodes (40): buildBglTimeWindows(), loadBglDataset(), parseBglLogFile(), __dirname, LOG_FILE, main(), OUT_FILE, bglPath (+32 more)
 
 ### Community 13 - "Nhật Ký Cập Nhật (Chronological Log)"
-Cohesion: 0.09
-Nodes (21): [18/11/2026 11:15] — Triển Khai Toàn Diện Bộ Kịch Bản Benchmark Thông Lượng & Đánh Giá Định Lượng Mô Hình (F1-Score / HDFS & BGL), [18/11/2026 12:28] — Xây Dựng Đồ Thị Tri Thức Codebase (Graphify) & Trích Xuất Dữ Liệu graph.json, [18/11/2026 12:42] — Khắc Phục Lỗi Hiển Thị Trắng Màn Hình & Hoàn Thiện Giao Diện Trực Quan Graphify (graph.html), [19/11/2026 17:20] — Chuẩn Hóa Bảng Màu Light Mode, Tái Thiết Kế Login Mobile & Dọn Dẹp Toàn Bộ Icon AI / Emoji Console Logs, [19/11/2026 18:08] — Thiết Kế Lại 3 Nút Trạng Thái, Khắc Phục Lỗi Nhấp Nháy Nút Truy Vấn & Bổ Sung Bottom Nav Mobile Trên Web, [19/11/2026 18:22] — Sửa Lỗi Hiển Thị Thanh Điều Hướng Đáy & Tinh Chỉnh Cỡ Chữ Sidebar Mobile Vừa Vặn, [19/11/2026 19:30] — Tích Hợp SQLite Database 7 Bảng Chuẩn Doanh Nghiệp & Cấu Hình Triển Khai Vercel (FE) + Render (BE), [19/11/2026 20:05] — Khắc Phục Lỗi WebSocket & Login 405 Vercel, Sẵn Sàng Deploy Backend Lên Render (+13 more)
+Cohesion: 0.10
+Nodes (20): [18/11/2026 12:28] — Xây Dựng Đồ Thị Tri Thức Codebase (Graphify) & Trích Xuất Dữ Liệu graph.json, [18/11/2026 12:42] — Khắc Phục Lỗi Hiển Thị Trắng Màn Hình & Hoàn Thiện Giao Diện Trực Quan Graphify (graph.html), [19/11/2026 17:20] — Chuẩn Hóa Bảng Màu Light Mode, Tái Thiết Kế Login Mobile & Dọn Dẹp Toàn Bộ Icon AI / Emoji Console Logs, [19/11/2026 18:08] — Thiết Kế Lại 3 Nút Trạng Thái, Khắc Phục Lỗi Nhấp Nháy Nút Truy Vấn & Bổ Sung Bottom Nav Mobile Trên Web, [19/11/2026 18:22] — Sửa Lỗi Hiển Thị Thanh Điều Hướng Đáy & Tinh Chỉnh Cỡ Chữ Sidebar Mobile Vừa Vặn, [19/11/2026 19:30] — Tích Hợp SQLite Database 7 Bảng Chuẩn Doanh Nghiệp & Cấu Hình Triển Khai Vercel (FE) + Render (BE), [19/11/2026 20:05] — Khắc Phục Lỗi WebSocket & Login 405 Vercel, Sẵn Sàng Deploy Backend Lên Render, [20/11/2026 19:10] — Cố Định URL Backend Render (datn-juwa) & Tinh Gọn Modal Login (+12 more)
 
 ### Community 14 - "queue/config.js"
 Cohesion: 0.16
@@ -189,20 +189,20 @@ Nodes (13): dotenv@^16.4.5, addToBuffer(), flushBuffer(), logBuffer, logParserWo
 
 ## Knowledge Gaps
 - **1 isolated node(s):** `RFC-3164`
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 301 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 302 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **2 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Nhật Ký Cập Nhật (Chronological Log)` connect `Nhật Ký Cập Nhật (Chronological Log)` to `search-api/index.js`?**
-  _High betweenness centrality (0.289) - this node is a cross-community bridge._
+- **Why does `Nhật Ký Cập Nhật (Chronological Log)` connect `Nhật Ký Cập Nhật (Chronological Log)` to `search-api/index.js`, `App.jsx`?**
+  _High betweenness centrality (0.291) - this node is a cross-community bridge._
 - **What connects `RFC-3164` to the rest of the system?**
   _1 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `useTheme` be split into smaller, more focused modules?**
-  _Cohesion score 0.0686456400742115 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.0689130020940415 - nodes in this community are weakly interconnected._
 - **Why does `[20/11/2026 19:58] — Kích Hoạt Luồng Stream Log Realtime Thông Minh & Bộ Đếm KPI Tự Tăng` connect `search-api/index.js` to `Nhật Ký Cập Nhật (Chronological Log)`?**
-  _High betweenness centrality (0.271) - this node is a cross-community bridge._
+  _High betweenness centrality (0.273) - this node is a cross-community bridge._
 - **Should `scripts` be split into smaller, more focused modules?**
   _Cohesion score 0.125 - nodes in this community are weakly interconnected._
 - **Should `full_evaluation.js` be split into smaller, more focused modules?**

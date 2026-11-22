@@ -324,9 +324,9 @@
     "semantic_hash": ""
   },
   "Mobile/package.json": {
-    "mtime": 1794826134.4310086,
-    "seen": 1795084038.3623981,
-    "ast_hash": "35a3767ec6c3d8a7284073580ed1d03f",
+    "mtime": 1795338902.8710554,
+    "seen": 1795339328.402208,
+    "ast_hash": "83c5c5695fb211e469820c05066e3808",
     "semantic_hash": ""
   },
   "Mobile/src/api/client.js": {
@@ -354,9 +354,9 @@
     "semantic_hash": ""
   },
   "Mobile/src/components/FloatingAiAssistant.js": {
-    "mtime": 1795083992.5968876,
-    "seen": 1795084038.3624105,
-    "ast_hash": "b88326c1fdb933abdc1166f1368394f4",
+    "mtime": 1795339257.24234,
+    "seen": 1795339328.4022157,
+    "ast_hash": "269c0212f2b9268341911dec59178fc9",
     "semantic_hash": ""
   },
   "Mobile/src/components/KpiCard.js": {
@@ -414,15 +414,15 @@
     "semantic_hash": ""
   },
   "Mobile/src/screens/anomalies/AnomaliesScreen.js": {
-    "mtime": 1794893183.4437153,
-    "seen": 1795084038.362438,
-    "ast_hash": "df77b944be80dba59da471eba2d08d14",
+    "mtime": 1795339156.2760673,
+    "seen": 1795339328.402233,
+    "ast_hash": "2f364a398a2bb99699da1149cd28ff21",
     "semantic_hash": ""
   },
   "Mobile/src/screens/anomalies/IncidentDetailScreen.js": {
-    "mtime": 1794893183.6724422,
-    "seen": 1795084038.3624465,
-    "ast_hash": "b4e58c36c6223e176e15af01862aa983",
+    "mtime": 1795339187.3766937,
+    "seen": 1795339328.402234,
+    "ast_hash": "8d5568b88582b50d7e7cf3334d4f058d",
     "semantic_hash": ""
   },
   "Mobile/src/screens/auth/LoginScreen.js": {
@@ -432,9 +432,9 @@
     "semantic_hash": ""
   },
   "Mobile/src/screens/home/DashboardScreen.js": {
-    "mtime": 1794829848.8066282,
-    "seen": 1795084038.3624535,
-    "ast_hash": "a1d97a9e0a6f00efdf235ec32319125d",
+    "mtime": 1795339085.2447374,
+    "seen": 1795339328.4022372,
+    "ast_hash": "1f9bc516937491c25503a96c25f1b84d",
     "semantic_hash": ""
   },
   "Mobile/src/screens/profile/AdminSettingsScreen.js": {
@@ -534,9 +534,9 @@
     "semantic_hash": ""
   },
   "tiendo.md": {
-    "mtime": 1795325372.2707934,
-    "seen": 1795325379.4850698,
-    "ast_hash": "88b7db2d69cb1660e7b445128a09e4d8",
+    "mtime": 1795339318.9398756,
+    "seen": 1795339328.4022627,
+    "ast_hash": "56b219dd3175a09eb414b42428d1223b",
     "semantic_hash": ""
   },
   "BE/database/sqlite.js": {
@@ -581,6 +581,12 @@
     "ast_hash": "76ebc423d0d0fefe614109174372f712",
     "semantic_hash": ""
   },
+  "Mobile/src/components/SreMessengerModal.js": {
+    "mtime": 1795338952.2006567,
+    "seen": 1795339328.402221,
+    "ast_hash": "28b593484718528bb30151318a5f2d87",
+    "semantic_hash": ""
+  },
   "BE/package-lock.json": {
     "mtime": 1795090883.446723,
     "seen": 1795091687.6649907,
@@ -594,9 +600,9 @@
     "semantic_hash": ""
   },
   "Mobile/package-lock.json": {
-    "mtime": 1794826415.404981,
-    "seen": 1795084038.3625178,
-    "ast_hash": "8c4caf8509b229fc3637e9a79e56b59d",
+    "mtime": 1795338903.0481899,
+    "seen": 1795339328.4022672,
+    "ast_hash": "ae24b6a41afde28558d8d75fc2e3ec84",
     "semantic_hash": ""
   }
 }

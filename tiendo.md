@@ -2,6 +2,15 @@
 
 ## Nhật Ký Cập Nhật (Chronological Log)
 
+### [22/11/2026 16:21] — Đồng Bộ Toàn Bộ 3 Tính Năng Lên Ứng Dụng Di Động: SRE Messenger, Heatmap 24h & AI Vision
+- **Loại**: Đồng bộ tính năng đa nền tảng (Mobile App Feature Parity & Multimodal Upgrade)
+- **File**: `Mobile/src/components/SreMessengerModal.js`, `Mobile/src/screens/home/DashboardScreen.js`, `Mobile/src/screens/anomalies/IncidentDetailScreen.js`, `Mobile/src/screens/anomalies/AnomaliesScreen.js`, `Mobile/src/components/FloatingAiAssistant.js`, `tiendo.md`
+- **Mô tả**:
+  1. Xây dựng Modal SRE Messenger thời gian thực qua Socket.IO trên Mobile, hỗ trợ đính kèm thẻ log sự cố, tích hợp nút mở trên Header Dashboard và màn hình Chi Tiết Sự Cố.
+  2. Bổ sung tính năng chạm vào từng ô ma trận Heatmap 24h trên Mobile để mở Modal xem danh sách log lỗi trong khung giờ tương ứng.
+  3. Cài đặt `expo-image-picker`, tích hợp tính năng quét và phân tích ảnh lỗi (Multimodal Vision) vào Floating AI Assistant trên Mobile.
+- **Kết quả**: Babel biên dịch 100% thành công trên 5 file (0 lỗi), ứng dụng di động đạt tương thích tính năng 100% với Web Dashboard.
+
 ### [22/11/2026 12:28] — Đồng Bộ Kích Thước Nút Select & Sửa Lỗi Z-Index Dropdown Đè Lên Card
 - **Loại**: Tối ưu giao diện & Sửa lỗi hiển thị UI (UI Consistency & Stacking Context Fix)
 - **File**: `FE/src/components/CustomSelect.jsx`, `FE/src/App.jsx`, `FE/src/custom_styles.css`, `tiendo.md`
@@ -175,13 +184,3 @@
   1. Trích xuất thành công toàn bộ đồ thị tri thức mã nguồn: 510 nodes, 1092 links, 17 communities.
   2. Xuất báo cáo cấu trúc `GRAPH_REPORT.md` phân tích god nodes và các liên kết bất ngờ.
 - **Kết quả**: Graphify CLI (`query`, `path`, `explain`) và cấu trúc dữ liệu đồ thị hoạt động chính xác 100%.
-
-### [18/11/2026 11:15] — Triển Khai Toàn Diện Bộ Kịch Bản Benchmark Thông Lượng & Đánh Giá Định Lượng Mô Hình (F1-Score / HDFS & BGL)
-- **Loại**: Thực nghiệm & Đánh giá định lượng (Benchmarking & Quantitative Evaluation)
-- **File**: `BE/benchmark/full_evaluation.js`, `BE/benchmark/evaluation_summary.json`, `BE/benchmark/REPORT_BENCHMARK_EVALUATION.md`, `BE/anomaly-engine/template-mining/vectorizer.js`, `BE/anomaly-engine/ml-models/train_and_evaluate.py`, `BE/package.json`, `tiendo.md`
-- **Mô tả**:
-  1. Khắc phục lỗi đọc thuộc tính `content` trong `vectorizer.js` và xử lý time window milliseconds trong `bglLoader.js`, trích xuất thành công 8 chiều Drain template vector cho cả HDFS và BGL.
-  2. Bổ sung cơ chế ghi đệm an toàn Sandbox (Fallback Temp) cho `generate_vectors.js` và `train_and_evaluate.py`.
-  3. Xây dựng kịch bản benchmark toàn diện `full_evaluation.js` (`npm run benchmark:full`): đo đạc thông lượng xử lý (150k - 930k logs/s, p99 < 0.03ms) và đánh giá độ chính xác (Precision, Recall, F1, Accuracy) đối chiếu 4 phương pháp trên 2 tập dữ liệu chuẩn Loghub.
-  4. Xuất báo cáo tổng hợp chuẩn khoa học `REPORT_BENCHMARK_EVALUATION.md` và `evaluation_summary.json` phục vụ trực tiếp cho Chương 4 của Báo cáo Đồ án tốt nghiệp.
-- **Kết quả**: Benchmark và đánh giá định lượng chạy thành công 100%, F1-Score đạt 1.0000 trên cả HDFS và BGL với mô hình Logistic Regression + Drain.

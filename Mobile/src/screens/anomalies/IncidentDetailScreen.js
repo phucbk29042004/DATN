@@ -25,11 +25,13 @@ import {
   Check,
   Wrench,
   X,
+  MessageSquare,
 } from 'lucide-react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { apiClient } from '../../api/client';
+import SreMessengerModal from '../../components/SreMessengerModal';
 
 const ROOT_CAUSES = [
   'Lỗi Code / Ứng Dụng (Application Bug)',
@@ -74,6 +76,7 @@ export default function IncidentDetailScreen({ route, navigation }) {
   const [selectedActionTaken, setSelectedActionTaken] = useState(ACTIONS_TAKEN[0]);
   const [resolutionNote, setResolutionNote] = useState('');
   const [updatingStatus, setUpdatingStatus] = useState(false);
+  const [messengerOpen, setMessengerOpen] = useState(false);
 
   if (!anomaly || !anomaly.timestamp) {
     return (
@@ -304,6 +307,16 @@ export default function IncidentDetailScreen({ route, navigation }) {
           </View>
         )}
 
+        {/* Trao đổi trong SRE Chat */}
+        <TouchableOpacity
+          style={[styles.btnAction, { backgroundColor: 'rgba(6, 182, 212, 0.12)', borderColor: 'rgba(6, 182, 212, 0.4)', borderWidth: 1, marginTop: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }]}
+          onPress={() => setMessengerOpen(true)}
+          activeOpacity={0.8}
+        >
+          <MessageSquare size={16} color="#06b6d4" />
+          <Text style={[styles.btnActionText, { color: '#06b6d4', fontWeight: '700' }]}>Trao Đổi Trong SRE Chat</Text>
+        </TouchableOpacity>
+
         {/* Message Log */}
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border, marginTop: 10 }]}>
           <Text style={[styles.cardTitle, { color: colors.text }]}>Thông Điệp Log Gốc</Text>
@@ -474,6 +487,12 @@ export default function IncidentDetailScreen({ route, navigation }) {
           </View>
         </View>
       </Modal>
+
+      <SreMessengerModal
+        visible={messengerOpen}
+        onClose={() => setMessengerOpen(false)}
+        taggedLog={anomaly}
+      />
     </View>
   );
 }
