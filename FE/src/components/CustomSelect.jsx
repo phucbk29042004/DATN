@@ -88,7 +88,12 @@ export default function CustomSelect({
     <div
       ref={containerRef}
       className={`custom-select-container ${className}`}
-      style={{ position: 'relative', width: style.width || 'auto', ...style }}
+      style={{
+        position: 'relative',
+        zIndex: isOpen ? 100 : 1,
+        width: style.width || 'auto',
+        ...style
+      }}
       id={id}
     >
       <button
@@ -104,16 +109,18 @@ export default function CustomSelect({
           justifyContent: 'space-between',
           gap: '0.5rem',
           width: '100%',
-          padding: '0.45rem 0.75rem',
-          fontSize: '0.84rem',
+          boxSizing: 'border-box',
+          minHeight: '40px',
+          padding: '0.55rem 0.85rem',
+          fontSize: '0.86rem',
           fontWeight: 500,
-          borderRadius: '10px',
+          borderRadius: '12px',
           border: isOpen ? '1px solid var(--accent-primary)' : '1px solid var(--border-color)',
-          background: 'var(--bg-secondary)',
+          background: 'var(--bg-input, var(--bg-card))',
           color: 'var(--text-primary)',
           cursor: disabled ? 'not-allowed' : 'pointer',
           outline: 'none',
-          transition: 'all 0.2s ease',
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
           boxShadow: isOpen ? '0 0 0 3px rgba(6, 182, 212, 0.15)' : 'none',
           opacity: disabled ? 0.6 : 1
         }}

@@ -1790,7 +1790,6 @@ export default function App() {
 
                   <CustomSelect
                     id="level-filter"
-                    className="select-filter"
                     value={levelFilter}
                     onChange={e => setLevelFilter(e.target.value)}
                     aria-label="Lọc theo mức độ"
@@ -2136,7 +2135,7 @@ export default function App() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
 
                 {/* HÀNG 1: Bộ lọc */}
-                <div className="card" style={{ padding: '1rem 1.25rem' }}>
+                <div className="card" style={{ padding: '1rem 1.25rem', position: 'relative', zIndex: 20 }}>
                   <div className="analytics-filters">
                     <div className="analytics-time-pills">
                       {['1h', '6h', '24h', '7d'].map(r => (
@@ -2624,7 +2623,7 @@ export default function App() {
           {/* ── TAB 3: SEARCH ──────────────────────────────────────────────── */}
           {activeTab === 'search' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div className="card search-filter-card" style={{ padding: '1rem 1.25rem' }}>
+              <div className="card search-filter-card" style={{ padding: '1rem 1.25rem', position: 'relative', zIndex: 20 }}>
                 <h3 style={{ marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1rem' }}>
                   <Search size={18} color="var(--accent-primary)" /> {t.searchFilterTitle}
                 </h3>
@@ -2635,7 +2634,13 @@ export default function App() {
                       id="search-query"
                       type="text"
                       className="search-input"
-                      style={{ padding: '0.45rem 0.75rem', fontSize: '0.85rem' }}
+                      style={{
+                        boxSizing: 'border-box',
+                        minHeight: '40px',
+                        padding: '0.55rem 0.85rem',
+                        borderRadius: '12px',
+                        fontSize: '0.86rem'
+                      }}
                       placeholder="error, timeout, connection refused..."
                       value={searchQuery}
                       onChange={e => setSearchQuery(e.target.value)}
@@ -2646,7 +2651,6 @@ export default function App() {
                     <label htmlFor="search-level" className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.2rem' }}>Mức độ</label>
                     <CustomSelect
                       id="search-level"
-                      className="select-filter"
                       style={{ width: '100%' }}
                       value={searchLevel}
                       onChange={e => setSearchLevel(e.target.value)}

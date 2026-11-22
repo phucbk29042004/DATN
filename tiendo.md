@@ -2,6 +2,15 @@
 
 ## Nhật Ký Cập Nhật (Chronological Log)
 
+### [22/11/2026 12:28] — Đồng Bộ Kích Thước Nút Select & Sửa Lỗi Z-Index Dropdown Đè Lên Card
+- **Loại**: Tối ưu giao diện & Sửa lỗi hiển thị UI (UI Consistency & Stacking Context Fix)
+- **File**: `FE/src/components/CustomSelect.jsx`, `FE/src/App.jsx`, `FE/src/custom_styles.css`, `tiendo.md`
+- **Mô tả**:
+  1. Gỡ bỏ `select-filter` gây đệm kép, chuẩn hóa `min-height: 40px`, `border-radius: 12px`, padding đồng bộ 100% giữa ô tìm kiếm, CustomSelect và DateTimePicker.
+  2. Bổ sung `zIndex: 100` khi `isOpen` cho `CustomSelect` và `position: relative, zIndex: 20` cho card bộ lọc, triệt tiêu lỗi dropdown menu bị che lấp bởi các thẻ KPI.
+  3. Tinh chỉnh `min-height: auto` cho khung đăng nhập, loại bỏ khoảng trắng thừa.
+- **Kết quả**: Vite build thành công 100% (5.76s, 0 lỗi), giao diện hiển thị đồng nhất và dropdown nổi chuẩn xác.
+
 ### [22/11/2026 12:07] — Đồng Bộ Toàn Diện Tài Liệu Hệ Thống: kientruchethong.md, nghiepvu.md & README.md
 - **Loại**: Cập nhật tài liệu kiến trúc & nghiệp vụ (Documentation / System & Business Sync)
 - **File**: `kientruchethong.md`, `nghiepvu.md`, `README.md`, `tiendo.md`
@@ -176,13 +185,3 @@
   3. Xây dựng kịch bản benchmark toàn diện `full_evaluation.js` (`npm run benchmark:full`): đo đạc thông lượng xử lý (150k - 930k logs/s, p99 < 0.03ms) và đánh giá độ chính xác (Precision, Recall, F1, Accuracy) đối chiếu 4 phương pháp trên 2 tập dữ liệu chuẩn Loghub.
   4. Xuất báo cáo tổng hợp chuẩn khoa học `REPORT_BENCHMARK_EVALUATION.md` và `evaluation_summary.json` phục vụ trực tiếp cho Chương 4 của Báo cáo Đồ án tốt nghiệp.
 - **Kết quả**: Benchmark và đánh giá định lượng chạy thành công 100%, F1-Score đạt 1.0000 trên cả HDFS và BGL với mô hình Logistic Regression + Drain.
-
-### [17/11/2026 12:20] — Chuẩn Hóa Vòng Đời Sự Cố SRE (Priority, RCA, Actions), Nâng Tầm Quyền Viewer & Căn Chỉnh Icon AI Chatbot
-- **Loại**: Nâng cấp Tính năng Nghiệp vụ SRE, Phân quyền RBAC, UI/UX Web & Mobile, Đồng bộ Tài liệu
-- **File**: `FE/src/components/AiAssistant.jsx`, `FE/src/components/IncidentNoteModal.jsx`, `FE/src/App.jsx`, `BE/search-api/incidentService.js`, `BE/search-api/index.js`, `Mobile/src/screens/anomalies/IncidentDetailScreen.js`, `Mobile/src/screens/anomalies/AnomaliesScreen.js`, `Mobile/src/components/AnomalyCard.js`, `kientruchethong.md`, `nghiepvu.md`, `PROJECT_CONTEXT.md`, `README.md`, `tiendo.md`
-- **Mô tả**:
-  1. **Icon AI Chatbot trên Web**: Luôn xuất hiện mặc định góc dưới bên phải khi đăng nhập, hỗ trợ kéo thả tự do tạm thời; khi bấm mở thì khung chat luôn hiện cố định góc dưới bên phải; khi đóng chat thì icon tự động trở về vị trí góc dưới bên phải ban đầu.
-  2. **Nâng cấp vai trò Viewer**: Không chỉ quan sát thụ động, Viewer có thể chủ động tham gia điều tra (ghi chú điều tra/triage với vai trò VIEWER), gắn cờ theo dõi và xem toàn bộ biên bản nghiệm thu sự cố chuẩn SRE của Admin.
-  3. **Chuẩn hóa vòng đời sự cố SRE**: Tiếp nhận sự cố (gán mức độ ưu tiên P1/P2/P3), lưu vết ghi chú điều tra nhiều bên (Viewer & Admin), nghiệm thu đóng sự cố (chọn Root Cause, Action Taken, Resolution Note). Đồng bộ đầy đủ dữ liệu và giao diện tức thì trên cả Web và Mobile App.
-  4. **Rà soát và cập nhật đồng bộ 4 tài liệu cốt lõi**: `kientruchethong.md`, `nghiepvu.md`, `PROJECT_CONTEXT.md`, `README.md`; đảm bảo tính toàn vẹn và khớp 100% với đề cương đồ án tốt nghiệp.
-- **Kết quả**: Kiểm thử Babel và esbuild đạt 100% không lỗi, các tài liệu hệ thống đồng bộ chuẩn xác.
