@@ -5,24 +5,6 @@ Dự án Đồ án tốt nghiệp Công nghệ Thông tin: **"Nghiên cứu và 
 Hệ thống được thiết kế theo kiến trúc **Microservices & Event-Driven**, đáp ứng thông lượng cao, phân tích cấu trúc log thời gian thực bằng thuật toán **Drain**, phát hiện bất thường đa tầng (**Rule-based, Thống kê Z-Score, Học máy Isolation Forest & Logistic Regression**), tích hợp **Trợ lý AI LogPulse Copilot (Groq / Gemini Multimodal Vision)**, kênh trao đổi nội bộ **SRE Messenger**, cơ sở dữ liệu bền vững **SQLite Enterprise 8 bảng**, cảnh báo đa kênh (**Discord & Gmail SMTP**), quản lý vòng đời sự cố và giám sát sức khỏe pipeline toàn diện.
 
 ---
-
-## 🏗️ BẢNG TỔNG HỢP DỊCH VỤ & CỔNG KẾT NỐI (PORTS)
-
-| STT | Dịch Vụ | Công Nghệ | Port | Vai Trò & Chức Năng |
-| :---: | :--- | :--- | :---: | :--- |
-| **1** | **Redis Server** | Redis / In-memory | `6379` | Hàng đợi đệm log tải cao BullMQ & Pub/Sub |
-| **2** | **OpenSearch Database** | OpenSearch Cluster | `9200` | Cơ sở dữ liệu phân tán lưu trữ chỉ mục & tìm kiếm toàn văn log |
-| **3** | **Collector Service** | Express.js (Node.js) | `4000` | Tiếp nhận log từ máy chủ/client qua HTTP API; tích hợp cơ chế Ingestion Fallback khi collector offline |
-| **4** | **Parser Worker** | BullMQ Worker | N/A | Bóc tách cấu trúc log (Drain Mining trên dữ liệu thật HDFS/BGL), tính toán Anomaly Score |
-| **5** | **Search API & WebSocket** | Express + Socket.IO | `5000` | Cung cấp REST API tìm kiếm, phát sóng log realtime, quản lý cấu hình & cảnh báo |
-| **6** | **Frontend Dashboard (Web)** | React 18 + Vite | `3000` | Giao diện giám sát trực quan, biểu đồ thời gian thực, CustomSelect Dark Mode, Heatmap 24h, SRE Messenger |
-| **7** | **Mobile App (Expo)** | React Native (Expo) | `8081` | Ứng dụng di động giám sát 5 Tabs, phân quyền Admin/Viewer, Realtime Stream & AI Bubble |
-| **8** | **ML API Service** *(Tùy chọn)* | FastAPI + scikit-learn | `8000` | Phục vụ dự đoán mô hình Machine Learning trực tiếp qua HTTP API |
-| **9** | **Enterprise SQLite Database** | SQLite 3 (WAL mode) | N/A (file `sre_enterprise.sqlite`) | CSDL quan hệ bền vững 8 bảng (người dùng RBAC, sự cố, ghi chú, cấu hình, kiểm toán, tin nhắn nội bộ) |
-| **10** | **SRE Internal Messenger** | Socket.IO + SQLite | `:5000` | Kênh trao đổi thời gian thực giữa Admin và Viewer, đính kèm thẻ log sự cố |
-
----
-
 ## ⚙️ YÊU CẦU MÔI TRƯỜNG & CHUẨN BỊ
 
 1. **Phần mềm bắt buộc**:
@@ -43,7 +25,7 @@ Hệ thống được thiết kế theo kiến trúc **Microservices & Event-Dri
 
 ---
 
-### 🚀 CÁCH 1: KHỞI ĐỘNG SIÊU TỐC 1-CLICK (KHUYÊN DÙNG)
+###  CÁCH 1: KHỞI ĐỘNG (KHUYÊN DÙNG)
 
 Để không phải mở 4–5 cửa sổ terminal thủ công, hệ thống đã trang bị sẵn kịch bản tự động hóa thông minh:
 
@@ -68,11 +50,11 @@ Hệ thống được thiết kế theo kiến trúc **Microservices & Event-Dri
 
 ---
 
-### 🛠️ CÁCH 2: KHỞI ĐỘNG THỦ CÔNG TỪNG BƯỚC (DÀNH CHO LẬP TRÌNH VIÊN)
+### CÁCH 2: KHỞI ĐỘNG THỦ CÔNG TỪNG BƯỚC (DÀNH CHO LẬP TRÌNH VIÊN)
 
 Nếu bạn muốn mở từng terminal riêng biệt để quan sát chi tiết log xuất ra của từng dịch vụ:
 
-#### 🟢 BƯỚC 1: KHỞI ĐỘNG HẠ TẦNG CƠ SỞ (REDIS & OPENSEARCH)
+#### BƯỚC 1: KHỞI ĐỘNG HẠ TẦNG CƠ SỞ (REDIS & OPENSEARCH)
 
 1. **Khởi động Redis (Cổng 6379):**
    - Mở thư mục cài đặt Redis trên máy và chạy `redis-server.exe` (hoặc gõ lệnh `redis-server` trong PowerShell).
@@ -85,7 +67,7 @@ Nếu bạn muốn mở từng terminal riêng biệt để quan sát chi tiết
 
 ---
 
-### 🔵 BƯỚC 2: KHỞI ĐỘNG CÁC DỊCH VỤ BACKEND PIPELINE
+### BƯỚC 2: KHỞI ĐỘNG CÁC DỊCH VỤ BACKEND PIPELINE
 *(Mở 3 cửa sổ PowerShell độc lập tại thư mục `d:\DATN\BE`)*
 
 - **Terminal 1 — Collector Service (Tiếp nhận Log - Port 4000):**
@@ -114,7 +96,7 @@ Nếu bạn muốn mở từng terminal riêng biệt để quan sát chi tiết
 
 ---
 
-### 🟣 BƯỚC 3: KHỞI ĐỘNG ML API SERVICE *(TÙY CHỌN DỰ ĐOÁN HỌC MÁY)*
+### BƯỚC 3: KHỞI ĐỘNG ML API SERVICE *(TÙY CHỌN DỰ ĐOÁN HỌC MÁY)*
 *(Mở 1 Terminal tại thư mục `d:\DATN\BE`)*
 
 Nếu muốn hệ thống phân loại bất thường bằng mô hình học máy chuyên sâu:
@@ -139,7 +121,7 @@ python anomaly-engine/ml-models/ml_api.py
 
 ---
 
-### 🟡 BƯỚC 4: KHỞI ĐỘNG GIAO DIỆN FRONTEND (REACT DASHBOARD)
+### BƯỚC 4: KHỞI ĐỘNG GIAO DIỆN FRONTEND (REACT DASHBOARD)
 *(Mở 1 Terminal tại thư mục `d:\DATN\FE`)*
 
 ```powershell
@@ -150,7 +132,7 @@ npm run dev
 
 ---
 
-### ⚡ BƯỚC 5: KÍCH HOẠT PHÁT LUỒNG DỮ LIỆU LOG THẬT (HDFS / BGL)
+### BƯỚC 5: KÍCH HOẠT PHÁT LUỒNG DỮ LIỆU LOG THẬT (HDFS / BGL)
 *(Mở 1 Terminal tại thư mục `d:\DATN\BE`)*
 
 Để mô phỏng hệ thống thực tế đang vận hành và sinh log:
@@ -163,7 +145,7 @@ Ngay sau khi lệnh chạy, log thật từ tập dữ liệu HDFS sẽ được
 
 ---
 
-## 🔐 THÔNG TIN TÀI KHOẢN ĐĂNG NHẬP & PHÂN QUYỀN (RBAC)
+## THÔNG TIN TÀI KHOẢN ĐĂNG NHẬP & PHÂN QUYỀN (RBAC)
 
 Hệ thống hỗ trợ cơ chế xác thực JWT và phân quyền theo vai trò (Role-Based Access Control):
 
@@ -172,11 +154,11 @@ Hệ thống hỗ trợ cơ chế xác thực JWT và phân quyền theo vai tr�
 | **`admin`** | *Khởi tạo nội bộ qua AuthService* | **Quản Trị Viên (Admin)** | **Toàn quyền:** Quản lý cấu hình rule, thêm/xóa từ khóa cảnh báo, bật Silence mode, dọn dẹp log quá hạn (Retention), kích hoạt Daily Digest, tiếp nhận sự cố gán độ ưu tiên (P1/P2/P3) và nghiệm thu giải quyết sự cố (Root Cause + Action Taken). |
 | **`viewer`** | *Khởi tạo nội bộ qua AuthService* | **Người Giám Sát (Viewer)** | **Giám sát & Điều tra:** Tra cứu log, xem biểu đồ, theo dõi sức khỏe pipeline, hỏi đáp cùng AI Copilot, bổ sung nhật ký điều tra sự cố (Investigation Notes), xem toàn bộ biên bản nghiệm thu sự cố chuẩn SRE. |
 
-> 💡 **Lưu ý bảo mật:** Thông tin mật khẩu được mã hóa và quản lý nội bộ. Trong môi trường phát triển (Development), hệ thống trang bị sẵn 2 nút chuyển vai trò nhanh trên giao diện để thuận tiện thao tác demo.
+> **Lưu ý bảo mật:** Thông tin tài khoản và mật khẩu (quản trị viên ( TK: admin, MK: admin123), người giám sát (TK:viewer, MK: viewer123))
 
 ---
 
-## 🌟 HƯỚNG DẪN TRẢI NGHIỆM CÁC TÍNH NĂNG NỔI BẬT
+## HƯỚNG DẪN TRẢI NGHIỆM CÁC TÍNH NĂNG NỔI BẬT
 
 1. **Trợ lý AI LogPulse Copilot (RCA, Multimodal Vision & Chatbot)**:
    - Nhấp vào biểu tượng bot neon nổi ở góc dưới bên phải màn hình để chat trực tiếp với AI về tình trạng hệ thống.
