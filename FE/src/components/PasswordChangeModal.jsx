@@ -81,6 +81,7 @@ export default function PasswordChangeModal({ isOpen, onClose, currentUser, addT
                 type="password"
                 className="form-input"
                 placeholder="••••••••"
+                autoComplete="current-password"
                 value={currentPassword}
                 onChange={e => setCurrentPassword(e.target.value)}
                 required
@@ -93,6 +94,7 @@ export default function PasswordChangeModal({ isOpen, onClose, currentUser, addT
                 type="password"
                 className="form-input"
                 placeholder="Ít nhất 6 ký tự"
+                autoComplete="new-password"
                 value={newPassword}
                 onChange={e => setNewPassword(e.target.value)}
                 required
@@ -105,6 +107,7 @@ export default function PasswordChangeModal({ isOpen, onClose, currentUser, addT
                 type="password"
                 className="form-input"
                 placeholder="Nhập lại mật khẩu mới"
+                autoComplete="new-password"
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
                 required

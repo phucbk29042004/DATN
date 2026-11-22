@@ -1,7 +1,7 @@
 {
   "0": "useTheme",
   "1": "scripts",
-  "2": "anomaly-engine/index.js",
+  "2": "full_evaluation.js",
   "3": "ml_api.py",
   "4": "App.jsx",
   "5": "Mobile/package.json",
@@ -24,15 +24,9 @@
   "22": "BÁO CÁO KẾT QUẢ ĐÁNH GIÁ ĐỊNH LƯỢNG VÀ HIỆU NĂNG HỆ THỐNG",
   "23": "Kiến Trúc Hệ Thống Log Analytics & Anomaly Detection Dashboard",
   "24": "vercel.json",
-  "25": "DrainParser",
-  "26": "hdfs/generate_vectors.js",
-  "27": "full_evaluation.js",
-  "28": "bgl/generate_vectors.js",
+  "25": "log_generator.js",
   "29": "alertService.js",
   "30": "sqlite.js",
   "31": "cronService.js",
-  "32": "pipeline_benchmark.js",
-  "33": "parseLog",
-  "34": "statistical/detector.js",
   "36": "parser/index.js"
 }

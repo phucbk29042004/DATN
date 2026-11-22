@@ -173,6 +173,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
                   value={username}
                   onChange={e => setUsername(e.target.value)}
                   placeholder={isVi ? 'Nhập tên tài khoản...' : 'Enter username...'}
+                  autoComplete="username"
                   style={{
                     width: '100%',
                     boxSizing: 'border-box',
@@ -200,6 +201,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   placeholder={isVi ? 'Nhập mật khẩu...' : 'Enter password...'}
+                  autoComplete="current-password"
                   style={{
                     width: '100%',
                     boxSizing: 'border-box',

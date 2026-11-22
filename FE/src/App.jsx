@@ -9,7 +9,7 @@ import {
   Settings, Download, Send, FileText, Eye, Shield, LogIn, LogOut,
   BellOff, Plus, Trash2, Check, KeyRound, ListFilter,
   CheckCircle2, XCircle, AlertCircle, RotateCcw, HelpCircle, Play, FileSpreadsheet,
-  BarChart3, CalendarClock, Server
+  BarChart3, CalendarClock, Server, MessageSquare
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,

@@ -1,24 +1,24 @@
 # Graph Report - DATN  (2026-11-22)
 
 ## Corpus Check
-- 96 files · ~102,782 words
+- 96 files · ~98,449 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 12 file(s) not represented in the graph (top: (none) 2, .example 2, .log 2)
 
 ## Summary
-- 731 nodes · 1377 edges · 36 communities (34 shown, 2 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 19 edges (avg confidence: 0.87)
+- 716 nodes · 1357 edges · 30 communities (28 shown, 2 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 17 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `b7bb0798`
+- Built from commit: `23eb64c6`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - useTheme
 - scripts
-- anomaly-engine/index.js
+- full_evaluation.js
 - ml_api.py
 - App.jsx
 - Mobile/package.json
@@ -40,21 +40,15 @@
 - BÁO CÁO KẾT QUẢ ĐÁNH GIÁ ĐỊNH LƯỢNG VÀ HIỆU NĂNG HỆ THỐNG
 - Kiến Trúc Hệ Thống Log Analytics & Anomaly Detection Dashboard
 - vercel.json
-- DrainParser
-- hdfs/generate_vectors.js
-- full_evaluation.js
-- bgl/generate_vectors.js
+- log_generator.js
 - alertService.js
 - sqlite.js
 - cronService.js
-- pipeline_benchmark.js
-- parseLog
-- statistical/detector.js
 - parser/index.js
 
 ## God Nodes (most connected - your core abstractions)
-1. `Nhật Ký Cập Nhật (Chronological Log)` - 36 edges
-2. `useTheme()` - 35 edges
+1. `useTheme()` - 35 edges
+2. `Nhật Ký Cập Nhật (Chronological Log)` - 21 edges
 3. `apiClient()` - 21 edges
 4. `App()` - 20 edges
 5. `react-native` - 20 edges
@@ -67,19 +61,19 @@
 ## Surprising Connections (you probably didn't know these)
 - `[16/11/2026 18:45] — Nâng Cấp Toàn Diện UX/UI Mobile: Khắc Phục KPI, Biểu Đồ Đường SVG, Tìm Kiếm Trực Tiếp, Toast & Modal Cài Đặt` --references--> `SvgLineChart()`  [INFERRED]
   tiendo.md → Mobile/src/components/SvgLineChart.js
-- `[09/11/2026 18:42] — Khởi Tạo Auth Gate Buộc Đăng Nhập Trước, Thêm Bảng Điều Khiển Cron Job Trên Submenu, Thiết Kế Lại Email/Discord Notification & Tối Ưu UX Đồ Thị` --references--> `reloadCronJobs()`  [INFERRED]
-  tiendo.md → BE/search-api/cronService.js
 - `[20/11/2026 19:58] — Kích Hoạt Luồng Stream Log Realtime Thông Minh & Bộ Đếm KPI Tự Tăng` --references--> `startCloudLogStreamer()`  [INFERRED]
   tiendo.md → BE/search-api/index.js
-- `[09/11/2026 18:42] — Khởi Tạo Auth Gate Buộc Đăng Nhập Trước, Thêm Bảng Điều Khiển Cron Job Trên Submenu, Thiết Kế Lại Email/Discord Notification & Tối Ưu UX Đồ Thị` --references--> `LoginModal()`  [INFERRED]
-  tiendo.md → FE/src/components/LoginModal.jsx
-- `setMaintenanceMode()` --calls--> `ghiNhatKyHeThong()`  [EXTRACTED]
-  BE/search-api/alertService.js → BE/database/sqlite.js
+- `App()` --calls--> `AdminSettingsModal()`  [EXTRACTED]
+  FE/src/App.jsx → FE/src/components/AdminSettingsModal.jsx
+- `App()` --calls--> `CronJobsModal()`  [EXTRACTED]
+  FE/src/App.jsx → FE/src/components/CronJobsModal.jsx
+- `App()` --calls--> `CustomDateTimePicker()`  [EXTRACTED]
+  FE/src/App.jsx → FE/src/components/CustomDateTimePicker.jsx
 
 ## Import Cycles
 - None detected.
 
-## Communities (36 total, 2 thin omitted)
+## Communities (30 total, 2 thin omitted)
 
 ### Community 0 - "useTheme"
 Cohesion: 0.07
@@ -89,9 +83,9 @@ Nodes (72): App(), MainApp(), apiClient(), getAuthToken(), setAuthToken(), CURRE
 Cohesion: 0.12
 Nodes (16): scripts, benchmark, benchmark:full, generate:logs, generate:vectors-bgl, generate:vectors-hdfs, ml:train-bgl, ml:train-hdfs (+8 more)
 
-### Community 2 - "anomaly-engine/index.js"
-Cohesion: 0.22
-Nodes (11): callMlPredict(), __dirname, DRAIN_WORKER_PATH, exportVectorsForML(), __filename, ML_API_TIMEOUT_MS, runAnomalyDetection(), vectorizeInWorker() (+3 more)
+### Community 2 - "full_evaluation.js"
+Cohesion: 0.06
+Nodes (45): callMlPredict(), __dirname, DRAIN_WORKER_PATH, exportVectorsForML(), __filename, ML_API_TIMEOUT_MS, runAnomalyDetection(), vectorizeInWorker() (+37 more)
 
 ### Community 3 - "ml_api.py"
 Cohesion: 0.07
@@ -99,7 +93,7 @@ Nodes (12): health(), lifespan(), _load_models(), predict(), PredictRequest, Pre
 
 ### Community 4 - "App.jsx"
 Cohesion: 0.08
-Nodes (34): App(), formatVnDateTime(), KpiSkeleton(), LEVEL_COLORS, Skeleton(), ToastContainer(), toLocalDatetimeInputString(), useToast() (+26 more)
+Nodes (33): App(), formatVnDateTime(), KpiSkeleton(), LEVEL_COLORS, Skeleton(), ToastContainer(), toLocalDatetimeInputString(), useToast() (+25 more)
 
 ### Community 5 - "Mobile/package.json"
 Cohesion: 0.07
@@ -130,12 +124,12 @@ Cohesion: 0.13
 Nodes (14): backgroundColor, adaptiveIcon, expo, android, ios, name, orientation, slug (+6 more)
 
 ### Community 12 - "hdfs/generate_vectors.js"
-Cohesion: 0.07
-Nodes (29): bglPath, __dirname, hdfsPath, outputPath, parseBglLine(), parseHdfsLine(), run(), __dirname (+21 more)
+Cohesion: 0.06
+Nodes (40): buildBglTimeWindows(), loadBglDataset(), parseBglLogFile(), __dirname, LOG_FILE, main(), OUT_FILE, bglPath (+32 more)
 
 ### Community 13 - "Nhật Ký Cập Nhật (Chronological Log)"
-Cohesion: 0.06
-Nodes (35): [04/11/2026 12:05] — Khắc Phục Triệt Để Toàn Bộ Lỗi Responsive Trên Mobile & Tablet (Header, Anti-Overflow, Pipeline Grid & Bảng Dữ Liệu), [07/11/2026 11:35] — Nâng Cấp Hệ Thống 2 Tab Anomaly (Danh Sách & Biểu Đồ Phân Tích Đa Chiều), Sửa Lỗi Tooltip Dark Mode & Đồng Bộ Toàn Diện Web & Mobile App, [07/11/2026 11:50] — Thiết Kế Lại Sub-Tabs Segmented Control, Tái Cấu Trúc Bố Cục 4 Thẻ KPI, Sửa Lỗi NaN:NaN & Warning Unique Key (Web & Mobile), [07/11/2026 12:10] — Việt Hóa Đa Ngôn Ngữ Nhãn Mức Độ Log, Tối Ưu Chiều Cao Heatmap Dạng Ma Trận Ngang & Chống Tràn Card Diễn Biến Điểm Bất Thường (Đồng Bộ Web & Mobile), [09/11/2026 19:04] — Khắc Phục Lỗi Modal Cron Jobs, Thiết Kế Lại Form Đăng Nhập Chuẩn SaaS (Ảnh Đồ Họa + Icon Ẩn/Hiện Mật Khẩu), Bổ Sung Tab Sức Khỏe Pipeline Lên Sidebar & Đồng Bộ Mobile, [09/11/2026 19:06] — Sửa Lỗi Runtime ReferenceError Server is not defined trong FE/src/App.jsx, [09/11/2026 19:28] — Tinh Chỉnh Icon Chatbot Kéo Thả Tự Do (Draggable), Ẩn Nút Đóng Trùng Lặp, Rút Gọn Prompt Chatbot & Chuẩn Hóa Tiếng Việt Form Đăng Nhập (Đồng Bộ Web & Mobile), [09/11/2026 20:13] — Thiết Lập .gitignore, Khởi Tạo Git & Đẩy Thành Công Toàn Bộ Mã Nguồn Lên GitHub (+27 more)
+Cohesion: 0.09
+Nodes (21): [16/11/2026 18:45] — Nâng Cấp Toàn Diện UX/UI Mobile: Khắc Phục KPI, Biểu Đồ Đường SVG, Tìm Kiếm Trực Tiếp, Toast & Modal Cài Đặt, [17/11/2026 12:20] — Chuẩn Hóa Vòng Đời Sự Cố SRE (Priority, RCA, Actions), Nâng Tầm Quyền Viewer & Căn Chỉnh Icon AI Chatbot, [18/11/2026 11:15] — Triển Khai Toàn Diện Bộ Kịch Bản Benchmark Thông Lượng & Đánh Giá Định Lượng Mô Hình (F1-Score / HDFS & BGL), [18/11/2026 12:28] — Xây Dựng Đồ Thị Tri Thức Codebase (Graphify) & Trích Xuất Dữ Liệu graph.json, [18/11/2026 12:42] — Khắc Phục Lỗi Hiển Thị Trắng Màn Hình & Hoàn Thiện Giao Diện Trực Quan Graphify (graph.html), [19/11/2026 17:20] — Chuẩn Hóa Bảng Màu Light Mode, Tái Thiết Kế Login Mobile & Dọn Dẹp Toàn Bộ Icon AI / Emoji Console Logs, [19/11/2026 18:08] — Thiết Kế Lại 3 Nút Trạng Thái, Khắc Phục Lỗi Nhấp Nháy Nút Truy Vấn & Bổ Sung Bottom Nav Mobile Trên Web, [19/11/2026 18:22] — Sửa Lỗi Hiển Thị Thanh Điều Hướng Đáy & Tinh Chỉnh Cỡ Chữ Sidebar Mobile Vừa Vặn (+13 more)
 
 ### Community 14 - "queue/config.js"
 Cohesion: 0.16
@@ -173,21 +167,9 @@ Nodes (6): 1. KẾT QUẢ BENCHMARK HIỆU NĂNG PIPELINE (THROUGHPUT & LATENCY)
 Cohesion: 0.33
 Nodes (5): 1. Luồng Dữ Liệu Realtime (Log Streaming Architecture), 2. Các Thành Phần Chính (Services & Ports), 3. ML Training Pipeline (Offline — chạy 1 lần), 4. Bộ Công Cụ Benchmark & Đánh Giá Định Lượng (Evaluation Suite), Kiến Trúc Hệ Thống Log Analytics & Anomaly Detection Dashboard
 
-### Community 25 - "DrainParser"
-Cohesion: 0.24
-Nodes (6): DrainParser, LogCluster, mergeTemplates(), similarity(), tokenize(), fitDrain()
-
-### Community 26 - "hdfs/generate_vectors.js"
-Cohesion: 0.26
-Nodes (9): __dirname, LABEL_FILE, LOG_FILE, main(), OUT_FILE, buildHdfsSequences(), loadHdfsDataset(), loadHdfsLabels() (+1 more)
-
-### Community 27 - "full_evaluation.js"
-Cohesion: 0.24
-Nodes (10): BGL_LOG, calculateMetrics(), calculatePercentiles(), __dirname, generateMockLogs(), HDFS_LABEL, HDFS_LOG, RESULTS_BGL (+2 more)
-
-### Community 28 - "bgl/generate_vectors.js"
-Cohesion: 0.25
-Nodes (7): buildBglTimeWindows(), loadBglDataset(), parseBglLogFile(), __dirname, LOG_FILE, main(), OUT_FILE
+### Community 25 - "log_generator.js"
+Cohesion: 0.33
+Nodes (5): generateRandomBatch(), LEVELS, MESSAGES, sendLogsToCollector(), SERVICES
 
 ### Community 29 - "alertService.js"
 Cohesion: 0.29
@@ -201,41 +183,29 @@ Nodes (9): DATA_DIR, DB_PATH, __dirname, __filename, initDatabase(), layDanhSach
 Cohesion: 0.38
 Nodes (9): ghiLichSuCron(), cronConfig, generate24hDigestData(), initCronJobs(), reloadCronJobs(), runLogRetentionCleanup(), sendDailyDigestReport(), sendDiscordDigest() (+1 more)
 
-### Community 32 - "pipeline_benchmark.js"
-Cohesion: 0.33
-Nodes (6): ALERT_LEVELS, checkLogLineSingle(), CRITICAL_KEYWORDS, calculatePercentiles(), generateMockLogs(), runBenchmark()
-
-### Community 33 - "parseLog"
-Cohesion: 0.50
-Nodes (6): generateLogHashId(), parseJsonLog(), parseLog(), parseNginxLog(), parseSyslog(), RFC-3164
-
-### Community 34 - "statistical/detector.js"
-Cohesion: 0.62
-Nodes (6): buildTimeSeries(), detectMovingAverage(), detectStatistical(), detectZScore(), mean(), stdDev()
-
 ### Community 36 - "parser/index.js"
 Cohesion: 0.21
 Nodes (13): dotenv@^16.4.5, addToBuffer(), flushBuffer(), logBuffer, logParserWorker, LOG_QUEUE_NAME, REALTIME_LOG_CHANNEL, redisPub (+5 more)
 
 ## Knowledge Gaps
 - **1 isolated node(s):** `RFC-3164`
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 315 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 301 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **2 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `[09/11/2026 18:42] — Khởi Tạo Auth Gate Buộc Đăng Nhập Trước, Thêm Bảng Điều Khiển Cron Job Trên Submenu, Thiết Kế Lại Email/Discord Notification & Tối Ưu UX Đồ Thị` connect `App.jsx` to `Nhật Ký Cập Nhật (Chronological Log)`, `cronService.js`?**
-  _High betweenness centrality (0.258) - this node is a cross-community bridge._
+- **Why does `Nhật Ký Cập Nhật (Chronological Log)` connect `Nhật Ký Cập Nhật (Chronological Log)` to `search-api/index.js`?**
+  _High betweenness centrality (0.289) - this node is a cross-community bridge._
 - **What connects `RFC-3164` to the rest of the system?**
   _1 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `useTheme` be split into smaller, more focused modules?**
   _Cohesion score 0.0686456400742115 - nodes in this community are weakly interconnected._
-- **Why does `reloadCronJobs()` connect `cronService.js` to `search-api/index.js`, `App.jsx`?**
-  _High betweenness centrality (0.246) - this node is a cross-community bridge._
+- **Why does `[20/11/2026 19:58] — Kích Hoạt Luồng Stream Log Realtime Thông Minh & Bộ Đếm KPI Tự Tăng` connect `search-api/index.js` to `Nhật Ký Cập Nhật (Chronological Log)`?**
+  _High betweenness centrality (0.271) - this node is a cross-community bridge._
 - **Should `scripts` be split into smaller, more focused modules?**
   _Cohesion score 0.125 - nodes in this community are weakly interconnected._
+- **Should `full_evaluation.js` be split into smaller, more focused modules?**
+  _Cohesion score 0.06451612903225806 - nodes in this community are weakly interconnected._
 - **Should `ml_api.py` be split into smaller, more focused modules?**
   _Cohesion score 0.07419712070874862 - nodes in this community are weakly interconnected._
-- **Should `App.jsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.07686932215234102 - nodes in this community are weakly interconnected._
