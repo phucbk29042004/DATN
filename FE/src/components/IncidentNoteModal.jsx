@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import CustomSelect from './CustomSelect.jsx';
 import {
   FileText,
   Send,
@@ -214,16 +215,17 @@ export default function IncidentNoteModal({
                 <>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                     <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>Mức ưu tiên:</span>
-                    <select
+                    <CustomSelect
                       className="select-filter"
-                      style={{ padding: '0.2rem 0.5rem', fontSize: '0.76rem' }}
+                      style={{ minWidth: '150px' }}
                       value={selectedPriority}
                       onChange={e => setSelectedPriority(e.target.value)}
-                    >
-                      <option value="P1">P1 - Khẩn cấp</option>
-                      <option value="P2">P2 - Nghiêm trọng</option>
-                      <option value="P3">P3 - Bình thường</option>
-                    </select>
+                      options={[
+                        { value: 'P1', label: 'P1 - Khẩn cấp' },
+                        { value: 'P2', label: 'P2 - Nghiêm trọng' },
+                        { value: 'P3', label: 'P3 - Bình thường' }
+                      ]}
+                    />
                   </div>
                   <button
                     className="btn-primary"
@@ -259,30 +261,24 @@ export default function IncidentNoteModal({
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                 <label style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Nguyên nhân gốc rễ (Root Cause):</label>
-                <select
+                <CustomSelect
                   className="select-filter"
-                  style={{ width: '100%', padding: '0.4rem 0.6rem', fontSize: '0.8rem' }}
+                  style={{ width: '100%' }}
                   value={selectedRootCause}
                   onChange={e => setSelectedRootCause(e.target.value)}
-                >
-                  {ROOT_CAUSES.map(rc => (
-                    <option key={rc.id} value={rc.label}>{rc.label}</option>
-                  ))}
-                </select>
+                  options={ROOT_CAUSES.map(rc => ({ value: rc.label, label: rc.label }))}
+                />
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                 <label style={{ fontSize: '0.76rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Biện pháp đã khắc phục (Action Taken):</label>
-                <select
+                <CustomSelect
                   className="select-filter"
-                  style={{ width: '100%', padding: '0.4rem 0.6rem', fontSize: '0.8rem' }}
+                  style={{ width: '100%' }}
                   value={selectedActionTaken}
                   onChange={e => setSelectedActionTaken(e.target.value)}
-                >
-                  {ACTIONS_TAKEN.map(act => (
-                    <option key={act.id} value={act.label}>{act.label}</option>
-                  ))}
-                </select>
+                  options={ACTIONS_TAKEN.map(act => ({ value: act.label, label: act.label }))}
+                />
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>

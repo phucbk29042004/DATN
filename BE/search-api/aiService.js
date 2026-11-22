@@ -89,19 +89,33 @@ async function callGroq(messages) {
 }
 
 /**
- * Gọi Google Gemini REST API (fallback)
+ * Gọi Google Gemini REST API (fallback hoặc phân tích hình ảnh)
  */
-async function callGemini(messages) {
+async function callGemini(messages, image = null) {
   if (!GEMINI_API_KEY) throw new Error('GEMINI_API_KEY chưa được cấu hình');
 
   // Chuyển đổi format OpenAI messages → Gemini contents
   const systemText = messages.find(m => m.role === 'system')?.content || '';
-  const contents = messages
-    .filter(m => m.role !== 'system')
-    .map(m => ({
+  const filteredMessages = messages.filter(m => m.role !== 'system');
+  const contents = filteredMessages.map((m, idx) => {
+    const parts = [{ text: m.content || 'Hãy phân tích hình ảnh hoặc log hệ thống sau:' }];
+    
+    // Nếu là tin nhắn user cuối cùng và có đính kèm ảnh
+    if (idx === filteredMessages.length - 1 && m.role === 'user' && image?.base64) {
+      const cleanBase64 = image.base64.replace(/^data:[^;]+;base64,/, '');
+      parts.push({
+        inline_data: {
+          mime_type: image.mimeType || 'image/png',
+          data: cleanBase64
+        }
+      });
+    }
+
+    return {
       role: m.role === 'assistant' ? 'model' : 'user',
-      parts: [{ text: m.content }]
-    }));
+      parts
+    };
+  });
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -116,7 +130,7 @@ async function callGemini(messages) {
         contents,
         generationConfig: {
           temperature: 0.4,
-          maxOutputTokens: 600
+          maxOutputTokens: 1000
         }
       }),
       signal: controller.signal
@@ -135,9 +149,18 @@ async function callGemini(messages) {
 }
 
 /**
- * Gọi AI với cơ chế fallback: Groq → Gemini
+ * Gọi AI với cơ chế fallback: Groq → Gemini (hoặc Gemini Vision nếu có ảnh)
  */
-async function callAI(messages) {
+async function callAI(messages, image = null) {
+  // Nếu người dùng gửi ảnh (Vision), trực tiếp sử dụng Gemini Multimodal
+  if (image && image.base64) {
+    if (GEMINI_API_KEY) {
+      const result = await callGemini(messages, image);
+      if (result) return { text: cleanOutput(result), provider: 'gemini-vision' };
+    }
+    throw new Error('Tính năng phân tích hình ảnh yêu cầu GEMINI_API_KEY.');
+  }
+
   // Thử Groq trước (tốc độ nhanh hơn)
   if (GROQ_API_KEY) {
     try {
@@ -163,11 +186,12 @@ async function callAI(messages) {
 }
 
 /**
- * Chat tự do với AI — nhận mảng messages từ client + context hệ thống
+ * Chat tự do với AI — nhận mảng messages từ client + context hệ thống + ảnh đính kèm
  * @param {Array} userMessages - [{role: 'user', content: '...'}, ...]
  * @param {string} systemContext - Tóm tắt KPI / anomaly gần nhất (tùy chọn)
+ * @param {Object} image - { base64: string, mimeType: string } (tùy chọn)
  */
-export async function chatWithAI(userMessages, systemContext = '') {
+export async function chatWithAI(userMessages, systemContext = '', image = null) {
   const contextNote = systemContext
     ? `\n\nThông tin hệ thống hiện tại:\n${systemContext}`
     : '';
@@ -177,7 +201,7 @@ export async function chatWithAI(userMessages, systemContext = '') {
     ...userMessages
   ];
 
-  return callAI(messages);
+  return callAI(messages, image);
 }
 
 /**

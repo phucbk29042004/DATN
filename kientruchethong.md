@@ -28,11 +28,12 @@ graph TD
 | **Mobile App (Expo)** | React Native + Expo | `8081` | Ứng dụng di động đa nền tảng (iOS/Android) 5 Tabs chuẩn Elevated Dock, Role-based Navigation, Realtime Socket.IO & Trợ lý AI nổi toàn cục |
 | **Multi-Channel Alerts** | Discord Webhook + Nodemailer | HTTPS / SMTP | Gửi tin nhắn tức thì sang Discord & gửi email báo cáo sự cố qua Gmail hoàn toàn miễn phí |
 | **ML API (Python)** | FastAPI + scikit-learn | `8000` | Serve Isolation Forest & Logistic Regression real-time qua `POST /predict` |
-| **AI Assistant Service** | Groq + Gemini REST API | N/A (tích hợp trong Search API :5000) | Trợ lý AI phân tích log, giải thích nguyên nhân bất thường, hỏi đáp tự do về giám sát hệ thống. Groq (primary) + Gemini (fallback) |
+| **AI Assistant Service** | Groq + Gemini REST API | N/A (tích hợp trong Search API :5000) | Trợ lý AI phân tích log, giải thích nguyên nhân bất thường, hỏi đáp tự do về giám sát hệ thống. Groq (primary) + Gemini (fallback & Multimodal Image Vision). Hiệu ứng Typewriter render mượt mà. |
+| **SRE Internal Messenger** | Socket.IO + SQLite (`tin_nhan_noi_bo`) | N/A (tích hợp trong Search API :5000) | Kênh trao đổi trực tiếp realtime giữa Quản Trị Viên (Admin) và Giám Sát Viên (Viewer), hỗ trợ đính kèm thẻ log sự cố và xem chi tiết tức thì. |
 | **Pipeline Health Service** | BullMQ API + Rolling Metrics | N/A (tích hợp trong Search API :5000) | Giám sát trạng thái hàng đợi BullMQ (waiting/active/failed), tính thông lượng throughput (log/s) & độ trễ pipeline |
 | **Authentication & RBAC** | JWT + bcryptjs | N/A (tích hợp trong Search API :5000) | Quản lý đăng nhập và phân quyền truy cập: Admin (toàn quyền) & Viewer (chỉ xem, khóa lưu cấu hình) |
 | **Incident Lifecycle Service** | SQLite Database (`better-sqlite3`) | N/A (tích hợp trong Search API :5000) | Quản lý vòng đời sự cố SRE chuẩn hóa (NEW ➔ ACK ➔ RESOLVED), phân loại mức độ ưu tiên (P1/P2/P3), lưu vết Root Cause & Action Taken, ghi chú điều tra (Viewer & Admin), deduplication 60s & chế độ bảo trì (Silence) |
-| **Enterprise SQLite Database** | SQLite 3 (WAL mode) | File `BE/data/sre_enterprise.sqlite` | Lưu trữ bền vững 7 bảng dữ liệu chuẩn SRE: người dùng RBAC, vòng đời sự cố, ghi chú điều tra, cấu hình hệ thống, lịch bảo trì, nhật ký kiểm toán (Audit Trail) và lịch sử cron |
+| **Enterprise SQLite Database** | SQLite 3 (WAL mode) | File `BE/data/sre_enterprise.sqlite` | Lưu trữ bền vững 8 bảng dữ liệu chuẩn SRE: người dùng RBAC, vòng đời sự cố, ghi chú điều tra, cấu hình hệ thống, lịch bảo trì, nhật ký kiểm toán (Audit Trail), lịch sử cron và tin nhắn nội bộ SRE |
 | **Cron & Retention Service** | node-cron + OpenSearch + SQLite | N/A (tích hợp trong Search API :5000) | Lập lịch tự động gửi Daily Digest lúc 08:00 (Discord + Email), dọn dẹp log cũ quá hạn lúc 00:00 (Retention Policy) và ghi lịch sử chạy vào bảng `lich_su_cron` |
 
 ## 3. ML Training Pipeline (Offline — chạy 1 lần)

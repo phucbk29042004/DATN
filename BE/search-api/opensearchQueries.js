@@ -10,6 +10,26 @@ const INDEX_PATTERN = 'logs-*';
 
 let realLogsCache = null;
 let dynamicTotalLogs = 4302;
+const runtimeAnomaliesBuffer = [];
+
+/**
+ * Ghi nhận anomaly mới phát sinh vào bộ đệm runtime (đồng bộ tức thì với KPI & Chatbot)
+ */
+export function recordRuntimeAnomaly(log) {
+  if (!log) return;
+  const isAnomaly = (log.anomaly_score || 0) >= 0.5 || log.is_anomaly || log.level === 'ERROR' || log.level === 'FATAL';
+  if (!isAnomaly) return;
+
+  const key = log.id || `${log.timestamp}_${log.message}`;
+  const exists = runtimeAnomaliesBuffer.some(a => (a.id && a.id === log.id) || `${a.timestamp}_${a.message}` === key);
+  if (!exists) {
+    runtimeAnomaliesBuffer.unshift({
+      ...log,
+      anomaly_score: log.anomaly_score || (log.level === 'FATAL' ? 0.95 : log.level === 'ERROR' ? 0.85 : 0.65)
+    });
+    if (runtimeAnomaliesBuffer.length > 500) runtimeAnomaliesBuffer.pop();
+  }
+}
 
 /**
  * Cập nhật và truy xuất bộ đếm tổng log runtime (tránh nhảy số khi OpenSearch offline)
@@ -123,13 +143,44 @@ function fallbackKpiStats() {
 
 function fallbackRecentAnomalies({ threshold = 0.5, size = 50 }) {
   const logs = getRealDatasetLogs();
-  const anomalies = logs.filter(l => (l.anomaly_score || 0) >= threshold);
-  anomalies.sort((a, b) => (b.anomaly_score || 0) - (a.anomaly_score || 0));
+  const datasetAnomalies = logs.filter(l => (l.anomaly_score || 0) >= threshold);
+
+  // Hợp nhất anomaly runtime với dataset thật (đảm bảo số lượng khớp với KPI)
+  const combinedMap = new Map();
+  for (const anom of runtimeAnomaliesBuffer) {
+    if ((anom.anomaly_score || 0) >= threshold) {
+      combinedMap.set(anom.id || `${anom.timestamp}_${anom.message}`, anom);
+    }
+  }
+  for (const anom of datasetAnomalies) {
+    const key = anom.id || `${anom.timestamp}_${anom.message}`;
+    if (!combinedMap.has(key)) {
+      combinedMap.set(key, anom);
+    }
+  }
+
+  const sortedAnomalies = Array.from(combinedMap.values()).sort((a, b) => {
+    const scoreDiff = (b.anomaly_score || 0) - (a.anomaly_score || 0);
+    if (scoreDiff !== 0) return scoreDiff;
+    return new Date(b.timestamp) - new Date(a.timestamp);
+  });
 
   return {
-    total: anomalies.length,
-    anomalies: anomalies.slice(0, size)
+    total: sortedAnomalies.length,
+    anomalies: sortedAnomalies.slice(0, size)
   };
+}
+
+function extractDrainTemplate(message) {
+  if (!message) return 'UNKNOWN_TEMPLATE';
+  return message
+    .replace(/\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}(?::[0-9]+)?\b/g, '<IP>')
+    .replace(/blk_-?\d+/g, 'blk_<ID>')
+    .replace(/0x[0-9a-fA-F]+/g, '<HEX>')
+    .replace(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/gi, '<UUID>')
+    .replace(/\b\d+\b/g, '<*>')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function fallbackDrainTemplates({ size = 100 }) {
@@ -137,13 +188,14 @@ function fallbackDrainTemplates({ size = 100 }) {
   const templateMap = new Map();
 
   for (const l of logs) {
-    if (!l.drain_template) continue;
-    const existing = templateMap.get(l.drain_template);
+    const tmplStr = l.drain_template || extractDrainTemplate(l.message);
+    if (!tmplStr) continue;
+    const existing = templateMap.get(tmplStr);
     if (existing) {
       existing.count += 1;
     } else {
-      templateMap.set(l.drain_template, {
-        template: l.drain_template,
+      templateMap.set(tmplStr, {
+        template: tmplStr,
         count: 1,
         template_id: l.drain_template_id || `T_${templateMap.size + 1}`,
         level: l.level || 'INFO',
@@ -154,12 +206,11 @@ function fallbackDrainTemplates({ size = 100 }) {
 
   const templates = Array.from(templateMap.values())
     .sort((a, b) => b.count - a.count)
-    .slice(0, size)
     .map((t, idx) => ({ id: idx + 1, ...t }));
 
   return {
     total: templates.length,
-    templates
+    templates: size ? templates.slice(0, size) : templates
   };
 }
 

@@ -994,6 +994,14 @@ tr:hover .sticky-right-col {
   padding-bottom: 0.5rem;
 }
 
+.heatmap-grid-header,
+.heatmap-grid-row {
+  display: grid;
+  grid-template-columns: 80px repeat(24, 28px);
+  gap: 4px;
+  align-items: center;
+}
+
 .heatmap-cell {
   width: 28px;
   height: 28px;
@@ -1005,10 +1013,47 @@ tr:hover .sticky-right-col {
   font-weight: 700;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   cursor: default;
+  box-sizing: border-box;
 }
 
 .heatmap-cell:hover {
   transform: scale(1.25);
   z-index: 5;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Typewriter Cursor & Dropdown / Messenger Animations ───────────────────── */
+.typewriter-cursor {
+  display: inline-block;
+  animation: typewriterBlink 0.8s infinite;
+  color: var(--accent-primary);
+  margin-left: 2px;
+  font-weight: 900;
+}
+
+@keyframes typewriterBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

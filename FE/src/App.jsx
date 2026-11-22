@@ -26,6 +26,8 @@ import IncidentNoteModal from './components/IncidentNoteModal.jsx';
 import CustomDateTimePicker from './components/CustomDateTimePicker.jsx';
 import TabHelpModal from './components/TabHelpModal.jsx';
 import CronJobsModal from './components/CronJobsModal.jsx';
+import CustomSelect from './components/CustomSelect.jsx';
+import SreMessengerModal from './components/SreMessengerModal.jsx';
 import { API_BASE, SOCKET_URL } from './config.js';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -167,6 +169,14 @@ export default function App() {
   // ── Templates Tab ──
   const [templates, setTemplates] = useState(null);
   const [templatesLoading, setTemplatesLoading] = useState(false);
+  const [displayedTemplatesCount, setDisplayedTemplatesCount] = useState(10);
+
+  // ── SRE Messenger & Tagged Log ──
+  const [isMessengerOpen, setIsMessengerOpen] = useState(false);
+  const [taggedLogForChat, setTaggedLogForChat] = useState(null);
+
+  // ── Heatmap Modal & Selection ──
+  const [selectedHeatmapCell, setSelectedHeatmapCell] = useState(null);
 
   // ── Selected Log for Modal Inspection ──
   const [selectedLog, setSelectedLog] = useState(null);
@@ -680,11 +690,26 @@ export default function App() {
     // Nhận log mới realtime
     socket.on('new_log', (log) => {
       setRealtimeLogs(prev => [log, ...prev].slice(0, 200));
+
+      const isAnomaly = (log.anomaly_score || 0) >= 0.5 || log.is_anomaly || log.level === 'ERROR' || log.level === 'FATAL';
+      const isFatal = log.level === 'FATAL';
+
+      // Tự động đẩy anomaly vào bảng Danh Sách Anomaly Events để số liệu khớp hoàn toàn với KPI và Chatbot
+      if (isAnomaly) {
+        setAnomalies(prev => {
+          if (!prev) return { total: 1, anomalies: [log] };
+          const exists = prev.anomalies.some(a => (a.id && a.id === log.id) || (a.timestamp === log.timestamp && a.message === log.message));
+          if (exists) return prev;
+          return {
+            total: (prev.total || 0) + 1,
+            anomalies: [log, ...prev.anomalies].slice(0, 100)
+          };
+        });
+      }
+
       // Tự động cộng dồn số lượng log trên thẻ KPI Realtime
       setKpiStats(prev => {
         if (!prev) return prev;
-        const isAnomaly = (log.anomaly_score || 0) >= 0.7;
-        const isFatal = log.level === 'FATAL';
         return {
           ...prev,
           total_logs_24h: (prev.total_logs_24h || 0) + 1,
@@ -1763,19 +1788,21 @@ export default function App() {
                     )}
                   </div>
 
-                  <select
+                  <CustomSelect
                     id="level-filter"
                     className="select-filter"
                     value={levelFilter}
                     onChange={e => setLevelFilter(e.target.value)}
                     aria-label="Lọc theo mức độ"
-                  >
-                    <option value="ALL">{t.filterAllLevels}</option>
-                    <option value="INFO">{LEVEL_MAP[lang]?.INFO || 'INFO'}</option>
-                    <option value="WARN">{LEVEL_MAP[lang]?.WARN || 'WARN'}</option>
-                    <option value="ERROR">{LEVEL_MAP[lang]?.ERROR || 'ERROR'}</option>
-                    <option value="FATAL">{LEVEL_MAP[lang]?.FATAL || 'FATAL'}</option>
-                  </select>
+                    style={{ minWidth: '140px' }}
+                    options={[
+                      { value: 'ALL', label: t.filterAllLevels },
+                      { value: 'INFO', label: LEVEL_MAP[lang]?.INFO || 'INFO' },
+                      { value: 'WARN', label: LEVEL_MAP[lang]?.WARN || 'WARN' },
+                      { value: 'ERROR', label: LEVEL_MAP[lang]?.ERROR || 'ERROR' },
+                      { value: 'FATAL', label: LEVEL_MAP[lang]?.FATAL || 'FATAL' }
+                    ]}
+                  />
                 </div>
 
                 <div
@@ -2122,26 +2149,27 @@ export default function App() {
                         </button>
                       ))}
                     </div>
-                    <select
+                    <CustomSelect
                       value={analyticsServiceFilter}
                       onChange={e => setAnalyticsServiceFilter(e.target.value)}
-                      style={{ padding: '0.3rem 0.6rem', fontSize: '0.78rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontFamily: 'inherit' }}
-                    >
-                      <option value="">Tất cả dịch vụ</option>
-                      {analyticsData?.top_services?.map(s => (
-                        <option key={s.service} value={s.service}>{s.service}</option>
-                      ))}
-                    </select>
-                    <select
+                      style={{ minWidth: '150px' }}
+                      options={[
+                        { value: '', label: 'Tất cả dịch vụ' },
+                        ...(analyticsData?.top_services?.map(s => ({ value: s.service, label: s.service })) || [])
+                      ]}
+                    />
+                    <CustomSelect
                       value={analyticsLevelFilter}
                       onChange={e => setAnalyticsLevelFilter(e.target.value)}
-                      style={{ padding: '0.3rem 0.6rem', fontSize: '0.78rem', borderRadius: '8px', border: '1px solid var(--border-color)', background: 'var(--bg-secondary)', color: 'var(--text-primary)', fontFamily: 'inherit' }}
-                    >
-                      <option value="">Tất cả level</option>
-                      {['INFO', 'WARN', 'ERROR', 'FATAL'].map(l => (
-                        <option key={l} value={l}>{l}</option>
-                      ))}
-                    </select>
+                      style={{ minWidth: '130px' }}
+                      options={[
+                        { value: '', label: 'Tất cả level' },
+                        { value: 'INFO', label: 'INFO' },
+                        { value: 'WARN', label: 'WARN' },
+                        { value: 'ERROR', label: 'ERROR' },
+                        { value: 'FATAL', label: 'FATAL' }
+                      ]}
+                    />
                     {analyticsServiceFilter && (
                       <span className="cross-filter-badge" onClick={() => setAnalyticsServiceFilter('')}>
                         <Filter size={11} /> {analyticsServiceFilter} <X size={11} />
@@ -2426,71 +2454,73 @@ export default function App() {
                         });
                         return (
                           <div className="heatmap-scroll-container">
-                            <div style={{ minWidth: '680px' }}>
-                              {/* Hours header row */}
-                              <div style={{ display: 'flex', gap: '3px', marginBottom: '4px', alignItems: 'center' }}>
-                                <div style={{ width: 68, fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-secondary)', flexShrink: 0 }}>
+                            <div style={{ minWidth: '780px' }}>
+                              {/* Hours header row with unified CSS Grid */}
+                              <div className="heatmap-grid-header" style={{ marginBottom: '6px' }}>
+                                <div style={{ width: 80, fontSize: '0.68rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
                                   {isVi ? 'Ngày \\ Giờ' : 'Date \\ Hour'}
                                 </div>
-                                <div style={{ display: 'flex', gap: '3px' }}>
-                                  {hours.map(h => (
-                                    <div key={h} style={{ width: 26, textAlign: 'center', fontSize: '0.62rem', fontWeight: 600, color: 'var(--text-secondary)', flexShrink: 0 }}>
-                                      {String(h).padStart(2, '0')}h
-                                    </div>
-                                  ))}
-                                </div>
+                                {hours.map(h => (
+                                  <div key={h} style={{ width: 28, textAlign: 'center', fontSize: '0.62rem', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                                    {String(h).padStart(2, '0')}h
+                                  </div>
+                                ))}
                               </div>
 
-                              {/* Date rows */}
+                              {/* Date rows with unified CSS Grid */}
                               {dates.map(date => (
-                                <div key={date} style={{ display: 'flex', gap: '3px', alignItems: 'center', marginBottom: '3px' }}>
-                                  <div style={{ width: 68, fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-primary)', flexShrink: 0 }}>
+                                <div key={date} className="heatmap-grid-row" style={{ marginBottom: '4px' }}>
+                                  <div style={{ width: 80, fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-primary)' }}>
                                     {date}
                                   </div>
-                                  <div style={{ display: 'flex', gap: '3px' }}>
-                                    {hours.map(h => {
-                                      const count = heatmapMap[`${date}-${h}`] || 0;
-                                      const intensity = count / maxCount;
-                                      let bg = 'var(--bg-input)';
-                                      let textColor = 'transparent';
-                                      let textShadow = 'none';
+                                  {hours.map(h => {
+                                    const count = heatmapMap[`${date}-${h}`] || 0;
+                                    const intensity = count / maxCount;
+                                    let bg = 'var(--bg-input)';
+                                    let textColor = 'transparent';
+                                    let textShadow = 'none';
 
-                                      if (count > 0) {
-                                        if (intensity < 0.25) {
-                                          bg = theme === 'dark' ? 'rgba(245,158,11,0.3)' : '#fef3c7';
-                                          textColor = theme === 'dark' ? '#fde047' : '#92400e';
-                                        } else if (intensity < 0.5) {
-                                          bg = theme === 'dark' ? 'rgba(245,158,11,0.65)' : '#fcd34d';
-                                          textColor = theme === 'dark' ? '#ffffff' : '#78350f';
-                                          textShadow = '0 1px 2px rgba(0,0,0,0.4)';
-                                        } else if (intensity < 0.75) {
-                                          bg = theme === 'dark' ? 'rgba(239,68,68,0.7)' : '#f87171';
-                                          textColor = '#ffffff';
-                                          textShadow = '0 1px 2px rgba(0,0,0,0.5)';
-                                        } else {
-                                          bg = theme === 'dark' ? '#dc2626' : '#ef4444';
-                                          textColor = '#ffffff';
-                                          textShadow = '0 1px 2px rgba(0,0,0,0.6)';
-                                        }
+                                    if (count > 0) {
+                                      if (intensity < 0.25) {
+                                        bg = theme === 'dark' ? 'rgba(245,158,11,0.3)' : '#fef3c7';
+                                        textColor = theme === 'dark' ? '#fde047' : '#92400e';
+                                      } else if (intensity < 0.5) {
+                                        bg = theme === 'dark' ? 'rgba(245,158,11,0.65)' : '#fcd34d';
+                                        textColor = theme === 'dark' ? '#ffffff' : '#78350f';
+                                        textShadow = '0 1px 2px rgba(0,0,0,0.4)';
+                                      } else if (intensity < 0.75) {
+                                        bg = theme === 'dark' ? 'rgba(239,68,68,0.7)' : '#f87171';
+                                        textColor = '#ffffff';
+                                        textShadow = '0 1px 2px rgba(0,0,0,0.5)';
+                                      } else {
+                                        bg = theme === 'dark' ? '#dc2626' : '#ef4444';
+                                        textColor = '#ffffff';
+                                        textShadow = '0 1px 2px rgba(0,0,0,0.6)';
                                       }
+                                    }
 
-                                      return (
-                                        <div
-                                          key={h}
-                                          className="heatmap-cell"
-                                          style={{
-                                            background: bg,
-                                            color: textColor,
-                                            textShadow: textShadow,
-                                            border: count > 0 ? '1px solid rgba(0,0,0,0.1)' : '1px solid var(--border-color-subtle)'
-                                          }}
-                                          title={`${date} ${String(h).padStart(2,'0')}:00 — ${count} lỗi`}
-                                        >
-                                          {count > 0 ? count : ''}
-                                        </div>
-                                      );
-                                    })}
-                                  </div>
+                                    return (
+                                      <div
+                                        key={h}
+                                        className="heatmap-cell"
+                                        onClick={() => {
+                                          if (count > 0) {
+                                            setSelectedHeatmapCell({ date, hour: h, count });
+                                          }
+                                        }}
+                                        style={{
+                                          background: bg,
+                                          color: textColor,
+                                          textShadow: textShadow,
+                                          border: count > 0 ? '1px solid rgba(0,0,0,0.1)' : '1px solid var(--border-color-subtle)',
+                                          cursor: count > 0 ? 'pointer' : 'default'
+                                        }}
+                                        title={`${date} ${String(h).padStart(2,'0')}:00 — ${count} lỗi (Bấm để xem danh sách)`}
+                                      >
+                                        {count > 0 ? count : ''}
+                                      </div>
+                                    );
+                                  })}
                                 </div>
                               ))}
 
@@ -2503,6 +2533,33 @@ export default function App() {
                                 <div style={{ width: 14, height: 14, borderRadius: 3, background: theme === 'dark' ? 'rgba(239,68,68,0.7)' : '#f87171' }} />
                                 <div style={{ width: 14, height: 14, borderRadius: 3, background: theme === 'dark' ? '#dc2626' : '#ef4444' }} />
                                 <span>{isVi ? 'Nhiều lỗi' : 'High'}</span>
+                              </div>
+
+                              {/* Tối ưu UX/UI khoảng trắng: Khung giờ cao điểm & Phân bổ SRE */}
+                              <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem' }}>
+                                <div style={{ padding: '0.65rem 0.85rem', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                                  <div style={{ fontSize: '0.72rem', color: '#ef4444', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                    <AlertCircle size={13} /> Khung Giờ Cao Điểm Lỗi
+                                  </div>
+                                  <div style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '0.2rem' }}>
+                                    {dates[0] || 'Gần nhất'} · {hours.reduce((maxH, h) => (heatmapMap[`${dates[0]}-${h}`] || 0) > (heatmapMap[`${dates[0]}-${maxH}`] || 0) ? h : maxH, 0)}:00h
+                                  </div>
+                                  <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.1rem' }}>
+                                    Đỉnh điểm {maxCount} lỗi / giờ phát sinh
+                                  </div>
+                                </div>
+
+                                <div style={{ padding: '0.65rem 0.85rem', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
+                                  <div style={{ fontSize: '0.72rem', color: '#f59e0b', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                    <TrendingUp size={13} /> Khuyến Nghị SRE
+                                  </div>
+                                  <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '0.2rem' }}>
+                                    Tập trung ca trực khung 14:00 - 18:00
+                                  </div>
+                                  <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.1rem' }}>
+                                    Hạn chế release tính năng vào giờ cao điểm
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -2587,19 +2644,20 @@ export default function App() {
                   </div>
                   <div className="form-group">
                     <label htmlFor="search-level" className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.2rem' }}>Mức độ</label>
-                    <select
+                    <CustomSelect
                       id="search-level"
                       className="select-filter"
-                      style={{ width: '100%', padding: '0.45rem 0.75rem', fontSize: '0.85rem' }}
+                      style={{ width: '100%' }}
                       value={searchLevel}
                       onChange={e => setSearchLevel(e.target.value)}
-                    >
-                      <option value="ALL">{t.filterAllLevels}</option>
-                      <option value="INFO">{LEVEL_MAP[lang]?.INFO || 'INFO'}</option>
-                      <option value="WARN">{LEVEL_MAP[lang]?.WARN || 'WARN'}</option>
-                      <option value="ERROR">{LEVEL_MAP[lang]?.ERROR || 'ERROR'}</option>
-                      <option value="FATAL">{LEVEL_MAP[lang]?.FATAL || 'FATAL'}</option>
-                    </select>
+                      options={[
+                        { value: 'ALL', label: t.filterAllLevels },
+                        { value: 'INFO', label: LEVEL_MAP[lang]?.INFO || 'INFO' },
+                        { value: 'WARN', label: LEVEL_MAP[lang]?.WARN || 'WARN' },
+                        { value: 'ERROR', label: LEVEL_MAP[lang]?.ERROR || 'ERROR' },
+                        { value: 'FATAL', label: LEVEL_MAP[lang]?.FATAL || 'FATAL' }
+                      ]}
+                    />
                   </div>
                   <div className="form-group">
                     <label className="form-label" style={{ fontSize: '0.8rem', marginBottom: '0.2rem' }}>{t.searchFromLabel}</label>
@@ -3026,21 +3084,66 @@ export default function App() {
                     {[1, 2, 3, 4].map(i => <Skeleton key={i} height="3rem" />)}
                   </div>
                 ) : templates && templates.templates.length > 0 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                    {templates.templates.map((tmpl, idx) => (
-                      <div key={tmpl.id || idx} className="template-row">
-                        <div className="template-id">T{String(idx + 1).padStart(3, '0')}</div>
-                        <div className="template-content">
-                          <span className="template-pattern">{tmpl.template}</span>
-                          <div className="template-meta">
-                            <span className={`badge badge-${(tmpl.level || 'info').toLowerCase()}`} style={{ fontSize: '0.7rem' }}>{LEVEL_MAP[lang]?.[(tmpl.level || 'INFO').toUpperCase()] || tmpl.level}</span>
-                            <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>{tmpl.service}</span>
-                            <span style={{ color: 'var(--accent-primary)', fontSize: '0.78rem' }}>×{tmpl.count?.toLocaleString()}</span>
-                          </div>
+                  (() => {
+                    const visibleList = templates.templates.slice(0, displayedTemplatesCount);
+                    return (
+                      <div
+                        style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', maxHeight: '540px', overflowY: 'auto' }}
+                        onScroll={e => {
+                          const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+                          if (scrollHeight - scrollTop - clientHeight < 40) {
+                            if (displayedTemplatesCount < templates.templates.length) {
+                              setDisplayedTemplatesCount(prev => prev + 10);
+                            }
+                          }
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.2rem 0.5rem', fontSize: '0.74rem', color: 'var(--text-secondary)' }}>
+                          <span>Dữ liệu mẫu log khai phá thật từ OpenSearch / SQLite / HDFS / BGL</span>
+                          <span style={{ fontWeight: 600, color: 'var(--accent-primary)' }}>
+                            Đang hiển thị {Math.min(displayedTemplatesCount, templates.templates.length)} / {templates.templates.length} mẫu
+                          </span>
                         </div>
+
+                        {visibleList.map((tmpl, idx) => (
+                          <div key={tmpl.id || idx} className="template-row">
+                            <div className="template-id">T{String(idx + 1).padStart(3, '0')}</div>
+                            <div className="template-content">
+                              <span className="template-pattern">{tmpl.template}</span>
+                              <div className="template-meta">
+                                <span className={`badge badge-${(tmpl.level || 'info').toLowerCase()}`} style={{ fontSize: '0.7rem' }}>
+                                  {LEVEL_MAP[lang]?.[(tmpl.level || 'INFO').toUpperCase()] || tmpl.level}
+                                </span>
+                                <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>{tmpl.service}</span>
+                                <span style={{ color: 'var(--accent-primary)', fontSize: '0.78rem' }}>×{tmpl.count?.toLocaleString()}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+
+                        {displayedTemplatesCount < templates.templates.length && (
+                          <div style={{ textAlign: 'center', padding: '0.75rem 0' }}>
+                            <button
+                              className="toggle-btn"
+                              onClick={() => setDisplayedTemplatesCount(prev => prev + 10)}
+                              style={{
+                                padding: '0.45rem 1.25rem',
+                                fontSize: '0.8rem',
+                                borderRadius: '8px',
+                                background: 'var(--bg-secondary)',
+                                border: '1px solid var(--border-color)',
+                                color: 'var(--accent-primary)',
+                                fontWeight: 600,
+                                cursor: 'pointer'
+                              }}
+                            >
+                              Tải thêm 10 mẫu tiếp theo ({displayedTemplatesCount} / {templates.templates.length})
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })()
                 ) : (
                   <div className="empty-state">
                     <Layers size={36} color="var(--accent-secondary)" style={{ opacity: 0.8 }} />
@@ -3079,11 +3182,148 @@ export default function App() {
               <pre className="modal-json-box">
                 {JSON.stringify(selectedLog, null, 2)}
               </pre>
-              <AiExplainButton logEntry={selectedLog} lang={lang} />
+              <div style={{ display: 'flex', gap: '0.6rem', marginTop: '0.75rem', flexWrap: 'wrap' }}>
+                <AiExplainButton logEntry={selectedLog} lang={lang} />
+                <button
+                  className="toggle-btn"
+                  onClick={() => {
+                    setTaggedLogForChat(selectedLog);
+                    setIsMessengerOpen(true);
+                    setSelectedLog(null);
+                    addToast(lang === 'vi' ? 'Đã đính kèm thẻ log vào Kênh Chat SRE' : 'Log attached to SRE Chat', 'success');
+                  }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    padding: '0.5rem 0.9rem',
+                    borderRadius: '8px',
+                    background: 'rgba(6, 182, 212, 0.12)',
+                    border: '1px solid rgba(6, 182, 212, 0.3)',
+                    color: 'var(--accent-primary)',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <MessageSquare size={14} /> {lang === 'vi' ? 'Trao đổi trong SRE Chat' : 'Discuss in SRE Chat'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* ── MODAL CHI TIẾT SỰ CỐ KHUNG GIỜ HEATMAP ─────────────────────────── */}
+      {selectedHeatmapCell && (
+        <div className="modal-overlay" onClick={() => setSelectedHeatmapCell(null)} aria-modal="true" role="dialog">
+          <div className="modal-container" style={{ maxWidth: '680px' }} onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600 }}>
+                <Calendar size={18} color="var(--accent-primary)" />
+                Chi Tiết Sự Cố: {selectedHeatmapCell.date} ({String(selectedHeatmapCell.hour).padStart(2, '0')}:00 - {String(selectedHeatmapCell.hour).padStart(2, '0')}:59)
+                <span className="badge badge-error" style={{ fontSize: '0.72rem' }}>{selectedHeatmapCell.count} lỗi</span>
+              </span>
+              <button
+                className="toast-close"
+                onClick={() => setSelectedHeatmapCell(null)}
+                aria-label="Đóng"
+                style={{ position: 'static', background: 'transparent', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', padding: '0.25rem', borderRadius: '6px' }}
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="modal-body" style={{ maxHeight: '420px', overflowY: 'auto' }}>
+              <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
+                Danh sách các sự cố lỗi ghi nhận trong khung giờ đã chọn từ hệ thống:
+              </p>
+              {(() => {
+                const cellLogs = (anomalies?.anomalies || []).filter(a => {
+                  if (!a.timestamp) return false;
+                  const d = new Date(a.timestamp);
+                  const dateStr = d.toISOString().slice(0, 10);
+                  const hour = d.getHours();
+                  return dateStr === selectedHeatmapCell.date && hour === selectedHeatmapCell.hour;
+                });
+
+                if (cellLogs.length === 0) {
+                  return (
+                    <div style={{ padding: '1rem', background: 'var(--bg-input)', borderRadius: '8px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                      Không tìm thấy bản ghi chi tiết trong bộ đệm gần nhất (đã được lưu trữ dài hạn tại OpenSearch).
+                    </div>
+                  );
+                }
+
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {cellLogs.map((log, idx) => (
+                      <div
+                        key={log.id || idx}
+                        style={{
+                          padding: '0.65rem 0.85rem',
+                          borderRadius: '8px',
+                          background: 'var(--bg-input)',
+                          border: '1px solid var(--border-color)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.25rem'
+                        }}
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.74rem' }}>
+                          <span style={{ fontWeight: 700, color: 'var(--accent-primary)' }}>{log.service}</span>
+                          <span className="badge badge-error" style={{ fontSize: '0.65rem' }}>{log.level}</span>
+                        </div>
+                        <div style={{ fontSize: '0.8rem', fontFamily: 'monospace', color: 'var(--text-primary)' }}>
+                          {log.message}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── SRE INTERNAL CHAT TRIGGER BUTTON & MODAL ───────────────────────── */}
+      <button
+        className="sre-messenger-fab"
+        onClick={() => setIsMessengerOpen(!isMessengerOpen)}
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          right: '84px',
+          zIndex: 9997,
+          width: 44,
+          height: 44,
+          borderRadius: '12px',
+          background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.9), rgba(59, 130, 246, 0.9))',
+          color: '#fff',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          boxShadow: '0 8px 20px rgba(6, 182, 212, 0.35)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+        }}
+        title="Mở Kênh Trao Đổi Sự Cố SRE (Admin <-> Viewer)"
+        aria-label="SRE Messenger"
+      >
+        <MessageSquare size={19} />
+      </button>
+
+      <SreMessengerModal
+        isOpen={isMessengerOpen}
+        onClose={() => setIsMessengerOpen(false)}
+        currentUser={currentUser}
+        socket={socketRef.current}
+        taggedLog={taggedLogForChat}
+        onClearTaggedLog={() => setTaggedLogForChat(null)}
+        onInspectLog={log => setSelectedLog(log)}
+      />
+
       {/* ── AI ASSISTANT FLOATING CHATBOT ──────────────────────────────────── */}
       <AiAssistant
         lang={lang}

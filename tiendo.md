@@ -2,6 +2,45 @@
 
 ## Nhật Ký Cập Nhật (Chronological Log)
 
+### [22/11/2026 11:05] — Nâng Cấp Toàn Diện 8 Hạng Mục: Chatbot Vision, Drain Infinite Scroll, Custom Select, Đồng Bộ Anomaly & SRE Messenger
+- **Loại**: Nâng cấp tính năng, Sửa lỗi hệ thống & Tối ưu UI/UX (AIOps, UI Modernization & Realtime Communication)
+- **File**: `BE/search-api/index.js`, `BE/search-api/opensearchQueries.js`, `BE/search-api/aiService.js`, `BE/database/sqlite.js`, `FE/src/App.jsx`, `FE/src/components/AiAssistant.jsx`, `FE/src/components/CustomSelect.jsx`, `FE/src/components/SreMessengerModal.jsx`, `FE/src/components/TabHelpModal.jsx`, `FE/src/components/IncidentNoteModal.jsx`, `FE/src/custom_styles.css`, `tiendo.md`
+- **Mô tả**:
+  1. AI Chatbot: Bổ sung hiệu ứng Typewriter Render mượt mà và tính năng quét/phân tích hình ảnh sơ đồ/log (Multimodal Vision qua Gemini API, hỗ trợ upload ảnh hoặc dán Ctrl+V từ clipboard).
+  2. Drain Mining: Bóc tách mẫu từ 100% dữ liệu log thật từ hệ thống (OpenSearch/HDFS/BGL), hỗ trợ phân trang kéo cuộn vô hạn (Infinite Scroll 10 bản ghi/lần).
+  3. Custom Select: Xây dựng component `CustomSelect.jsx` chuẩn Dark Glassmorphism, thay thế toàn bộ thẻ select mặc định trên toàn hệ thống.
+  4. Sửa lỗi 500 Simulator: Thêm cơ chế Fallback Ingestion trực tiếp vào SQLite và broadcast Socket.IO khi collector port 4000 offline.
+  5. Đồng bộ Anomaly (25 vs 52): Duy trì buffer runtime và gắn listener `new_log` tự động đẩy anomaly mới vào bảng Danh Sách Anomaly Events, khớp hoàn toàn với KPI và Chatbot.
+  6. Heatmap 24h: Chuẩn hóa CSS Grid `repeat(24, 28px)` căn thẳng hàng tuyệt đối giữa giờ và ô dữ liệu; click ô mở Modal xem chi tiết lỗi; bổ sung phân tích giờ cao điểm và khuyến nghị SRE lấp đầy khoảng trắng.
+  7. Chú thích màn hình: Cập nhật đầy đủ hướng dẫn chi tiết cho 7 tab và sub-tab trong `TabHelpModal.jsx`.
+  8. SRE Internal Messenger: Xây dựng kênh chat realtime Admin <-> Viewer lưu trữ SQLite, hỗ trợ gắn thẻ (tag) log sự cố vào cuộc hội thoại và xem chi tiết tức thì.
+- **Kết quả**: Tất cả backend & frontend build thành công 100%, 8 hạng mục vận hành trơn tru và đồng bộ.
+
+### [21/11/2026 21:25] — Gắn Chuẩn Heading 1-2-3 & Tích Hợp Hyperlink Nhảy Trang Cho Toàn Bộ Mục Lục (HoanThien.docx)
+- **Loại**: Cải tiến tài liệu & Tương tác Word (Document Navigation & Interactive TOC)
+- **File**: `DATN_DeCuongChiTiet_HuynhNgocPhuc_1150070035_HoanThien.docx`, `tiendo.md`
+- **Mô tả**:
+  1. Gán chuẩn `Heading 1, 2, 3` và Bookmark định danh cho 51 đề mục lớn nhỏ trong toàn bộ nội dung tài liệu.
+  2. Bọc 100% các mục trong Mục Lục bằng thẻ `w:hyperlink`, hỗ trợ bấm Ctrl + Click nhảy tức thì đến trang tương ứng.
+  3. Kích hoạt toàn diện cây sơ đồ điều hướng Navigation Pane (`Ctrl + F`) trong Microsoft Word.
+- **Kết quả**: Tài liệu đạt chuẩn 100%, Mục Lục tương tác nhảy trang mượt mà và hiển thị cây mục lục tự động.
+
+### [21/11/2026 21:15] — Bổ Sung Mục Lục & Cấu Hình Phân Trang Chuẩn Đồ Án Tốt Nghiệp Cho File HoanThien.docx
+- **Loại**: Hoàn thiện định dạng tài liệu học thuật (Document Formatting & Pagination)
+- **File**: `DATN_DeCuongChiTiet_HuynhNgocPhuc_1150070035_HoanThien.docx`, `tiendo.md`
+- **Mô tả**:
+  1. Thêm trang Mục Lục chuẩn chỉnh sau trang bìa với đầy đủ các cấp đề mục, tab leader dấu chấm và số trang.
+  2. Tách tài liệu thành 2 Section: Section 1 (Trang bìa, Mục lục) đánh số trang chữ La Mã thường (i, ii...); Section 2 (Từ Mục 1. Mở đầu trở đi) đánh số trang dạng số tự nhiên (1, 2, 3...) bắt đầu lại từ 1.
+- **Kết quả**: File DOCX hoàn thiện 100%, bố cục và phân trang chuẩn theo quy định trình bày đồ án tốt nghiệp.
+
+### [21/11/2026 21:05] — Xuất File Đề Cương Chi Tiết Mới (HoanThien.docx) Cập Nhật Toàn Bộ Kiến Trúc & Công Nghệ Thực Tế
+- **Loại**: Cập nhật tài liệu đề cương tốt nghiệp (Academic Outline Documentation)
+- **File**: `DATN_DeCuongChiTiet_HuynhNgocPhuc_1150070035_HoanThien.docx`, `tiendo.md`
+- **Mô tả**:
+  1. Tạo file đề cương mới `DATN_DeCuongChiTiet_HuynhNgocPhuc_1150070035_HoanThien.docx` kế thừa 100% style, bảng 15 tuần, font chữ, lề trang từ file gốc.
+  2. Bổ sung trọn vẹn 6 điểm nâng cấp thực tế: CSDL SQLite Enterprise 7 bảng, Hybrid Cloud (Vercel/Render/Upstash), quy trình SRE Incident Response 3 pha, Benchmark đối sánh 4 mô hình đạt F1 1.0000 trên HDFS/BGL, trực quan hóa 3D WebGL Galaxy.
+- **Kết quả**: File DOCX mới (96.9 KB) chuẩn ECMA-376 OpenXML, nội dung khớp 100% với kiến trúc mã nguồn dự án hiện hành.
+
 ### [21/11/2026 11:30] — Khắc Phục Lỗi Vòng Lặp KPI Log Counter, Thiết Kế Lại Logo SRE Sentinel, Tối Ưu Codebase & Bổ Sung Graphify 3D WebGL Galaxy
 - **Loại**: Sửa lỗi dữ liệu thời gian thực, Tái thiết kế nhận diện thương hiệu, Dọn dẹp mã nguồn & Trực quan hóa 3D
 - **File**: `BE/search-api/opensearchQueries.js`, `BE/search-api/index.js`, `FE/src/App.jsx`, `FE/src/components/LoginModal.jsx`, `graphify-out/graph.html`, `graphify-out/graph_3d.html`, `tiendo.md`

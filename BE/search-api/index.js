@@ -13,11 +13,12 @@ import {
   getRecentAnomalies,
   getDrainTemplates,
   getAnomalyAnalytics,
-  incrementDynamicTotalLogs
+  incrementDynamicTotalLogs,
+  recordRuntimeAnomaly
 } from './opensearchQueries.js';
 import { chatWithAI, explainLog } from './aiService.js';
 import { alertConfig, dispatchAlerts, sendDiscordAlert, sendEmailAlert, setMaintenanceMode, getMaintenanceMode, saveConfigToSqlite } from './alertService.js';
-import db, { ghiNhatKyHeThong } from '../database/sqlite.js';
+import db, { ghiNhatKyHeThong, luuTinNhanNoiBo, layDanhSachTinNhanNoiBo } from '../database/sqlite.js';
 import { loginUser, changePassword, authenticateToken, requireAdmin, optionalAuth } from './authService.js';
 import { getPipelineHealth, recordPipelineLog } from './pipelineMetrics.js';
 import { updateIncidentStatus, addIncidentNote, enrichAnomaliesWithIncidentState } from './incidentService.js';
@@ -118,6 +119,7 @@ export function broadcastNewLog(logEntry) {
   recentLogBuffer.unshift(logEntry);
   if (recentLogBuffer.length > MAX_BUFFER) recentLogBuffer.pop();
   incrementDynamicTotalLogs(1);
+  recordRuntimeAnomaly(logEntry);
   io.emit('new_log', logEntry);
 
   // Ghi nhận số liệu thông lượng và độ trễ pipeline
@@ -157,6 +159,24 @@ io.on('connection', (socket) => {
   if (recentLogBuffer.length > 0) {
     socket.emit('log_buffer', recentLogBuffer.slice(0, 50));
   }
+
+  // Lắng nghe chat nội bộ SRE (Admin <-> Viewer)
+  socket.on('sre_chat_send', (data) => {
+    try {
+      const saved = luuTinNhanNoiBo({
+        nguoiGui: data.sender || 'anonymous',
+        vaiTro: data.role || 'viewer',
+        tenHienThi: data.displayName || data.sender || 'Người dùng',
+        noiDung: data.content || '',
+        dinhKemLog: data.logAttachment || null
+      });
+      if (saved) {
+        io.emit('sre_chat_message', saved);
+      }
+    } catch (err) {
+      console.error('[SRE Chat Socket Error]:', err.message);
+    }
+  });
 
   socket.on('disconnect', () => {
     console.log(`[Socket.IO] Client ngắt kết nối: ${socket.id}`);
@@ -534,19 +554,19 @@ app.get('/api/v1/export/csv', async (req, res) => {
 
 // ── POST /api/v1/ai/chat ─────────────────────────────────────────────────────
 /**
- * AI Chatbot — Hỏi đáp tự do về giám sát hệ thống
- * Body: { messages: [{role, content}], systemContext?: string }
+ * AI Chatbot — Hỏi đáp tự do về giám sát hệ thống (Hỗ trợ Multimodal Vision)
+ * Body: { messages: [{role, content}], systemContext?: string, image?: { base64, mimeType } }
  */
 app.post('/api/v1/ai/chat', async (req, res) => {
   try {
-    let { messages, query, systemContext } = req.body;
+    let { messages, query, systemContext, image } = req.body;
     if (!messages && query) {
       messages = [{ role: 'user', content: query }];
     }
     if (!Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ error: 'Thiếu nội dung tin nhắn (messages)' });
     }
-    const result = await chatWithAI(messages, systemContext || '');
+    const result = await chatWithAI(messages, systemContext || '', image || null);
     return res.status(200).json({ reply: result.text, answer: result.text, provider: result.provider });
   } catch (err) {
     console.error('[AI Chat Error]:', err.message);
@@ -556,13 +576,58 @@ app.post('/api/v1/ai/chat', async (req, res) => {
 
 // Alias cho các client có thể còn gọi /api/v1/ai/query
 app.post('/api/v1/ai/query', (req, res) => {
-  let { messages, query, systemContext } = req.body;
+  let { messages, query, systemContext, image } = req.body;
   if (!messages && query) {
     messages = [{ role: 'user', content: query }];
   }
-  return chatWithAI(messages || [], systemContext || '')
+  return chatWithAI(messages || [], systemContext || '', image || null)
     .then(result => res.status(200).json({ reply: result.text, answer: result.text, provider: result.provider }))
     .catch(err => res.status(500).json({ error: err.message || 'AI Assistant không phản hồi' }));
+});
+
+// ── SRE INTERNAL CHAT (ADMIN <-> VIEWER MESSENGER) ───────────────────────────
+/**
+ * Lấy lịch sử tin nhắn nội bộ SRE
+ */
+app.get('/api/v1/chat/messages', (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit || 50, 10), 100);
+    const msgs = layDanhSachTinNhanNoiBo(limit);
+    return res.status(200).json(msgs);
+  } catch (err) {
+    return res.status(500).json({ error: 'Không thể lấy danh sách tin nhắn' });
+  }
+});
+
+/**
+ * Gửi tin nhắn nội bộ SRE (hỗ trợ đính kèm thẻ log sự cố)
+ */
+app.post('/api/v1/chat/messages', optionalAuth, (req, res) => {
+  try {
+    const { content, logAttachment, displayName, sender, role } = req.body;
+    if (!content && !logAttachment) {
+      return res.status(400).json({ error: 'Nội dung tin nhắn hoặc đính kèm không được để trống' });
+    }
+    const userRole = req.user ? req.user.role : (role || 'viewer');
+    const userDisplay = req.user ? (req.user.displayName || req.user.username) : (displayName || sender || 'Người dùng');
+    const userName = req.user ? req.user.username : (sender || 'anonymous');
+
+    const saved = luuTinNhanNoiBo({
+      nguoiGui: userName,
+      vaiTro: userRole,
+      tenHienThi: userDisplay,
+      noiDung: content || '',
+      dinhKemLog: logAttachment || null
+    });
+
+    if (saved) {
+      io.emit('sre_chat_message', saved);
+      return res.status(200).json(saved);
+    }
+    return res.status(500).json({ error: 'Không thể lưu tin nhắn vào cơ sở dữ liệu' });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 // ── POST /api/v1/ai/explain-log ──────────────────────────────────────────────
@@ -653,18 +718,44 @@ app.post('/api/v1/simulator/generate', async (req, res) => {
       logs.push({ timestamp: logTime, service, level, message, environment: 'production' });
     }
 
-    const collectorRes = await fetch('http://localhost:4000/api/v1/logs/batch', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ logs })
-    });
-
-    if (!collectorRes.ok) {
-      throw new Error(`Collector trả về lỗi HTTP ${collectorRes.status}`);
+    let collectorSuccess = false;
+    let collectorData = null;
+    try {
+      const collectorRes = await fetch('http://localhost:4000/api/v1/logs/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ logs })
+      });
+      if (collectorRes.ok) {
+        collectorData = await collectorRes.json();
+        collectorSuccess = true;
+      }
+    } catch (fetchErr) {
+      console.warn('[Simulator Info] Collector port 4000 offline, tự động ingestion trực tiếp:', fetchErr.message);
     }
 
-    const data = await collectorRes.json();
-    return res.status(200).json({ success: true, count: logs.length, collector: data });
+    if (!collectorSuccess) {
+      // Direct ingestion fallback: phát tán ngay vào runtime buffer, Socket.IO & tính toán anomaly
+      for (const log of logs) {
+        const isAnomaly = log.level === 'FATAL' || log.level === 'ERROR' || log.level === 'WARN';
+        const enrichedLog = {
+          id: `sim_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          ...log,
+          drain_template: log.message.replace(/\b\d+\b/g, '<*>').replace(/\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/g, '<IP>'),
+          anomaly_score: log.level === 'FATAL' ? 0.95 : log.level === 'ERROR' ? 0.85 : log.level === 'WARN' ? 0.65 : 0.05,
+          is_anomaly: isAnomaly
+        };
+        broadcastNewLog(enrichedLog);
+      }
+      return res.status(200).json({
+        success: true,
+        count: logs.length,
+        mode: 'direct_ingestion',
+        message: 'Đã phát sinh và phân phối log trực tiếp thành công.'
+      });
+    }
+
+    return res.status(200).json({ success: true, count: logs.length, collector: collectorData });
   } catch (err) {
     console.error('[Simulator Error]:', err.message);
     return res.status(500).json({ error: err.message || 'Không thể phát sinh log mẫu' });

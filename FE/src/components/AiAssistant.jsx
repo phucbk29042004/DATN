@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { MessageSquare, Send, X, Trash2, Terminal, User, Loader, Zap, AlertTriangle } from 'lucide-react';
+import { MessageSquare, Send, X, Trash2, Terminal, User, Loader, Zap, AlertTriangle, Image as ImageIcon, Paperclip } from 'lucide-react';
 import { API_BASE } from '../config.js';
 
 /**
@@ -27,8 +27,49 @@ export default function AiAssistant({ lang, t, theme, currentUser, kpiStats }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null); // { base64, mimeType, previewUrl }
   const chatEndRef = useRef(null);
   const inputRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const typingTimerRef = useRef(null);
+
+  const isVi = lang === 'vi';
+
+  // Cleanup typing timer
+  useEffect(() => {
+    return () => {
+      if (typingTimerRef.current) clearInterval(typingTimerRef.current);
+    };
+  }, []);
+
+  // Xử lý nạp file ảnh
+  const handleImageFile = (file) => {
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setSelectedImage({
+        base64: e.target.result,
+        mimeType: file.type,
+        previewUrl: e.target.result
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Hỗ trợ Paste ảnh trực tiếp từ Clipboard (Ctrl + V)
+  const handlePaste = (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          handleImageFile(file);
+          break;
+        }
+      }
+    }
+  };
 
   // Position state: null by default (fixed bottom-right). Temporary drag only, never persisted.
   const [position, setPosition] = useState(null);
@@ -208,12 +249,18 @@ export default function AiAssistant({ lang, t, theme, currentUser, kpiStats }) {
 
   const sendMessage = useCallback(async () => {
     const text = input.trim();
-    if (!text || loading) return;
+    if ((!text && !selectedImage) || loading) return;
 
-    const userMsg = { role: 'user', content: text };
+    const currentImg = selectedImage;
+    const userMsg = {
+      role: 'user',
+      content: text || (isVi ? 'Phân tích hình ảnh hệ thống này' : 'Analyze this system image'),
+      image: currentImg ? currentImg.previewUrl : null
+    };
     const updatedMessages = [...messages, userMsg];
     setMessages(updatedMessages);
     setInput('');
+    setSelectedImage(null);
     setLoading(true);
 
     try {
@@ -231,7 +278,8 @@ export default function AiAssistant({ lang, t, theme, currentUser, kpiStats }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: updatedMessages.map(m => ({ role: m.role, content: m.content })),
-          systemContext
+          systemContext,
+          image: currentImg ? { base64: currentImg.base64, mimeType: currentImg.mimeType } : null
         })
       });
 
@@ -241,21 +289,55 @@ export default function AiAssistant({ lang, t, theme, currentUser, kpiStats }) {
       }
 
       const data = await res.json();
+      const fullText = cleanAsterisks(data.reply);
+      const provider = data.provider;
+
+      setLoading(false);
+      // Khởi tạo tin nhắn cho hiệu ứng Typewriter Render mượt mà
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: cleanAsterisks(data.reply),
-        provider: data.provider
+        content: '',
+        provider,
+        isTyping: true
       }]);
+
+      if (typingTimerRef.current) clearInterval(typingTimerRef.current);
+      let currIdx = 0;
+      const step = 4;
+      typingTimerRef.current = setInterval(() => {
+        currIdx += step;
+        if (currIdx >= fullText.length) {
+          clearInterval(typingTimerRef.current);
+          setMessages(prev => {
+            const list = [...prev];
+            const last = list[list.length - 1];
+            if (last && last.role === 'assistant') {
+              list[list.length - 1] = { ...last, content: fullText, isTyping: false };
+            }
+            return list;
+          });
+        } else {
+          const partial = fullText.slice(0, currIdx);
+          setMessages(prev => {
+            const list = [...prev];
+            const last = list[list.length - 1];
+            if (last && last.role === 'assistant') {
+              list[list.length - 1] = { ...last, content: partial, isTyping: true };
+            }
+            return list;
+          });
+        }
+      }, 15);
+
     } catch (err) {
+      setLoading(false);
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: cleanAsterisks(err.message),
         isError: true
       }]);
-    } finally {
-      setLoading(false);
     }
-  }, [input, messages, loading, currentUser, kpiStats]);
+  }, [input, messages, loading, currentUser, kpiStats, selectedImage, isVi]);
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -267,8 +349,6 @@ export default function AiAssistant({ lang, t, theme, currentUser, kpiStats }) {
   const clearChat = () => {
     setMessages([]);
   };
-
-  const isVi = lang === 'vi';
 
   return (
     <>
@@ -379,8 +459,14 @@ export default function AiAssistant({ lang, t, theme, currentUser, kpiStats }) {
                   {msg.role === 'user' ? <User size={14} /> : <Terminal size={14} />}
                 </div>
                 <div className={`ai-msg-bubble ${msg.isError ? 'ai-msg-error' : ''}`}>
+                  {msg.image && (
+                    <div style={{ marginBottom: '0.45rem', borderRadius: '8px', overflow: 'hidden', maxWidth: '240px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                      <img src={msg.image} alt="Log screenshot" style={{ width: '100%', height: 'auto', display: 'block' }} />
+                    </div>
+                  )}
                   <div className="ai-msg-text" style={{ whiteSpace: 'pre-wrap', lineHeight: 1.55 }}>
                     {cleanAsterisks(msg.content)}
+                    {msg.isTyping && <span className="typewriter-cursor">▋</span>}
                   </div>
                   {msg.provider && (
                     <span className="ai-msg-provider">via {msg.provider}</span>
@@ -402,22 +488,91 @@ export default function AiAssistant({ lang, t, theme, currentUser, kpiStats }) {
             <div ref={chatEndRef} />
           </div>
 
-          {/* Input */}
-          <div className="ai-input-bar">
+          {/* Selected Image Preview */}
+          {selectedImage && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '0.35rem 0.75rem',
+                background: 'rgba(6, 182, 212, 0.08)',
+                borderTop: '1px solid rgba(6, 182, 212, 0.25)',
+                fontSize: '0.75rem',
+                color: 'var(--accent-primary)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <img
+                  src={selectedImage.previewUrl}
+                  alt="Thumb"
+                  style={{ width: 28, height: 28, objectFit: 'cover', borderRadius: 4, border: '1px solid var(--accent-primary)' }}
+                />
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-primary)' }}>
+                  {isVi ? 'Đã đính kèm ảnh (Gemini Vision)' : 'Image attached for analysis'}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedImage(null)}
+                style={{ background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: 2 }}
+                title="Xóa ảnh"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          )}
+
+          {/* Input Bar */}
+          <div className="ai-input-bar" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.75rem' }}>
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              style={{ display: 'none' }}
+              onChange={e => {
+                if (e.target.files?.[0]) handleImageFile(e.target.files[0]);
+                e.target.value = '';
+              }}
+            />
+            <button
+              type="button"
+              className="ai-attach-btn"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={loading}
+              title={isVi ? 'Tải lên hoặc dán (Ctrl+V) ảnh lỗi/sơ đồ để phân tích' : 'Upload or paste image'}
+              style={{
+                background: selectedImage ? 'rgba(6, 182, 212, 0.2)' : 'transparent',
+                border: 'none',
+                color: selectedImage ? 'var(--accent-primary)' : 'var(--text-secondary)',
+                cursor: 'pointer',
+                padding: '0.4rem',
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s'
+              }}
+            >
+              <ImageIcon size={18} />
+            </button>
+
             <textarea
               ref={inputRef}
               className="ai-input"
-              placeholder={isVi ? 'Nhập câu hỏi về log, anomaly...' : 'Ask about logs, anomalies...'}
+              placeholder={isVi ? 'Hỏi AI, tải lên ảnh hoặc bấm Ctrl+V để dán ảnh...' : 'Ask AI, upload or paste image...'}
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
+              onPaste={handlePaste}
               rows={1}
               disabled={loading}
+              style={{ flex: 1 }}
             />
             <button
               className="ai-send-btn"
               onClick={sendMessage}
-              disabled={!input.trim() || loading}
+              disabled={(!input.trim() && !selectedImage) || loading}
               aria-label="Send"
             >
               <Send size={16} />

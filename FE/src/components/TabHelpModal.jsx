@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, HelpCircle, Activity, AlertTriangle, Search, Cpu, Settings, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { X, HelpCircle, Activity, AlertTriangle, Search, Cpu, Settings, ShieldCheck, CheckCircle2, GitCommit, Layers, Wrench } from 'lucide-react';
 
 const TAB_INFO = {
   overview: {
@@ -7,44 +7,48 @@ const TAB_INFO = {
     titleEn: 'Guide: System Overview Dashboard',
     icon: Activity,
     badgeVi: 'GIÁM SÁT REALTIME',
-    descVi: 'Trung tâm chỉ huy hiển thị tổng quan tình trạng của toàn bộ hệ sinh thái dịch vụ.',
+    descVi: 'Trung tâm chỉ huy hiển thị tổng quan tình trạng của toàn bộ hệ sinh thái dịch vụ vi mô và hạ tầng.',
     sectionsVi: [
       {
         heading: '4 Thẻ Chỉ Số KPI Trực Tiếp',
-        content: 'Tổng số log lưu trữ, số lượng bất thường phát hiện, số mẫu Drain đã trích xuất và tốc độ log thu nạp theo thời gian thực. Bạn có thể bấm trực tiếp vào từng thẻ để chuyển nhanh đến màn hình tương ứng.'
+        content: 'Tổng số log lưu trữ, số lượng bất thường phát hiện, số mẫu Drain đã trích xuất và tốc độ log thu nạp theo thời gian thực. Bấm trực tiếp vào từng thẻ để chuyển nhanh đến màn hình tương ứng.'
       },
       {
-        heading: 'Biểu Đồ Xu Hướng & Phân Phối',
-        content: 'Quan sát tốc độ thu thập log theo từng mốc thời gian và tỷ lệ phân phối giữa các cấp độ INFO, WARN, ERROR, FATAL.'
+        heading: 'Mật Độ Lỗi Theo Khung Giờ (24h Heatmap)',
+        content: 'Trực quan hóa tần suất lỗi theo 24 giờ trong ngày. Căn lề pixel-perfect giữa các cột giờ. Bấm trực tiếp vào bất kỳ ô nào để mở Modal xem chi tiết các lỗi trong khung giờ đó.'
+      },
+      {
+        heading: 'Phân Tích Giờ Cao Điểm & Tỉ Lệ Mức Độ Lỗi',
+        content: 'Thống kê tự động giờ cao điểm hay phát sinh sự cố nhất và phân bố tỷ lệ Critical, Error, Warning để đội SRE chủ động phòng ngừa.'
       },
       {
         heading: 'Luồng Log Streams Realtime',
-        content: 'Hiển thị dữ liệu log đẩy về từ Socket.IO theo thời gian thực với cơ chế cuộn mượt tự động (Infinite Scroll) batch 10 log.'
+        content: 'Hiển thị dữ liệu log đẩy về từ Socket.IO theo thời gian thực với cơ chế cuộn mượt tự động batch 10 log kèm bộ lọc cấp độ tức thì.'
       }
     ]
   },
   anomalies: {
-    titleVi: 'Hướng Dẫn: Giám Sát Bất Thường (3-Tier Anomaly Engine)',
-    titleEn: 'Guide: 3-Tier Anomaly Detection Engine',
+    titleVi: 'Hướng Dẫn: Giám Sát Bất Thường (AIOps Anomaly Engine)',
+    titleEn: 'Guide: AIOps Anomaly Detection Engine',
     icon: AlertTriangle,
     badgeVi: 'AIOPS ENGINE',
-    descVi: 'Cơ chế phát hiện bất thường kết hợp 3 tầng thông minh giúp nhận diện sự cố chuẩn xác.',
+    descVi: 'Cơ chế phát hiện bất thường kết hợp 3 tầng thông minh và 3 phân hệ trực quan hóa chuyên sâu.',
     sectionsVi: [
       {
-        heading: 'Tầng 1: Rule-Based (Từ Khóa Nguy Hiểm)',
-        content: 'Bắt tức thì các lỗi nghiêm trọng định sẵn như OutOfMemory, Connection Refused, Deadlock, NullPointer.'
-      },
-      {
-        heading: 'Tầng 2: Statistical (Thống Kê Z-Score)',
-        content: 'Phát hiện sự đột biến bất thường về tần suất xuất hiện log so với ngưỡng trung bình lịch sử.'
-      },
-      {
-        heading: 'Tầng 3: Machine Learning (Drain Template & Model)',
-        content: 'Bóc tách cấu trúc cú pháp log và sử dụng mô hình học máy để phân loại các hành vi lạ chưa từng gặp.'
+        heading: 'Phát Hiện Bất Thường (Anomaly Events)',
+        content: 'Kết hợp Rule-Based, Thống kê Z-Score và Mô hình Học máy Isolation Forest (ngưỡng anomaly_score >= 0.5) để nhận diện sự cố chuẩn xác. Dữ liệu đồng bộ tức thì với bộ đếm KPI và AI Chatbot.'
       },
       {
         heading: 'Vòng Đời Xử Lý Sự Cố (Incident Lifecycle)',
-        content: 'Hỗ trợ đổi trạng thái (Mới → Tiếp nhận → Đã xử lý) kèm ghi chú phương án khắc phục (Remediation Notes).'
+        content: 'Hỗ trợ cập nhật trạng thái sự cố (MỚI → TIẾP NHẬN → ĐÃ XỬ LÝ) kèm ghi chú nguyên nhân gốc và biện pháp khắc phục.'
+      },
+      {
+        heading: 'Dự Báo Xu Hướng (Time Series Forecast)',
+        content: 'Sử dụng mô hình chuỗi thời gian để dự báo lưu lượng log và cảnh báo sớm các đột biến lỗi trước khi xảy ra sự cố ngừng hệ thống.'
+      },
+      {
+        heading: 'Phân Cụm Không Gian (PCA Clustering)',
+        content: 'Giảm chiều dữ liệu vector hóa log xuống không gian 2D/3D giúp phát hiện các cụm log bất thường tách biệt khỏi hành vi bình thường.'
       }
     ]
   },
@@ -56,37 +60,100 @@ const TAB_INFO = {
     descVi: 'Công cụ truy vấn dữ liệu log tốc độ cao hỗ trợ điều tra sự cố và phân tích chuyên sâu.',
     sectionsVi: [
       {
-        heading: 'Bộ Lọc Đa Chiều',
-        content: 'Tìm kiếm theo từ khóa thông minh, lọc theo cấp độ (INFO, WARN, ERROR, FATAL) và khoảng thời gian linh hoạt với bộ chọn ngày giờ hiện đại.'
+        heading: 'Bộ Lọc Đa Chiều Hiện Đại',
+        content: 'Tìm kiếm theo từ khóa thông minh, lọc theo cấp độ (INFO, WARN, ERROR, FATAL) và khoảng thời gian linh hoạt với Custom Select Dark Mode.'
       },
       {
-        heading: 'Phân Tích Bằng AI (AI Root Cause Analysis)',
-        content: 'Bấm nút "AI Giải Thích" tại bất kỳ dòng log lỗi nào để Trợ lý AI phân tích nguyên nhân gốc và đề xuất giải pháp xử lý.'
+        heading: 'Phân Trang Cuộn Vô Hạn (Infinite Scroll)',
+        content: 'Tự động tải thêm từng đợt 10 log khi người dùng cuộn chuột tới cuối danh sách, tối ưu bộ nhớ trình duyệt.'
       },
       {
-        heading: 'Xuất Báo Cáo Excel Chuẩn (.xlsx)',
-        content: 'Tải toàn bộ kết quả lọc ra file Excel chuyên nghiệp có sẵn thanh bộ lọc dữ liệu (Auto-Filter) và in đậm tiêu đề.'
+        heading: 'Phân Tích Nguyên Nhân Bằng AI (RCA)',
+        content: 'Bấm nút "AI Giải Thích" tại bất kỳ dòng log lỗi nào để Trợ lý AI phân tích nguyên nhân gốc và đề xuất giải pháp xử lý tức thì.'
+      },
+      {
+        heading: 'Xuất Báo Cáo Excel & CSV Chuẩn',
+        content: 'Tải toàn bộ kết quả lọc ra file Excel chuyên nghiệp (.xlsx) có sẵn thanh bộ lọc dữ liệu (Auto-Filter) và CSV định dạng UTF-8.'
       }
     ]
   },
   templates: {
-    titleVi: 'Hướng Dẫn: Khai Phá Mẫu Log Tự Động (Drain Mining)',
+    titleVi: 'Hướng Dẫn: Mẫu Log Tự Động (Drain Mining)',
     titleEn: 'Guide: Drain Log Template Mining',
-    icon: Cpu,
+    icon: Layers,
     badgeVi: 'DRAIN ALGORITHM',
     descVi: 'Thuật toán cây phân tích trực tuyến tự động nhóm hàng triệu dòng log thô thành các mẫu định dạng cấu trúc.',
     sectionsVi: [
       {
-        heading: 'Cơ Chế Bóc Tách Biến Số',
-        content: 'Thay thế các giá trị biến động (IP, User ID, Token, UUID) bằng ký hiệu đại diện <*> để gom nhóm các log cùng loại.'
+        heading: 'Dữ Liệu Thật 100% Từ Hệ Thống',
+        content: 'Khai phá trực tiếp từ OpenSearch và tập dữ liệu log thực tế chuẩn HDFS/BGL với thuật toán Drain bóc tách tham số dynamic.'
       },
       {
-        heading: 'Đánh Giá Bất Thường Cấu Trúc',
-        content: 'Mỗi template được tính toán điểm bất thường (Anomaly Score) dựa trên mức độ hiếm gặp và từ khóa nhạy cảm.'
+        heading: 'Phân Tách Biến Số Tham Số Hóa',
+        content: 'Thay thế các giá trị biến động (IP, ID khối, Mã Hex, Token) bằng ký hiệu đại diện <*> và <IP> để gom nhóm các log cùng loại.'
       },
       {
-        heading: 'Kiểm Thử Nhanh Trên UI',
-        content: 'Bạn chỉ cần bấm nút "Nạp Log Thử Nghiệm" ngay trên giao diện để hệ thống tự động sinh log và trích xuất template tức thì.'
+        heading: 'Kéo Cuộn Vô Hạn (Infinite Scroll 10 Records)',
+        content: 'Tải trước 10 mẫu log đầu tiên, tự động nạp tiếp từng chunk 10 mẫu khi cuộn xuống dưới, giúp trải nghiệm duyệt mượt mà.'
+      }
+    ]
+  },
+  pipeline: {
+    titleVi: 'Hướng Dẫn: Giám Sát Chuỗi Thu Nạp (Pipeline Health)',
+    titleEn: 'Guide: Ingestion Pipeline Health',
+    icon: Cpu,
+    badgeVi: 'PIPELINE TELEMETRY',
+    descVi: 'Theo dõi tình trạng hoạt động, thông lượng và độ trễ của toàn bộ chuỗi tiếp nhận log.',
+    sectionsVi: [
+      {
+        heading: 'Chuỗi Khối Microservices',
+        content: 'Giám sát trạng thái 4 mắt xích cốt lõi: Ingestion Collector, Redis Buffer Queue, Drain Parser Worker và OpenSearch Storage.'
+      },
+      {
+        heading: 'Độ Trễ & Tốc Độ Xử Lý (Throughput & Latency)',
+        content: 'Đo lường thời gian trễ từ khi log phát sinh tới khi lưu trữ (ms) và số lượng log tiếp nhận mỗi giây (EPS).'
+      },
+      {
+        heading: 'Cảnh Báo Nghẽn Hàng Đợi (Queue Lag)',
+        content: 'Cảnh báo tự động khi số lượng log tồn đọng trong Redis Queue vượt ngưỡng an toàn để SRE can thiệp scale worker.'
+      }
+    ]
+  },
+  admin: {
+    titleVi: 'Hướng Dẫn: Quản Trị & Bảo Trì SRE (Maintenance)',
+    titleEn: 'Guide: SRE Administration & Maintenance',
+    icon: Wrench,
+    badgeVi: 'ENTERPRISE SRE',
+    descVi: 'Trung tâm cấu hình cảnh báo, quản lý chế độ bảo trì và các tác vụ tự động hóa nền.',
+    sectionsVi: [
+      {
+        heading: 'Cấu Hình Cảnh Báo Đa Kênh',
+        content: 'Tích hợp cảnh báo thời gian thực qua Discord Webhook và Email SMTP khi phát sinh log FATAL hoặc Anomaly vượt ngưỡng.'
+      },
+      {
+        heading: 'Chế Độ Bảo Trì (Maintenance Mode Silence)',
+        content: 'Bật chế độ bảo trì tạm thời (15p, 30p, 60p) để tạm ngưng gửi cảnh báo rác trong lúc đội kỹ thuật triển khai bản cập nhật.'
+      },
+      {
+        heading: 'Tự Động Dọn Dẹp Log (Retention Cleanup)',
+        content: 'Tác vụ Cron tự động lưu trữ và thanh trừng các bản ghi log quá hạn để tiết kiệm dung lượng ổ đĩa.'
+      }
+    ]
+  },
+  trace: {
+    titleVi: 'Hướng Dẫn: Truy Vết Phân Tán (Distributed Tracing)',
+    titleEn: 'Guide: Distributed Tracing & Span Tree',
+    icon: GitCommit,
+    badgeVi: 'DISTRIBUTED TRACING',
+    descVi: 'Truy vết hành trình của request qua các dịch vụ vi mô để xác định điểm nghẽn hiệu năng.',
+    sectionsVi: [
+      {
+        heading: 'Cây Span & Cuộc Gọi API',
+        content: 'Biểu diễn trực quan cây phân nhánh các lệnh gọi API giữa Gateway, Auth, Order, Payment và Database.'
+      },
+      {
+        heading: 'Thời Gian Thực Thi (Execution Duration)',
+        content: 'Đo lường thời gian xử lý chi tiết của từng mắt xích và tô màu đỏ các span bị nghẽn (bottleneck).'
       }
     ]
   }

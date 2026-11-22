@@ -105,9 +105,21 @@ export function initDatabase() {
       ket_qua TEXT
     );
 
+    -- 8. Bảng tin nhắn nội bộ SRE (Admin <-> Viewer Chat)
+    CREATE TABLE IF NOT EXISTS tin_nhan_noi_bo (
+      id TEXT PRIMARY KEY,
+      nguoi_gui TEXT NOT NULL,
+      vai_tro TEXT NOT NULL DEFAULT 'viewer',
+      ten_hien_thi TEXT NOT NULL,
+      noi_dung TEXT NOT NULL,
+      dinh_kem_log TEXT,
+      thoi_gian DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE INDEX IF NOT EXISTS idx_su_co_trang_thai ON su_co(trang_thai);
     CREATE INDEX IF NOT EXISTS idx_ghi_chu_su_co ON ghi_chu_su_co(su_co_id);
     CREATE INDEX IF NOT EXISTS idx_nhat_ky_thoi_gian ON nhat_ky_he_thong(thoi_gian);
+    CREATE INDEX IF NOT EXISTS idx_tin_nhan_thoi_gian ON tin_nhan_noi_bo(thoi_gian);
   `;
 
   db.exec(schema);
@@ -279,6 +291,61 @@ export function ghiLichSuCron(tenTacVu, trangThai, thoiLuongMs = 0, ketQua = '')
     );
   } catch (err) {
     console.error('[SQLite] Lỗi khi ghi lịch sử cron:', err.message);
+  }
+}
+
+/**
+ * Lưu tin nhắn nội bộ SRE (Admin / Viewer)
+ */
+export function luuTinNhanNoiBo({ id, nguoiGui, vaiTro, tenHienThi, noiDung, dinhKemLog }) {
+  try {
+    const msgId = id || `msg_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    const stmt = db.prepare(`
+      INSERT INTO tin_nhan_noi_bo (id, nguoi_gui, vai_tro, ten_hien_thi, noi_dung, dinh_kem_log)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `);
+    stmt.run(
+      msgId,
+      nguoiGui || 'anonymous',
+      vaiTro || 'viewer',
+      tenHienThi || 'Người dùng',
+      noiDung,
+      dinhKemLog ? (typeof dinhKemLog === 'string' ? dinhKemLog : JSON.stringify(dinhKemLog)) : null
+    );
+    return {
+      id: msgId,
+      nguoi_gui: nguoiGui,
+      vai_tro: vaiTro,
+      ten_hien_thi: tenHienThi,
+      noi_dung: noiDung,
+      dinh_kem_log: dinhKemLog,
+      thoi_gian: new Date().toISOString()
+    };
+  } catch (err) {
+    console.error('[SQLite] Lỗi khi lưu tin nhắn nội bộ:', err.message);
+    return null;
+  }
+}
+
+/**
+ * Lấy danh sách tin nhắn nội bộ gần nhất
+ */
+export function layDanhSachTinNhanNoiBo(limit = 50) {
+  try {
+    const rows = db.prepare(`
+      SELECT id, nguoi_gui, vai_tro, ten_hien_thi, noi_dung, dinh_kem_log, thoi_gian
+      FROM tin_nhan_noi_bo
+      ORDER BY thoi_gian ASC
+      LIMIT ?
+    `).all(limit);
+
+    return rows.map(r => ({
+      ...r,
+      dinh_kem_log: r.dinh_kem_log ? (() => { try { return JSON.parse(r.dinh_kem_log); } catch { return r.dinh_kem_log; } })() : null
+    }));
+  } catch (err) {
+    console.error('[SQLite] Lỗi khi lấy tin nhắn nội bộ:', err.message);
+    return [];
   }
 }
 
