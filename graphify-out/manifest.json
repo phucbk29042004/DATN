@@ -228,8 +228,8 @@
     "semantic_hash": ""
   },
   "FE/src/App.jsx": {
-    "mtime": 1795321914.3227644,
-    "seen": 1795322043.9952965,
+    "mtime": 1795322082.1023538,
+    "seen": 1795322102.3130467,
     "ast_hash": "5334d403003a464db08b25b0205d8336",
     "semantic_hash": ""
   },
@@ -264,14 +264,14 @@
     "semantic_hash": ""
   },
   "FE/src/components/LoginModal.jsx": {
-    "mtime": 1795321914.551462,
-    "seen": 1795322043.995319,
-    "ast_hash": "b6d7b9a709694959e4a41ae43240febf",
+    "mtime": 1795323973.436769,
+    "seen": 1795324043.7958965,
+    "ast_hash": "a5509e8084e86e5706d8c44e86dc8bb0",
     "semantic_hash": ""
   },
   "FE/src/components/PasswordChangeModal.jsx": {
-    "mtime": 1795321914.7849393,
-    "seen": 1795322043.9953213,
+    "mtime": 1795322082.654453,
+    "seen": 1795322102.3130598,
     "ast_hash": "92c58b16f1d18db0e2df0adce08b78d6",
     "semantic_hash": ""
   },
@@ -510,9 +510,9 @@
     "semantic_hash": ""
   },
   "README.md": {
-    "mtime": 1794974761.8382497,
-    "seen": 1795084038.362495,
-    "ast_hash": "5fa7f4f02bbb323aec7f2ce1db9a888e",
+    "mtime": 1795324022.3614695,
+    "seen": 1795324043.7959616,
+    "ast_hash": "fa9009df5ad545e1f705e36310c060ee",
     "semantic_hash": ""
   },
   "desgin.md": {
@@ -522,21 +522,21 @@
     "semantic_hash": ""
   },
   "kientruchethong.md": {
-    "mtime": 1795320564.8291237,
-    "seen": 1795320593.058862,
-    "ast_hash": "82b3391b6d739159871d32c4f77ba94b",
+    "mtime": 1795323957.7097335,
+    "seen": 1795324043.7959647,
+    "ast_hash": "a4b1a07dde2bfc19a1e901e4f33eb921",
     "semantic_hash": ""
   },
   "nghiepvu.md": {
-    "mtime": 1794893184.3961067,
-    "seen": 1795084038.3625064,
-    "ast_hash": "1d7f16a51a8fbebb85c2c18c2d98337b",
+    "mtime": 1795323990.0178647,
+    "seen": 1795324043.7959657,
+    "ast_hash": "2f2e24689b8415cc75dfe3bc9f181144",
     "semantic_hash": ""
   },
   "tiendo.md": {
-    "mtime": 1795322035.505307,
-    "seen": 1795322043.9955623,
-    "ast_hash": "27234b4149226bc1d0354a4b53b316d7",
+    "mtime": 1795324040.3553798,
+    "seen": 1795324043.7959673,
+    "ast_hash": "406c7bbbe98e5313f8f45975796d549d",
     "semantic_hash": ""
   },
   "BE/database/sqlite.js": {

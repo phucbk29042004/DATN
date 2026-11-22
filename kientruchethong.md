@@ -20,11 +20,11 @@ graph TD
 
 | Service | Công Nghệ | Port | Chức Năng |
 | :--- | :--- | :--- | :--- |
-| **Collector Service** | Express.js | `4000` | Tiếp nhận log từ client/streamer qua HTTP API |
+| **Collector Service** | Express.js | `4000` | Tiếp nhận log từ client/streamer qua HTTP API; tích hợp cơ chế Ingestion Fallback ghi trực tiếp SQLite và phát sóng Socket.IO khi collector offline |
 | **Search API & WebSocket** | Express + Socket.IO | `5000` | Cung cấp RESTful Search API, phát sóng log realtime, quản lý cấu hình & phát cảnh báo đa kênh |
-| **Parser Service** | Worker Thread / BullMQ | N/A | Phân tích cấu trúc log (Drain Algorithm), gắn Anomaly Score |
+| **Parser Service** | Worker Thread / BullMQ | N/A | Bóc tách cấu trúc log (Drain Mining trên 100% dữ liệu thật HDFS/BGL/OpenSearch, hỗ trợ Infinite Scroll 10 bản ghi), gắn Anomaly Score |
 | **OpenSearch Storage** | OpenSearch Cluster | `9200` | Lưu trữ chỉ mục log và hỗ trợ tìm kiếm toàn văn |
-| **Frontend UI (Web)** | React + Vite + CSS | `3000` | Giao diện theo dõi log, biểu đồ trực quan, bộ lọc đa năng, xuất báo cáo CSV/XLSX & Modal soi log chi tiết |
+| **Frontend UI (Web)** | React + Vite + CSS | `3000` | Giao diện theo dõi log, biểu đồ trực quan, CustomSelect Dark Mode, Ma trận Heatmap 24h & Modal chi tiết lỗi, SRE Messenger, chú thích 7 Tab |
 | **Mobile App (Expo)** | React Native + Expo | `8081` | Ứng dụng di động đa nền tảng (iOS/Android) 5 Tabs chuẩn Elevated Dock, Role-based Navigation, Realtime Socket.IO & Trợ lý AI nổi toàn cục |
 | **Multi-Channel Alerts** | Discord Webhook + Nodemailer | HTTPS / SMTP | Gửi tin nhắn tức thì sang Discord & gửi email báo cáo sự cố qua Gmail hoàn toàn miễn phí |
 | **ML API (Python)** | FastAPI + scikit-learn | `8000` | Serve Isolation Forest & Logistic Regression real-time qua `POST /predict` |

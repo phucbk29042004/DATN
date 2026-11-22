@@ -1,17 +1,17 @@
 # Graph Report - DATN  (2026-11-22)
 
 ## Corpus Check
-- 96 files · ~98,449 words
+- 96 files · ~98,961 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 12 file(s) not represented in the graph (top: (none) 2, .example 2, .log 2)
 
 ## Summary
-- 716 nodes · 1357 edges · 30 communities (28 shown, 2 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 17 edges (avg confidence: 0.86)
+- 717 nodes · 1357 edges · 30 communities (28 shown, 2 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 16 edges (avg confidence: 0.86)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `23eb64c6`
+- Built from commit: `6d00868b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -59,16 +59,16 @@
 10. `lucide-react` - 14 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `[16/11/2026 18:45] — Nâng Cấp Toàn Diện UX/UI Mobile: Khắc Phục KPI, Biểu Đồ Đường SVG, Tìm Kiếm Trực Tiếp, Toast & Modal Cài Đặt` --references--> `SvgLineChart()`  [INFERRED]
-  tiendo.md → Mobile/src/components/SvgLineChart.js
 - `[20/11/2026 19:58] — Kích Hoạt Luồng Stream Log Realtime Thông Minh & Bộ Đếm KPI Tự Tăng` --references--> `startCloudLogStreamer()`  [INFERRED]
   tiendo.md → BE/search-api/index.js
-- `App()` --calls--> `AdminSettingsModal()`  [EXTRACTED]
-  FE/src/App.jsx → FE/src/components/AdminSettingsModal.jsx
-- `App()` --calls--> `CronJobsModal()`  [EXTRACTED]
-  FE/src/App.jsx → FE/src/components/CronJobsModal.jsx
-- `App()` --calls--> `CustomDateTimePicker()`  [EXTRACTED]
-  FE/src/App.jsx → FE/src/components/CustomDateTimePicker.jsx
+- `runFullEvaluation()` --calls--> `loadBglDataset()`  [EXTRACTED]
+  BE/benchmark/full_evaluation.js → BE/datasets/bgl/bglLoader.js
+- `main()` --calls--> `vectorizeDataset()`  [EXTRACTED]
+  BE/datasets/bgl/generate_vectors.js → BE/anomaly-engine/template-mining/vectorizer.js
+- `main()` --calls--> `vectorizeDataset()`  [EXTRACTED]
+  BE/datasets/hdfs/generate_vectors.js → BE/anomaly-engine/template-mining/vectorizer.js
+- `runFullEvaluation()` --calls--> `loadHdfsDataset()`  [EXTRACTED]
+  BE/benchmark/full_evaluation.js → BE/datasets/hdfs/hdfsLoader.js
 
 ## Import Cycles
 - None detected.
@@ -117,7 +117,7 @@ Nodes (37): Border Radius Scale, Brand & Accent, Brand Gradient, Breakpoints, Bu
 
 ### Community 10 - "4. CÁC QUY TRÌNH NGHIỆP VỤ CỐT LÕI (CORE BUSINESS WORKFLOWS)"
 Cohesion: 0.08
-Nodes (23): 1.1. Bài toán thực tế, 1.2. Mục tiêu của hệ thống LogPulse, 1. TỔNG QUAN & BỐI CẢNH NGHIỆP VỤ, 2.1. Quản trị viên hệ thống (Admin / DevOps Lead), 2.2. Người giám sát & Kỹ sư vận hành (Viewer / SOC Analyst / L1 Support), 2. ĐỐI TƯỢNG NGƯỜI DÙNG & VAI TRÒ (ACTORS & PERSONAS), 3. MA TRẬN PHÂN QUYỀN TRUY CẬP (RBAC MATRIX), 4. CÁC QUY TRÌNH NGHIỆP VỤ CỐT LÕI (CORE BUSINESS WORKFLOWS) (+15 more)
+Nodes (24): 1.1. Bài toán thực tế, 1.2. Mục tiêu của hệ thống LogPulse, 1. TỔNG QUAN & BỐI CẢNH NGHIỆP VỤ, 2.1. Quản trị viên hệ thống (Admin / DevOps Lead), 2.2. Người giám sát & Kỹ sư vận hành (Viewer / SOC Analyst / L1 Support), 2. ĐỐI TƯỢNG NGƯỜI DÙNG & VAI TRÒ (ACTORS & PERSONAS), 3. MA TRẬN PHÂN QUYỀN TRUY CẬP (RBAC MATRIX), 4. CÁC QUY TRÌNH NGHIỆP VỤ CỐT LÕI (CORE BUSINESS WORKFLOWS) (+16 more)
 
 ### Community 11 - "expo"
 Cohesion: 0.13
@@ -129,7 +129,7 @@ Nodes (40): buildBglTimeWindows(), loadBglDataset(), parseBglLogFile(), __dirnam
 
 ### Community 13 - "Nhật Ký Cập Nhật (Chronological Log)"
 Cohesion: 0.09
-Nodes (21): [16/11/2026 18:45] — Nâng Cấp Toàn Diện UX/UI Mobile: Khắc Phục KPI, Biểu Đồ Đường SVG, Tìm Kiếm Trực Tiếp, Toast & Modal Cài Đặt, [17/11/2026 12:20] — Chuẩn Hóa Vòng Đời Sự Cố SRE (Priority, RCA, Actions), Nâng Tầm Quyền Viewer & Căn Chỉnh Icon AI Chatbot, [18/11/2026 11:15] — Triển Khai Toàn Diện Bộ Kịch Bản Benchmark Thông Lượng & Đánh Giá Định Lượng Mô Hình (F1-Score / HDFS & BGL), [18/11/2026 12:28] — Xây Dựng Đồ Thị Tri Thức Codebase (Graphify) & Trích Xuất Dữ Liệu graph.json, [18/11/2026 12:42] — Khắc Phục Lỗi Hiển Thị Trắng Màn Hình & Hoàn Thiện Giao Diện Trực Quan Graphify (graph.html), [19/11/2026 17:20] — Chuẩn Hóa Bảng Màu Light Mode, Tái Thiết Kế Login Mobile & Dọn Dẹp Toàn Bộ Icon AI / Emoji Console Logs, [19/11/2026 18:08] — Thiết Kế Lại 3 Nút Trạng Thái, Khắc Phục Lỗi Nhấp Nháy Nút Truy Vấn & Bổ Sung Bottom Nav Mobile Trên Web, [19/11/2026 18:22] — Sửa Lỗi Hiển Thị Thanh Điều Hướng Đáy & Tinh Chỉnh Cỡ Chữ Sidebar Mobile Vừa Vặn (+13 more)
+Nodes (21): [17/11/2026 12:20] — Chuẩn Hóa Vòng Đời Sự Cố SRE (Priority, RCA, Actions), Nâng Tầm Quyền Viewer & Căn Chỉnh Icon AI Chatbot, [18/11/2026 11:15] — Triển Khai Toàn Diện Bộ Kịch Bản Benchmark Thông Lượng & Đánh Giá Định Lượng Mô Hình (F1-Score / HDFS & BGL), [18/11/2026 12:28] — Xây Dựng Đồ Thị Tri Thức Codebase (Graphify) & Trích Xuất Dữ Liệu graph.json, [18/11/2026 12:42] — Khắc Phục Lỗi Hiển Thị Trắng Màn Hình & Hoàn Thiện Giao Diện Trực Quan Graphify (graph.html), [19/11/2026 17:20] — Chuẩn Hóa Bảng Màu Light Mode, Tái Thiết Kế Login Mobile & Dọn Dẹp Toàn Bộ Icon AI / Emoji Console Logs, [19/11/2026 18:08] — Thiết Kế Lại 3 Nút Trạng Thái, Khắc Phục Lỗi Nhấp Nháy Nút Truy Vấn & Bổ Sung Bottom Nav Mobile Trên Web, [19/11/2026 18:22] — Sửa Lỗi Hiển Thị Thanh Điều Hướng Đáy & Tinh Chỉnh Cỡ Chữ Sidebar Mobile Vừa Vặn, [19/11/2026 19:30] — Tích Hợp SQLite Database 7 Bảng Chuẩn Doanh Nghiệp & Cấu Hình Triển Khai Vercel (FE) + Render (BE) (+13 more)
 
 ### Community 14 - "queue/config.js"
 Cohesion: 0.16
@@ -189,20 +189,20 @@ Nodes (13): dotenv@^16.4.5, addToBuffer(), flushBuffer(), logBuffer, logParserWo
 
 ## Knowledge Gaps
 - **1 isolated node(s):** `RFC-3164`
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 301 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 303 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **2 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Nhật Ký Cập Nhật (Chronological Log)` connect `Nhật Ký Cập Nhật (Chronological Log)` to `search-api/index.js`?**
-  _High betweenness centrality (0.289) - this node is a cross-community bridge._
+- **Why does `[20/11/2026 19:58] — Kích Hoạt Luồng Stream Log Realtime Thông Minh & Bộ Đếm KPI Tự Tăng` connect `search-api/index.js` to `Nhật Ký Cập Nhật (Chronological Log)`?**
+  _High betweenness centrality (0.025) - this node is a cross-community bridge._
 - **What connects `RFC-3164` to the rest of the system?**
   _1 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `useTheme` be split into smaller, more focused modules?**
   _Cohesion score 0.0686456400742115 - nodes in this community are weakly interconnected._
-- **Why does `[20/11/2026 19:58] — Kích Hoạt Luồng Stream Log Realtime Thông Minh & Bộ Đếm KPI Tự Tăng` connect `search-api/index.js` to `Nhật Ký Cập Nhật (Chronological Log)`?**
-  _High betweenness centrality (0.271) - this node is a cross-community bridge._
+- **Why does `Nhật Ký Cập Nhật (Chronological Log)` connect `Nhật Ký Cập Nhật (Chronological Log)` to `search-api/index.js`?**
+  _High betweenness centrality (0.024) - this node is a cross-community bridge._
 - **Should `scripts` be split into smaller, more focused modules?**
   _Cohesion score 0.125 - nodes in this community are weakly interconnected._
 - **Should `full_evaluation.js` be split into smaller, more focused modules?**

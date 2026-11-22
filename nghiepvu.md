@@ -96,6 +96,7 @@ Hệ thống được thiết kế phục vụ 2 nhóm đối tượng người 
 | **Ghi chú điều tra sự cố (Investigation Notes)** | ✅ Có | ✅ Có | Viewer & Admin cùng ghi chú phân tích, log trace |
 | **Giải quyết sự cố (RESOLVED & SRE Report)** | ✅ Có | 👁️ Xem | Admin chọn Root Cause & Action Taken chuẩn SRE |
 | **Xem biên bản nghiệm thu sự cố (SRE Report)** | ✅ Có | ✅ Có | Minh bạch nguyên nhân & hành động khắc phục |
+| **Trao đổi SRE Messenger & Đính kèm log** | ✅ Có | ✅ Có | Nhắn tin thời gian thực giữa Admin và Viewer |
 | **Bật / Tắt chế độ bảo trì (Silence Mode)** | ✅ Có | ❌ Bị khóa | Viewer chỉ thấy trạng thái đang bật/tắt |
 | **Chỉnh sửa từ khóa cảnh báo (Alert Keywords)** | ✅ Có | ❌ Bị khóa | Nút thêm/xóa tag bị vô hiệu hóa với Viewer |
 | **Thay đổi ngưỡng Anomaly Score / Cooldown** | ✅ Có | ❌ Bị khóa | Nút "Lưu Cấu Hình" bị ẩn/khóa với Viewer |
@@ -154,14 +155,15 @@ flowchart TD
 
 ---
 
-### Quy trình 2: Bóc tách cấu trúc log tự động (Drain Algorithm)
+### Quy trình 2: Bóc tách cấu trúc log tự động (Drain Algorithm) & Khai phá mẫu log
 - **Mục đích**: Chuyển đổi các dòng log thô phi cấu trúc thành mẫu log chuẩn hóa (Template) có thể phân tích được bằng máy.
 - **Các bước thực hiện**:
-  1. Parser Worker lấy từng job từ BullMQ ra xử lý.
+  1. Parser Worker lấy từng job từ BullMQ ra xử lý, hoặc trích xuất trực tiếp từ 100% dữ liệu log thật của hệ thống (OpenSearch/HDFS/BGL).
   2. Áp dụng thuật toán **Drain** (cấu trúc cây chiều sâu cố định):
-     - Lọc bỏ các giá trị biến thiên (IP, ID tiến trình, số khối block, hex address, đường dẫn tệp).
+     - Lọc bỏ các giá trị biến thiên (IP, ID tiến trình, số khối block, hex address, UUID, đường dẫn tệp) thành các token `<*>`, `<IP>`, `<HEX>`, `<UUID>`.
      - Ánh xạ dòng log về một mẫu tổng quát, ví dụ: `Received block <*> of size <*> from <*>`.
   3. Trích xuất các tham số động vào mảng dữ liệu phục vụ điều tra chuyên sâu.
+  4. Hỗ trợ hiển thị trên Tab **"Mẫu Log Tự Động (Drain Mining)"** với cơ chế kéo cuộn vô hạn (Infinite Scroll 10 bản ghi/lần) tối ưu hóa hiệu năng render.
 
 ---
 
@@ -235,7 +237,9 @@ flowchart TD
       3. *Hành động khắc phục đề xuất (Remediation Actions)*: Các câu lệnh cụ thể, các file cấu hình cần kiểm tra.
   - **Trợ lý trò chuyện thông minh (Floating Copilot)**:
     - Kỹ sư có thể mở thanh chat ở góc phải màn hình để hỏi đáp tự do về cách tối ưu hệ sinh thái, cấu hình OpenSearch, hoặc giải thích các hiện tượng lạ trong hệ thống.
-  - **Kiến trúc High Availability (HA)**: Kết hợp gọi **Groq API** (`llama-3.3-70b-versatile`) với tốc độ suy luận cực nhanh làm kênh chính; tự động chuyển đổi sang **Google Gemini API** (`gemini-2.0-flash`) làm kênh dự phòng khi gặp sự cố mạng hoặc cạn quota.
+    - **Hiệu ứng Typewriter Render**: Phản hồi được sinh dần từng từ mượt mà, trực quan.
+    - **Multimodal Vision (Phân tích ảnh chụp)**: Hỗ trợ người dùng kéo thả, upload hoặc dán trực tiếp (`Ctrl + V`) ảnh chụp màn hình terminal, sơ đồ kiến trúc, mã lỗi để Trợ lý Gemini phân tích và đưa ra giải pháp ngay trong khung chat.
+  - **Kiến trúc High Availability (HA)**: Kết hợp gọi **Groq API** (`llama-3.3-70b-versatile`) với tốc độ suy luận cực nhanh làm kênh chính; tự động chuyển đổi sang **Google Gemini API** (`gemini-2.0-flash`) làm kênh dự phòng khi gặp sự cố mạng hoặc cạn quota, đồng thời đảm nhiệm phân tích thị giác đa phương thức (Multimodal Vision).
 
 ---
 
@@ -269,9 +273,20 @@ flowchart TD
 
 ### Quy trình 9: Tra cứu, Soi chi tiết log & Xuất báo cáo CSV
 - **Mục đích**: Phục vụ việc tra cứu, kiểm toán và báo cáo số liệu cho các bên liên quan.
-- **Tìm kiếm đa năng**: Tìm kiếm toàn văn theo từ khóa, lọc đồng thời theo Service, Mức độ nghiêm trọng (Level), Khoảng thời gian và Trạng thái bất thường.
+- **Tìm kiếm đa năng**: Tìm kiếm toàn văn theo từ khóa, lọc đồng thời theo Service, Mức độ nghiêm trọng (Level), Khoảng thời gian và Trạng thái bất thường qua bộ chọn `CustomSelect` Dark Mode.
 - **Chế độ tạm dừng phát sóng (Pause/Resume)**: Cho phép kỹ sư bấm "Tạm dừng" để cố định danh sách log khi đang đọc soi lỗi mà không bị các dòng log mới đẩy trôi màn hình.
+- **Ma trận Heatmap 24h tương tác**: Căn chuẩn CSS Grid `repeat(24, 28px)` giữa giờ và ô dữ liệu, click vào từng ô mở Modal soi danh sách các log lỗi trong khung giờ đó, đi kèm thống kê giờ cao điểm và khuyến nghị SRE.
 - **Xuất dữ liệu CSV**: Bấm nút **"Xuất CSV"** để tải về tệp tin bảng tính chứa đầy đủ các trường thông tin log hiện đang lọc để lập báo cáo kỹ thuật.
+
+---
+
+### Quy trình 10: Kênh trao đổi nội bộ thời gian thực SRE Messenger (Admin <-> Viewer)
+- **Mục đích**: Cung cấp kênh liên lạc tức thì tại hiện trường giữa Quản Trị Viên (Admin) và Kỹ Sư Trực Ban (Viewer) để phối hợp xử lý sự cố mà không cần chuyển ngữ cảnh sang ứng dụng chat bên ngoài.
+- **Cơ chế hoạt động**:
+  - Giao tiếp thời gian thực 2 chiều qua kết nối WebSocket (`Socket.IO`) và lưu trữ bền vững trong bảng `tin_nhan_noi_bo` của SQLite Enterprise.
+  - Hỗ trợ ghim/gắn thẻ (`tag`) trực tiếp bản ghi log sự cố hoặc dòng log nghi vấn vào tin nhắn.
+  - Người nhận chỉ cần bấm vào thẻ log đính kèm là có thể mở ngay Modal xem chi tiết sự cố với đầy đủ stack trace, Drain template và Anomaly Score.
+  - Phân định rõ ràng huy hiệu vai trò `ADMIN` (màu xanh tím) và `VIEWER` (màu lam ngọc) kèm mốc thời gian chi tiết.
 
 ---
 

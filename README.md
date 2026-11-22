@@ -2,7 +2,7 @@
 
 Dự án Đồ án tốt nghiệp Công nghệ Thông tin: **"Nghiên cứu và xây dựng hệ thống phân tích log tập trung và phát hiện bất thường"**.
 
-Hệ thống được thiết kế theo kiến trúc **Microservices & Event-Driven**, đáp ứng thông lượng cao, phân tích cấu trúc log thời gian thực bằng thuật toán **Drain**, phát hiện bất thường đa tầng (**Rule-based, Thống kê Z-Score, Học máy Isolation Forest & Logistic Regression**), tích hợp **Trợ lý AI LogPulse Copilot (Groq / Gemini)**, cảnh báo đa kênh (**Discord & Gmail SMTP**), quản lý vòng đời sự cố và giám sát sức khỏe pipeline toàn diện.
+Hệ thống được thiết kế theo kiến trúc **Microservices & Event-Driven**, đáp ứng thông lượng cao, phân tích cấu trúc log thời gian thực bằng thuật toán **Drain**, phát hiện bất thường đa tầng (**Rule-based, Thống kê Z-Score, Học máy Isolation Forest & Logistic Regression**), tích hợp **Trợ lý AI LogPulse Copilot (Groq / Gemini Multimodal Vision)**, kênh trao đổi nội bộ **SRE Messenger**, cơ sở dữ liệu bền vững **SQLite Enterprise 8 bảng**, cảnh báo đa kênh (**Discord & Gmail SMTP**), quản lý vòng đời sự cố và giám sát sức khỏe pipeline toàn diện.
 
 ---
 
@@ -12,12 +12,14 @@ Hệ thống được thiết kế theo kiến trúc **Microservices & Event-Dri
 | :---: | :--- | :--- | :---: | :--- |
 | **1** | **Redis Server** | Redis / In-memory | `6379` | Hàng đợi đệm log tải cao BullMQ & Pub/Sub |
 | **2** | **OpenSearch Database** | OpenSearch Cluster | `9200` | Cơ sở dữ liệu phân tán lưu trữ chỉ mục & tìm kiếm toàn văn log |
-| **3** | **Collector Service** | Express.js (Node.js) | `4000` | Tiếp nhận log từ các máy chủ/client qua HTTP API (`/single`, `/batch`) |
-| **4** | **Parser Worker** | BullMQ Worker | N/A | Bóc tách cấu trúc log (Drain), tính toán điểm Anomaly Score, nạp OpenSearch |
+| **3** | **Collector Service** | Express.js (Node.js) | `4000` | Tiếp nhận log từ máy chủ/client qua HTTP API; tích hợp cơ chế Ingestion Fallback khi collector offline |
+| **4** | **Parser Worker** | BullMQ Worker | N/A | Bóc tách cấu trúc log (Drain Mining trên dữ liệu thật HDFS/BGL), tính toán Anomaly Score |
 | **5** | **Search API & WebSocket** | Express + Socket.IO | `5000` | Cung cấp REST API tìm kiếm, phát sóng log realtime, quản lý cấu hình & cảnh báo |
-| **6** | **Frontend Dashboard (Web)** | React 18 + Vite | `3000` | Giao diện giám sát trực quan, biểu đồ thời gian thực, quản lý sự cố, trợ lý AI |
+| **6** | **Frontend Dashboard (Web)** | React 18 + Vite | `3000` | Giao diện giám sát trực quan, biểu đồ thời gian thực, CustomSelect Dark Mode, Heatmap 24h, SRE Messenger |
 | **7** | **Mobile App (Expo)** | React Native (Expo) | `8081` | Ứng dụng di động giám sát 5 Tabs, phân quyền Admin/Viewer, Realtime Stream & AI Bubble |
 | **8** | **ML API Service** *(Tùy chọn)* | FastAPI + scikit-learn | `8000` | Phục vụ dự đoán mô hình Machine Learning trực tiếp qua HTTP API |
+| **9** | **Enterprise SQLite Database** | SQLite 3 (WAL mode) | N/A (file `sre_enterprise.sqlite`) | CSDL quan hệ bền vững 8 bảng (người dùng RBAC, sự cố, ghi chú, cấu hình, kiểm toán, tin nhắn nội bộ) |
+| **10** | **SRE Internal Messenger** | Socket.IO + SQLite | `:5000` | Kênh trao đổi thời gian thực giữa Admin và Viewer, đính kèm thẻ log sự cố |
 
 ---
 
@@ -176,8 +178,10 @@ Hệ thống hỗ trợ cơ chế xác thực JWT và phân quyền theo vai tr�
 
 ## 🌟 HƯỚNG DẪN TRẢI NGHIỆM CÁC TÍNH NĂNG NỔI BẬT
 
-1. **Trợ lý AI LogPulse Copilot (RCA & Chatbot)**:
-   - Nhấp vào biểu tượng bot neon nổi ở góc dưới bên phải màn hình để chat trực tiếp với AI về tình trạng hệ thống (icon kéo thả tự do, khung chat cố định góc phải, khi đóng icon tự động trở về vị trí góc phải).
+1. **Trợ lý AI LogPulse Copilot (RCA, Multimodal Vision & Chatbot)**:
+   - Nhấp vào biểu tượng bot neon nổi ở góc dưới bên phải màn hình để chat trực tiếp với AI về tình trạng hệ thống.
+   - **Typewriter Render**: Phản hồi được sinh từng từ mượt mà, trực quan.
+   - **Multimodal Vision**: Hỗ trợ kéo thả, upload hoặc dán (`Ctrl + V`) ảnh chụp terminal, sơ đồ hoặc mã lỗi để Gemini phân tích trực tiếp.
    - Nhấp vào bất kỳ dòng log nào trên bảng log ➔ Trong cửa sổ Modal xem chi tiết log, bấm nút **"🤖 Phân tích cùng AI"** để AI tự động phân tích nguyên nhân gốc rễ (Root Cause) và đưa ra các hành động khắc phục cụ thể.
 2. **Quản Lý Vòng Đời Sự Cố Chuẩn SRE (SRE Incident Lifecycle)**:
    - Chuyển sang tab **Bất Thường (Anomalies)** trên Web hoặc màn hình Sự Cố trên Mobile: Lọc các sự cố theo trạng thái `TẤT CẢ`, `MỚI (NEW)`, `ĐÃ TIẾP NHẬN (ACK)`, `ĐÃ XỬ LÝ (RESOLVED)`.
@@ -199,3 +203,8 @@ Hệ thống hỗ trợ cơ chế xác thực JWT và phân quyền theo vai tr�
    - Thêm hoặc xóa trực tiếp các từ khóa cảnh báo trên giao diện web (dạng Tags) mà không cần phải can thiệp sửa code backend.
 8. **Đa Ngôn Ngữ & Chế Độ Sáng/Tối**:
    - Dễ dàng chuyển đổi linh hoạt giữa giao diện **Tiếng Việt / English** và **Chế độ Sáng / Tối (Light/Dark Mode)** trên thanh Header.
+9. **Kênh Liên Lạc Nội Bộ SRE Messenger**:
+   - Mở cửa sổ chat nội bộ góc dưới bên phải để trao đổi trực tiếp thời gian thực giữa Admin và Viewer, hỗ trợ ghim/gắn thẻ (`tag`) trực tiếp bản ghi log sự cố vào cuộc trò chuyện.
+10. **Khai Phá Mẫu Log Tự Động (Drain Mining) & Ma Trận Heatmap 24h Tương Tác**:
+   - Bóc tách mẫu log tự động từ 100% dữ liệu thật (OpenSearch/HDFS/BGL), hỗ trợ kéo cuộn vô hạn (Infinite Scroll 10 bản ghi/lần).
+   - Ma trận Heatmap 24h căn chuẩn CSS Grid 24 cột giờ, nhấp vào từng ô để mở Modal xem chi tiết lỗi và bảng phân tích giờ cao điểm SRE.

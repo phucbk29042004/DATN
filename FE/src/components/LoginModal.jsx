@@ -46,8 +46,8 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
       });
 
       if (res.status === 405) {
-        throw new Error(isVi 
-          ? 'Không thể kết nối đến máy chủ Backend (405 Method Not Allowed).' 
+        throw new Error(isVi
+          ? 'Không thể kết nối đến máy chủ Backend (405 Method Not Allowed).'
           : 'Cannot connect to Backend server (405 Method Not Allowed).');
       }
 
@@ -66,8 +66,8 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
       if (onClose) onClose();
     } catch (err) {
       if (err.message.includes('Failed to fetch')) {
-        setError(isVi 
-          ? 'Không thể kết nối đến máy chủ Backend. Vui lòng kiểm tra lại dịch vụ.' 
+        setError(isVi
+          ? 'Không thể kết nối đến máy chủ Backend. Vui lòng kiểm tra lại dịch vụ.'
           : 'Cannot connect to Backend server. Please check service status.');
       } else {
         setError(err.message);
@@ -81,7 +81,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
     <div className="login-portal-wrapper">
       <div className="login-portal-card" onClick={e => e.stopPropagation()}>
         {/* Left Column: Bức ảnh trung tâm dữ liệu giám sát cao cấp */}
-        <div 
+        <div
           className="login-banner-side"
           style={{
             backgroundImage: `linear-gradient(180deg, rgba(15, 23, 42, 0.45) 0%, rgba(15, 23, 42, 0.92) 100%), url('https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1000&q=80')`,
@@ -124,7 +124,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
               {isVi ? 'Hạ Tầng Giám Sát Phân Tán' : 'Distributed Monitoring Platform'}
             </h2>
             <p style={{ fontSize: '0.82rem', margin: 0, opacity: 0.8, lineHeight: 1.5 }}>
-              {isVi 
+              {isVi
                 ? 'Hệ thống AIOps phát hiện bất thường và giám sát tập trung chuẩn doanh nghiệp.'
                 : 'Enterprise AIOps anomaly detection and centralized monitoring system.'}
             </p>
@@ -136,7 +136,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess, lang }) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.2rem' }}>
             <div>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0 0 4px 0', color: 'var(--text-primary)' }}>
-                {isVi ? 'Đăng Nhập Cổng Giám Sát' : 'Sign In to Portal'}
+                {isVi ? 'Đăng Nhập' : 'Sign In to Portal'}
               </h3>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>
                 {isVi ? 'Vui lòng nhập thông tin tài khoản quản trị' : 'Please enter your administrator credentials'}

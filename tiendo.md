@@ -2,6 +2,15 @@
 
 ## Nhật Ký Cập Nhật (Chronological Log)
 
+### [22/11/2026 12:07] — Đồng Bộ Toàn Diện Tài Liệu Hệ Thống: kientruchethong.md, nghiepvu.md & README.md
+- **Loại**: Cập nhật tài liệu kiến trúc & nghiệp vụ (Documentation / System & Business Sync)
+- **File**: `kientruchethong.md`, `nghiepvu.md`, `README.md`, `tiendo.md`
+- **Mô tả**:
+  1. `kientruchethong.md`: Bổ sung Ingestion Fallback Engine và Drain Mining trên dữ liệu thật với Infinite Scroll 10 bản ghi.
+  2. `nghiepvu.md`: Cập nhật bảng RBAC, bổ sung Quy trình 10 SRE Messenger gắn thẻ log sự cố, AI Multimodal Vision và Heatmap 24h Modal.
+  3. `README.md`: Thêm CSDL SQLite Enterprise 8 bảng, SRE Messenger, Ingestion Fallback và trải nghiệm Gemini Vision vào bảng dịch vụ & tính năng nổi bật.
+- **Kết quả**: Cả 3 file tài liệu cốt lõi đã đồng bộ 100% với mã nguồn hiện hành của dự án.
+
 ### [22/11/2026 11:33] — Sửa Lỗi ReferenceError MessageSquare & Bổ Sung Chuẩn Autocomplete Cho Form Đăng Nhập
 - **Loại**: Sửa lỗi giao diện & Chuẩn hóa DOM Form (Bug Fix & Accessibility / DOM Standards)
 - **File**: `FE/src/App.jsx`, `FE/src/components/LoginModal.jsx`, `FE/src/components/PasswordChangeModal.jsx`, `tiendo.md`
@@ -177,15 +186,3 @@
   3. **Chuẩn hóa vòng đời sự cố SRE**: Tiếp nhận sự cố (gán mức độ ưu tiên P1/P2/P3), lưu vết ghi chú điều tra nhiều bên (Viewer & Admin), nghiệm thu đóng sự cố (chọn Root Cause, Action Taken, Resolution Note). Đồng bộ đầy đủ dữ liệu và giao diện tức thì trên cả Web và Mobile App.
   4. **Rà soát và cập nhật đồng bộ 4 tài liệu cốt lõi**: `kientruchethong.md`, `nghiepvu.md`, `PROJECT_CONTEXT.md`, `README.md`; đảm bảo tính toàn vẹn và khớp 100% với đề cương đồ án tốt nghiệp.
 - **Kết quả**: Kiểm thử Babel và esbuild đạt 100% không lỗi, các tài liệu hệ thống đồng bộ chuẩn xác.
-
-### [16/11/2026 18:45] — Nâng Cấp Toàn Diện UX/UI Mobile: Khắc Phục KPI, Biểu Đồ Đường SVG, Tìm Kiếm Trực Tiếp, Toast & Modal Cài Đặt
-- **Loại**: Cải tiến giao diện & Tính năng Mobile + Web (UX/UI Overhaul, Live Search, SVG Charts, Toast System, Modals)
-- **File**: `Mobile/src/screens/home/DashboardScreen.js`, `Mobile/src/components/KpiCard.js`, `Mobile/src/screens/anomalies/AnomaliesScreen.js`, `Mobile/src/components/SvgLineChart.js`, `Mobile/src/screens/quickAction/QuickActionScreen.js`, `Mobile/src/screens/profile/ProfileScreen.js`, `Mobile/src/context/ToastContext.js`, `FE/src/App.jsx`, `BE/search-api/opensearchQueries.js`, `tiendo.md`
-- **Mô tả**:
-  1. Đồng bộ dữ liệu KPI Mobile từ `/stats/kpi`, loại bỏ dấu `-`, cho phép bấm từng thẻ KPI chuyển nhanh sang các tab Tra cứu, Sự cố, Mẫu Drain và cuộn tới bảng Realtime Log Streams.
-  2. Bổ sung bảng luồng log thời gian thực full-width tại màn hình Tổng quan Mobile tương tự Web kèm modal xem chi tiết.
-  3. Xây dựng biểu đồ đường động chuẩn SVG `SvgLineChart` hiển thị lưu lượng log và diễn biến điểm số bất thường (kèm ngưỡng 0.7) thay thế biểu đồ cột thô sơ.
-  4. Nâng cấp tìm kiếm đa trường không phân biệt hoa thường (`phrase_prefix` khớp cả service_name và message), bổ sung bộ lọc khung giờ (1h, 24h, 7d, Tất cả) và tính năng gõ tới đâu tìm tới đó (live debounce 300ms) trên cả Web và Mobile.
-  5. Xây dựng hệ thống Toast thông báo trạng thái tải dữ liệu trên Mobile mượt mà, chuyên nghiệp.
-  6. Chuyển đổi "Đổi mật khẩu" và "Cấu hình báo cáo" sang dạng slide-up Modal trực tiếp tại tab Tài khoản, loại bỏ việc chuyển màn hình gây khó chịu.
-- **Kết quả**: Kiểm thử Babel và esbuild đạt 100% không lỗi, giao diện hiện đại phẳng chuẩn Enterprise.
