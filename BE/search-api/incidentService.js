@@ -71,12 +71,22 @@ export function updateIncidentStatus(id, status, user = {}, noteText = '', meta 
   }
 
   const existing = getIncidentStmt.get(id);
+  if (existing && existing.trang_thai === 'RESOLVED' && status === 'NEW') {
+    throw new Error('Không thể chuyển ngược sự cố đã RESOLVED về trạng thái NEW');
+  }
+
   const now = new Date().toISOString();
   const userName = user.displayName || user.username || 'System Admin';
 
   const priority = meta.priority || (existing ? existing.muc_do_uu_tien : 'P2');
   const root_cause = meta.root_cause !== undefined ? meta.root_cause : (existing ? existing.nguyen_nhan_goc : null);
   const action_taken = meta.action_taken !== undefined ? meta.action_taken : (existing ? existing.bien_phap_xu_ly : null);
+
+  if (status === 'RESOLVED') {
+    if (!root_cause || !String(root_cause).trim() || !action_taken || !String(action_taken).trim()) {
+      throw new Error('Khi đóng sự cố (RESOLVED) bắt buộc phải nhập Nguyên nhân gốc (root_cause) và Biện pháp khắc phục (action_taken)');
+    }
+  }
   let acknowledgedBy = existing ? existing.nguoi_tiep_nhan : null;
   let acknowledgedAt = existing ? existing.thoi_gian_tiep_nhan : null;
   let resolvedBy = existing ? existing.nguoi_xu_ly : null;

@@ -62,7 +62,7 @@ export default function ChangePasswordScreen({ navigation }) {
       </View>
 
       <View style={styles.content}>
-        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.borderSubtle }]}>
           <Text style={[styles.label, { color: colors.textSecondary }]}>Mật khẩu hiện tại</Text>
           <View style={[styles.inputWrapper, { backgroundColor: colors.surfaceVariant, borderColor: colors.borderSubtle }]}>
             <Lock size={16} color={colors.textMuted} style={styles.icon} />
@@ -139,18 +139,19 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
+    letterSpacing: -0.25,
   },
   content: {
     padding: 16,
   },
   card: {
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 18,
     borderWidth: 1,
   },
   label: {
-    fontSize: 12,
+    fontSize: 12.5,
     fontWeight: '600',
     marginBottom: 6,
   },
@@ -158,7 +159,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     height: 44,
-    borderRadius: 10,
+    borderRadius: 11,
     borderWidth: 1,
     paddingHorizontal: 12,
   },
@@ -168,11 +169,12 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: '100%',
-    fontSize: 13,
+    fontSize: 13.5,
+    fontWeight: '400',
   },
   btnSubmit: {
     height: 46,
-    borderRadius: 10,
+    borderRadius: 9999,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 20,
@@ -184,8 +186,8 @@ const styles = StyleSheet.create({
   },
   btnSubmitText: {
     color: '#ffffff',
-    fontSize: 13.5,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 

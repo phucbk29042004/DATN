@@ -205,7 +205,31 @@ async function runFullEvaluation() {
   });
   const hdfsZScoreMetrics = calculateMetrics(hdfsTrue, hdfsZScorePred);
 
-  // Phương pháp 3 & 4: ML Models từ results_hdfs.json
+  // Phương pháp 3 & 4: ML Models từ results_hdfs.json (tính đúng từ confusion_matrix, không hardcode)
+  const formatMlRow = (mod) => {
+    if (!mod || !Array.isArray(mod.confusion_matrix)) {
+      return {
+        precision: mod?.precision ?? 0,
+        recall: mod?.recall ?? 0,
+        f1_score: mod?.f1_score ?? 0,
+        accuracy: 0,
+        cmStr: 'N/A'
+      };
+    }
+    const tn = mod.confusion_matrix[0]?.[0] ?? 0;
+    const fp = mod.confusion_matrix[0]?.[1] ?? 0;
+    const fn = mod.confusion_matrix[1]?.[0] ?? 0;
+    const tp = mod.confusion_matrix[1]?.[1] ?? 0;
+    const total = tp + fp + fn + tn;
+    return {
+      precision: mod.precision ?? 0,
+      recall: mod.recall ?? 0,
+      f1_score: mod.f1_score ?? 0,
+      accuracy: total > 0 ? Number(((tp + tn) / total).toFixed(4)) : 0,
+      cmStr: `${tp}/${fp}/${fn}/${tn}`
+    };
+  };
+
   let hdfsIfMetrics = { precision: 0, recall: 0, f1_score: 0 };
   let hdfsLrMetrics = { precision: 0, recall: 0, f1_score: 0 };
   if (fs.existsSync(RESULTS_HDFS)) {
@@ -217,6 +241,9 @@ async function runFullEvaluation() {
       if (lrMod) hdfsLrMetrics = lrMod;
     } catch (e) {}
   }
+
+  const hdfsIfRow = formatMlRow(hdfsIfMetrics);
+  const hdfsLrRow = formatMlRow(hdfsLrMetrics);
 
   console.table({
     '1. Rule-Based': {
@@ -234,29 +261,29 @@ async function runFullEvaluation() {
       'TP/FP/FN/TN': `${hdfsZScoreMetrics.confusion_matrix.TP}/${hdfsZScoreMetrics.confusion_matrix.FP}/${hdfsZScoreMetrics.confusion_matrix.FN}/${hdfsZScoreMetrics.confusion_matrix.TN}`
     },
     '3. Drain + Isolation Forest (ML)': {
-      'Precision': hdfsIfMetrics.precision,
-      'Recall': hdfsIfMetrics.recall,
-      'F1-Score': hdfsIfMetrics.f1_score,
-      'Accuracy': hdfsIfMetrics.f1_score > 0 ? 0.67 : 0.67,
-      'TP/FP/FN/TN': '0/0/1/2'
+      'Precision': hdfsIfRow.precision,
+      'Recall': hdfsIfRow.recall,
+      'F1-Score': hdfsIfRow.f1_score,
+      'Accuracy': hdfsIfRow.accuracy,
+      'TP/FP/FN/TN': hdfsIfRow.cmStr
     },
     '4. Drain + Logistic Regr (ML)': {
-      'Precision': hdfsLrMetrics.precision,
-      'Recall': hdfsLrMetrics.recall,
-      'F1-Score': hdfsLrMetrics.f1_score,
-      'Accuracy': 1.0,
-      'TP/FP/FN/TN': '1/0/0/2'
+      'Precision': hdfsLrRow.precision,
+      'Recall': hdfsLrRow.recall,
+      'F1-Score': hdfsLrRow.f1_score,
+      'Accuracy': hdfsLrRow.accuracy,
+      'TP/FP/FN/TN': hdfsLrRow.cmStr
     }
   });
 
   // ==========================================
-  // PHẦN 3: ĐÁNH GIÁ ĐỊNH LƯỢNG TRÊN BGL DATASET (TIME WINDOW)
+  // PHẦN 3: ĐÁNH GIÁ ĐỊNH LƯỢNG TRÊN BGL DATASET (TIME WINDOW 60s)
   // ==========================================
   console.log('\n----------------------------------------------------------------------');
   console.log('PHẦN 3: ĐÁNH GIÁ ĐỘ CHÍNH XÁC PHÁT HIỆN BẤT THƯỜNG TRÊN BGL DATASET');
   console.log('----------------------------------------------------------------------');
 
-  const { windows: bglWindows } = await loadBglDataset(BGL_LOG, 300_000);
+  const { windows: bglWindows } = await loadBglDataset(BGL_LOG, 60_000);
   const bglTrue = bglWindows.map(w => w.is_anomaly);
 
   // Phương pháp 1: Rule-Based trên BGL
@@ -291,6 +318,9 @@ async function runFullEvaluation() {
     } catch (e) {}
   }
 
+  const bglIfRow = formatMlRow(bglIfMetrics);
+  const bglLrRow = formatMlRow(bglLrMetrics);
+
   console.table({
     '1. Rule-Based': {
       'Precision': bglRuleMetrics.precision,
@@ -307,18 +337,18 @@ async function runFullEvaluation() {
       'TP/FP/FN/TN': `${bglZScoreMetrics.confusion_matrix.TP}/${bglZScoreMetrics.confusion_matrix.FP}/${bglZScoreMetrics.confusion_matrix.FN}/${bglZScoreMetrics.confusion_matrix.TN}`
     },
     '3. Drain + Isolation Forest (ML)': {
-      'Precision': bglIfMetrics.precision,
-      'Recall': bglIfMetrics.recall,
-      'F1-Score': bglIfMetrics.f1_score,
-      'Accuracy': 0.8,
-      'TP/FP/FN/TN': '0/0/1/4'
+      'Precision': bglIfRow.precision,
+      'Recall': bglIfRow.recall,
+      'F1-Score': bglIfRow.f1_score,
+      'Accuracy': bglIfRow.accuracy,
+      'TP/FP/FN/TN': bglIfRow.cmStr
     },
     '4. Drain + Logistic Regr (ML)': {
-      'Precision': bglLrMetrics.precision,
-      'Recall': bglLrMetrics.recall,
-      'F1-Score': bglLrMetrics.f1_score,
-      'Accuracy': 1.0,
-      'TP/FP/FN/TN': '1/0/0/4'
+      'Precision': bglLrRow.precision,
+      'Recall': bglLrRow.recall,
+      'F1-Score': bglLrRow.f1_score,
+      'Accuracy': bglLrRow.accuracy,
+      'TP/FP/FN/TN': bglLrRow.cmStr
     }
   });
 

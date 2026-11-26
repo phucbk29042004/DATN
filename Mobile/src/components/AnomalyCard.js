@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { CheckCircle2, Clock, AlertCircle, Eye, Check, FileText } from 'lucide-react-native';
 import { useTheme } from '../theme/ThemeContext';
 
-export default function AnomalyCard({ item, onUpdateStatus, onAddNote, onPress }) {
+export default function AnomalyCard({ item, isAdmin = false, onUpdateStatus, onAddNote, onPress }) {
   const { colors } = useTheme();
 
   const status = item.incident_status || 'NEW';
@@ -40,12 +40,12 @@ export default function AnomalyCard({ item, onUpdateStatus, onAddNote, onPress }
     <TouchableOpacity
       activeOpacity={0.88}
       onPress={onPress}
-      style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
+      style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.borderSubtle }]}
     >
       {/* Header: Service + Level + Score */}
       <View style={styles.headerRow}>
         <View style={styles.serviceRow}>
-          <Text style={[styles.serviceText, { color: colors.secondary }]} numberOfLines={1}>
+          <Text style={[styles.serviceText, { color: colors.link || colors.primary }]} numberOfLines={1}>
             {serviceName}
           </Text>
           <View style={[styles.levelBadge, { backgroundColor: level === 'ERROR' || level === 'FATAL' ? colors.dangerLight : colors.primaryLight }]}>
@@ -104,21 +104,21 @@ export default function AnomalyCard({ item, onUpdateStatus, onAddNote, onPress }
         {/* Status Badge */}
         {getStatusBadge()}
 
-        {/* Action Button */}
-        {status === 'NEW' && (
+        {/* Action Button (Chỉ Admin mới được phép Tiếp nhận / Xử lý) */}
+        {isAdmin && status === 'NEW' && (
           <TouchableOpacity
             style={[styles.btnAction, { borderColor: colors.warning }]}
-            onPress={() => onUpdateStatus(item.id || item.hash_id, 'ACKNOWLEDGED')}
+            onPress={() => onUpdateStatus(item.id || item.hash_id, 'ACKNOWLEDGED', item)}
           >
             <Eye size={12} color={colors.warning} />
             <Text style={[styles.btnActionText, { color: colors.warning }]}>Tiếp nhận</Text>
           </TouchableOpacity>
         )}
 
-        {status === 'ACKNOWLEDGED' && (
+        {isAdmin && status === 'ACKNOWLEDGED' && (
           <TouchableOpacity
             style={[styles.btnAction, { borderColor: colors.success }]}
-            onPress={() => onUpdateStatus(item.id || item.hash_id, 'RESOLVED')}
+            onPress={() => onUpdateStatus(item.id || item.hash_id, 'RESOLVED', item)}
           >
             <Check size={12} color={colors.success} />
             <Text style={[styles.btnActionText, { color: colors.success }]}>Xử lý xong</Text>
@@ -149,8 +149,8 @@ export default function AnomalyCard({ item, onUpdateStatus, onAddNote, onPress }
 
 const styles = StyleSheet.create({
   card: {
-    padding: 12,
-    borderRadius: 12,
+    padding: 14,
+    borderRadius: 18,
     borderWidth: 1,
     marginVertical: 5,
     marginHorizontal: 12,

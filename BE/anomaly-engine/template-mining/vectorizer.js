@@ -86,3 +86,53 @@ export function vectorizeDataset(sequences, drainOptions = {}) {
 
   return { X, y, templateIds, templates, parser };
 }
+
+/**
+ * Vectorize batch log realtime theo từ điển template cố định (frozen vocabulary)
+ * giúp giữ đúng số chiều vector với StandardScaler / mô hình sklearn đã huấn luyện.
+ *
+ * @param {Array<string|Object>} logs
+ * @param {Array<{ id?: number, template: string }>} vocabTemplates
+ * @param {Object} drainOptions
+ * @returns {{ vector: number[], unknownCount: number, matchedTemplates: Array }}
+ */
+export function vectorizeWithFrozenVocab(logs, vocabTemplates = [], drainOptions = {}) {
+  const vector = new Array(vocabTemplates.length).fill(0);
+  if (!Array.isArray(logs) || logs.length === 0 || vocabTemplates.length === 0) {
+    return { vector, unknownCount: 0, matchedTemplates: [] };
+  }
+
+  const templateIndexMap = new Map();
+  vocabTemplates.forEach((item, idx) => {
+    const tpl = typeof item === 'string' ? item : item.template;
+    if (tpl) templateIndexMap.set(tpl, idx);
+  });
+
+  const parser = new DrainParser(drainOptions);
+  for (const item of vocabTemplates) {
+    const tpl = typeof item === 'string' ? item : item.template;
+    if (tpl) parser.parseMessage(tpl);
+  }
+
+  let unknownCount = 0;
+  const matchedSet = new Set();
+
+  for (const log of logs) {
+    const message = typeof log === 'string' ? log : (log.message || log.content || '');
+    const cluster = parser.parseMessage(message);
+    const tplStr = cluster.template_str || (Array.isArray(cluster.template) ? cluster.template.join(' ') : cluster.template);
+    const matchedIdx = templateIndexMap.get(tplStr);
+    if (matchedIdx !== undefined) {
+      vector[matchedIdx] += 1;
+      matchedSet.add(tplStr);
+    } else {
+      unknownCount += 1;
+    }
+  }
+
+  return {
+    vector,
+    unknownCount,
+    matchedTemplates: Array.from(matchedSet)
+  };
+}

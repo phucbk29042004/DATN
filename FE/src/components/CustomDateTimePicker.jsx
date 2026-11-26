@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Calendar, Clock, ChevronLeft, ChevronRight, X, Check, RotateCcw } from 'lucide-react';
+import { Calendar, Clock, ChevronLeft, ChevronRight, ChevronDown, X, Check, RotateCcw } from 'lucide-react';
 
 /**
  * Modern Enterprise Custom Date & Time Picker
@@ -33,6 +33,8 @@ export default function CustomDateTimePicker({
   const [tempSelectedDate, setTempSelectedDate] = useState(() => initialDate);
   const [hour, setHour] = useState(() => initialDate ? initialDate.getHours() : new Date().getHours());
   const [minute, setMinute] = useState(() => initialDate ? initialDate.getMinutes() : 0);
+  const [isHourOpen, setIsHourOpen] = useState(false);
+  const [isMinuteOpen, setIsMinuteOpen] = useState(false);
 
   // Đồng bộ khi prop `value` thay đổi từ bên ngoài (ví dụ bấm chip chọn nhanh 1h, 24h, 7d)
   useEffect(() => {
@@ -50,6 +52,8 @@ export default function CustomDateTimePicker({
     const handleClickOutside = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
         setIsOpen(false);
+        setIsHourOpen(false);
+        setIsMinuteOpen(false);
       }
     };
     if (isOpen) {
@@ -303,32 +307,74 @@ export default function CustomDateTimePicker({
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-              <select
-                className="modern-datepicker-select"
-                value={hour}
-                onChange={(e) => setHour(parseInt(e.target.value, 10))}
-              >
-                {Array.from({ length: 24 }).map((_, h) => (
-                  <option key={h} value={h}>
-                    {String(h).padStart(2, '0')}
-                  </option>
-                ))}
-              </select>
+              {/* Hour Custom Dropdown */}
+              <div style={{ position: 'relative' }}>
+                <button
+                  type="button"
+                  className={`modern-datepicker-time-btn ${isHourOpen ? 'active' : ''}`}
+                  onClick={() => {
+                    setIsHourOpen(!isHourOpen);
+                    setIsMinuteOpen(false);
+                  }}
+                  title={isVi ? 'Chọn giờ' : 'Select hour'}
+                >
+                  {String(hour).padStart(2, '0')}
+                  <ChevronDown size={11} />
+                </button>
+                {isHourOpen && (
+                  <div className="modern-datepicker-time-dropdown">
+                    {Array.from({ length: 24 }).map((_, h) => (
+                      <div
+                        key={h}
+                        className={`modern-datepicker-time-option ${hour === h ? 'selected' : ''}`}
+                        onClick={() => {
+                          setHour(h);
+                          setIsHourOpen(false);
+                        }}
+                      >
+                        {String(h).padStart(2, '0')}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <span style={{ fontWeight: 700, color: 'var(--text-muted)' }}>:</span>
-              <select
-                className="modern-datepicker-select"
-                value={minute}
-                onChange={(e) => setMinute(parseInt(e.target.value, 10))}
-              >
-                {Array.from({ length: 12 }).map((_, idx) => {
-                  const m = idx * 5;
-                  return (
-                    <option key={m} value={m}>
-                      {String(m).padStart(2, '0')}
-                    </option>
-                  );
-                })}
-              </select>
+
+              {/* Minute Custom Dropdown */}
+              <div style={{ position: 'relative' }}>
+                <button
+                  type="button"
+                  className={`modern-datepicker-time-btn ${isMinuteOpen ? 'active' : ''}`}
+                  onClick={() => {
+                    setIsMinuteOpen(!isMinuteOpen);
+                    setIsHourOpen(false);
+                  }}
+                  title={isVi ? 'Chọn phút' : 'Select minute'}
+                >
+                  {String(minute).padStart(2, '0')}
+                  <ChevronDown size={11} />
+                </button>
+                {isMinuteOpen && (
+                  <div className="modern-datepicker-time-dropdown">
+                    {Array.from({ length: 12 }).map((_, idx) => {
+                      const m = idx * 5;
+                      return (
+                        <div
+                          key={m}
+                          className={`modern-datepicker-time-option ${minute === m ? 'selected' : ''}`}
+                          onClick={() => {
+                            setMinute(m);
+                            setIsMinuteOpen(false);
+                          }}
+                        >
+                          {String(m).padStart(2, '0')}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 

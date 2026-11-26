@@ -29,7 +29,7 @@ export default function FloatingAiAssistant() {
     {
       id: 'welcome',
       role: 'assistant',
-      text: `Xin chào ${currentUser?.displayName || 'bạn'}! Tôi là Trợ Lý AI của LogPulse. Tôi có thể giúp bạn giải đáp số liệu KPI, phân tích nguyên nhân sự cố log và hướng dẫn xử lý.`,
+      text: `Xin chào ${currentUser?.displayName || 'bạn'}! Đây là kênh hỗ trợ vận hành LogPulse giúp tra cứu số liệu KPI, phân tích nguyên nhân sự cố log và gợi ý hướng xử lý.`,
     },
   ]);
   const [input, setInput] = useState('');
@@ -103,7 +103,7 @@ export default function FloatingAiAssistant() {
 
   return (
     <>
-      {/* Floating Action Bubble */}
+      {/* Floating Support Trigger */}
       <TouchableOpacity
         activeOpacity={0.85}
         onPress={() => setIsOpen(true)}
@@ -111,12 +111,12 @@ export default function FloatingAiAssistant() {
           styles.floatingBubble,
           {
             backgroundColor: colors.primary,
-            bottom: 84 + Math.max(insets.bottom, 8),
-            shadowColor: colors.primary,
+            borderColor: colors.borderSubtle,
+            bottom: 76 + Math.max(insets.bottom, 8),
           },
         ]}
       >
-        <Terminal size={20} color="#ffffff" />
+        <Terminal size={19} color="#ffffff" />
       </TouchableOpacity>
 
       {/* AI Assistant Modal */}
@@ -139,10 +139,10 @@ export default function FloatingAiAssistant() {
             <View style={[styles.drawerHeader, { borderBottomColor: colors.borderSubtle }]}>
               <View style={styles.headerTitleRow}>
                 <View style={[styles.aiBadge, { backgroundColor: colors.primaryLight }]}>
-                  <Terminal size={16} color={colors.primary} />
+                  <Terminal size={16} color={colors.link || colors.primary} />
                 </View>
                 <View>
-                  <Text style={[styles.headerTitle, { color: colors.text }]}>Trợ Lý Vận Hành Hệ Thống</Text>
+                  <Text style={[styles.headerTitle, { color: colors.text }]}>Hỗ Trợ Vận Hành Hệ Thống</Text>
                   <Text style={[styles.headerSub, { color: colors.textMuted }]}>
                     Quyền hạn: {currentUser?.role === 'admin' ? 'Quản Trị Viên' : 'Giám Sát Viên'}
                   </Text>
@@ -182,7 +182,7 @@ export default function FloatingAiAssistant() {
                 <View style={[styles.loadingBox, { backgroundColor: colors.surfaceVariant }]}>
                   <ActivityIndicator size="small" color={colors.primary} />
                   <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
-                    AI đang suy nghĩ và tra cứu dữ liệu...
+                    Đang tra cứu và phân tích dữ liệu...
                   </Text>
                 </View>
               )}
@@ -192,7 +192,7 @@ export default function FloatingAiAssistant() {
             {selectedImage && (
               <View style={[styles.imagePreviewRow, { backgroundColor: colors.surfaceVariant, borderTopColor: colors.borderSubtle }]}>
                 <Image source={{ uri: selectedImage.uri }} style={styles.imageThumb} />
-                <Text style={[styles.imagePreviewText, { color: colors.textSecondary }]}>Đã đính kèm ảnh để AI phân tích</Text>
+                <Text style={[styles.imagePreviewText, { color: colors.textSecondary }]}>Đã đính kèm ảnh chụp lỗi</Text>
                 <TouchableOpacity onPress={() => setSelectedImage(null)} style={styles.removeImageBtn}>
                   <X size={15} color={colors.textMuted} />
                 </TouchableOpacity>
@@ -206,23 +206,23 @@ export default function FloatingAiAssistant() {
                 style={[
                   styles.pickImageBtn,
                   {
-                    backgroundColor: selectedImage ? 'rgba(6, 182, 212, 0.15)' : colors.surfaceVariant,
-                    borderColor: selectedImage ? colors.primary : colors.border,
+                    backgroundColor: selectedImage ? colors.primaryLight : colors.surfaceVariant,
+                    borderColor: selectedImage ? colors.primary : colors.borderSubtle,
                   },
                 ]}
               >
-                <ImageIcon size={18} color={selectedImage ? colors.primary : colors.textMuted} />
+                <ImageIcon size={18} color={selectedImage ? (colors.link || colors.primary) : colors.textMuted} />
               </TouchableOpacity>
               <TextInput
                 style={[
                   styles.input,
                   {
                     backgroundColor: colors.surfaceVariant,
-                    borderColor: colors.border,
+                    borderColor: colors.borderSubtle,
                     color: colors.text,
                   },
                 ]}
-                placeholder={selectedImage ? "Nhập câu hỏi kèm ảnh..." : "Hỏi AI về log, sự cố, chỉ số KPI..."}
+                placeholder={selectedImage ? "Nhập mô tả lỗi kèm ảnh..." : "Tra cứu về log, sự cố, chỉ số KPI..."}
                 placeholderTextColor={colors.textMuted}
                 value={input}
                 onChangeText={setInput}
@@ -252,23 +252,14 @@ export default function FloatingAiAssistant() {
 const styles = StyleSheet.create({
   floatingBubble: {
     position: 'absolute',
-    right: 18,
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    right: 16,
+    width: 44,
+    height: 44,
+    borderRadius: 9999,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 999,
-    ...Platform.select({
-      ios: {
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.35,
-        shadowRadius: 8,
-      },
-      android: {
-        elevation: 8,
-      },
-    }),
   },
   modalOverlay: {
     flex: 1,

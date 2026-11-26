@@ -9,12 +9,12 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Layers, RefreshCw, Hash, Cpu } from 'lucide-react-native';
+import { Layers, RefreshCw, Hash, Server, ArrowLeft } from 'lucide-react-native';
 import { useTheme } from '../../theme/ThemeContext';
 import { useToast } from '../../context/ToastContext';
 import { apiClient } from '../../api/client';
 
-export default function DrainTemplatesScreen() {
+export default function DrainTemplatesScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const { showToast } = useToast();
@@ -52,7 +52,16 @@ export default function DrainTemplatesScreen() {
       {/* Top Header */}
       <View style={[styles.header, { borderBottomColor: colors.borderSubtle, backgroundColor: colors.surface }]}>
         <View style={styles.titleRow}>
-          <Layers size={20} color={colors.secondary} />
+          {navigation?.canGoBack?.() && (
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={[styles.backBtn, { backgroundColor: colors.surfaceVariant, borderColor: colors.borderSubtle }]}
+              activeOpacity={0.75}
+            >
+              <ArrowLeft size={16} color={colors.text} />
+            </TouchableOpacity>
+          )}
+          <Layers size={18} color={colors.link || colors.primary} />
           <Text style={[styles.title, { color: colors.text }]}>Mẫu Log Tự Động (Drain)</Text>
         </View>
         <TouchableOpacity
@@ -81,7 +90,7 @@ export default function DrainTemplatesScreen() {
         <FlatList
           data={templates}
           keyExtractor={(item, idx) => item.template_id || item.cluster_id || idx.toString()}
-          contentContainerStyle={{ paddingVertical: 10, paddingBottom: 100 }}
+          contentContainerStyle={{ paddingVertical: 10, paddingBottom: Math.max(insets.bottom, 24) }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
           renderItem={({ item }) => {
             const count = item.count || item.size || 1;
@@ -89,18 +98,18 @@ export default function DrainTemplatesScreen() {
               <View
                 style={[
                   styles.card,
-                  { backgroundColor: colors.surface, borderColor: colors.border },
+                  { backgroundColor: colors.surface, borderColor: colors.borderSubtle },
                 ]}
               >
                 <View style={styles.cardHeader}>
                   <View style={styles.idRow}>
-                    <Hash size={13} color={colors.primary} />
-                    <Text style={[styles.idText, { color: colors.primary }]}>
+                    <Hash size={13} color={colors.link || colors.primary} />
+                    <Text style={[styles.idText, { color: colors.link || colors.primary }]}>
                       {item.template_id || item.cluster_id || 'TPL'}
                     </Text>
                   </View>
                   <View style={[styles.countBadge, { backgroundColor: colors.primaryLight }]}>
-                    <Text style={[styles.countText, { color: colors.primary }]}>
+                    <Text style={[styles.countText, { color: colors.link || colors.primary }]}>
                       {count} lần xuất hiện
                     </Text>
                   </View>
@@ -116,7 +125,7 @@ export default function DrainTemplatesScreen() {
                 {/* Service Tag */}
                 {item.service && (
                   <View style={styles.footerRow}>
-                    <Cpu size={12} color={colors.textMuted} />
+                    <Server size={12} color={colors.textMuted} />
                     <Text style={[styles.footerService, { color: colors.textSecondary }]}>
                       {item.service}
                     </Text>
@@ -150,12 +159,21 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
+    letterSpacing: -0.25,
+  },
+  backBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 8,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   reloadBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 34,
+    height: 34,
+    borderRadius: 8,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -181,8 +199,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   card: {
-    padding: 14,
-    borderRadius: 14,
+    padding: 16,
+    borderRadius: 18,
     borderWidth: 1,
     marginHorizontal: 12,
     marginVertical: 5,

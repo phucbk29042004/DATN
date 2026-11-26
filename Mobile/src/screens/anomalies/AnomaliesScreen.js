@@ -22,7 +22,6 @@ import {
   ListFilter,
   Database,
   ShieldAlert,
-  Zap,
   Activity,
   Layers,
   Calendar,
@@ -55,7 +54,7 @@ const LEVEL_NAMES_VI = {
 export default function AnomaliesScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const { colors, isDark } = useTheme();
-  const { currentUser } = useAuth();
+  const { currentUser, isAdmin } = useAuth();
   const { showToast } = useToast();
 
   // Sub-Tab Switcher: 'list' | 'charts'
@@ -141,7 +140,15 @@ export default function AnomaliesScreen({ navigation }) {
     });
   };
 
-  const handleUpdateStatus = async (id, newStatus) => {
+  const handleUpdateStatus = async (id, newStatus, itemObj = null) => {
+    if (!isAdmin) {
+      Alert.alert('Không có quyền', 'Chỉ Quản trị viên (Admin) mới được phép cập nhật trạng thái sự cố.');
+      return;
+    }
+    if (newStatus === 'RESOLVED' && itemObj) {
+      navigation.navigate('IncidentDetail', { anomaly: itemObj, openResolve: true });
+      return;
+    }
     try {
       await apiClient(`/anomalies/${id}/status`, {
         method: 'PATCH',
@@ -224,7 +231,7 @@ export default function AnomaliesScreen({ navigation }) {
           <TouchableOpacity
             style={[
               styles.subTabButton,
-              subTab === 'list' && { backgroundColor: colors.primary, shadowColor: colors.primary, elevation: 4 },
+              subTab === 'list' && { backgroundColor: colors.primary },
             ]}
             onPress={() => setSubTab('list')}
             activeOpacity={0.8}
@@ -233,7 +240,7 @@ export default function AnomaliesScreen({ navigation }) {
             <Text
               style={[
                 styles.subTabText,
-                { color: subTab === 'list' ? '#ffffff' : colors.textSecondary, fontWeight: subTab === 'list' ? '700' : '500' },
+                { color: subTab === 'list' ? '#ffffff' : colors.textSecondary, fontWeight: subTab === 'list' ? '600' : '400' },
               ]}
             >
               Danh Sách Sự Cố
@@ -243,7 +250,7 @@ export default function AnomaliesScreen({ navigation }) {
           <TouchableOpacity
             style={[
               styles.subTabButton,
-              subTab === 'charts' && { backgroundColor: colors.primary, shadowColor: colors.primary, elevation: 4 },
+              subTab === 'charts' && { backgroundColor: colors.primary },
             ]}
             onPress={() => setSubTab('charts')}
             activeOpacity={0.8}
@@ -252,7 +259,7 @@ export default function AnomaliesScreen({ navigation }) {
             <Text
               style={[
                 styles.subTabText,
-                { color: subTab === 'charts' ? '#ffffff' : colors.textSecondary, fontWeight: subTab === 'charts' ? '700' : '500' },
+                { color: subTab === 'charts' ? '#ffffff' : colors.textSecondary, fontWeight: subTab === 'charts' ? '600' : '400' },
               ]}
             >
               Biểu Đồ Phân Tích
@@ -322,6 +329,7 @@ export default function AnomaliesScreen({ navigation }) {
               renderItem={({ item }) => (
                 <AnomalyCard
                   item={item}
+                  isAdmin={isAdmin}
                   onUpdateStatus={handleUpdateStatus}
                   onAddNote={(it) => setNoteModalItem(it)}
                   onPress={() => navigation.navigate('IncidentDetail', { anomaly: item })}
@@ -347,7 +355,7 @@ export default function AnomaliesScreen({ navigation }) {
             <View style={styles.filterSectionHeader}>
               <Text style={[styles.cardTitle, { color: colors.text }]}>Bộ Lọc Phân Tích</Text>
               <TouchableOpacity
-                onPress={fetchAnalytics}
+                onPress={() => fetchAnalytics(true)}
                 disabled={analyticsLoading}
                 style={[styles.smallRefreshBtn, { backgroundColor: colors.surfaceVariant }]}
               >
@@ -438,11 +446,11 @@ export default function AnomaliesScreen({ navigation }) {
             return (
               <View style={styles.kpiGrid}>
                 {/* KPI 1: Tổng Log */}
-                <View style={[styles.kpiCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                <View style={[styles.kpiCard, { backgroundColor: colors.surface, borderColor: colors.borderSubtle }]}>
                   <View style={styles.kpiHeaderRow}>
                     <Text style={[styles.kpiLabel, { color: colors.textSecondary }]}>Tổng Số Log</Text>
-                    <View style={[styles.kpiIconCircle, { backgroundColor: 'rgba(99,102,241,0.12)' }]}>
-                      <Database size={15} color="#6366f1" />
+                    <View style={[styles.kpiIconCircle, { backgroundColor: colors.primaryLight }]}>
+                      <Database size={15} color={colors.link || colors.primary} />
                     </View>
                   </View>
                   <Text style={[styles.kpiValue, { color: colors.text }]}>
@@ -452,7 +460,7 @@ export default function AnomaliesScreen({ navigation }) {
                 </View>
 
                 {/* KPI 2: Log Lỗi ERROR/FATAL */}
-                <View style={[styles.kpiCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                <View style={[styles.kpiCard, { backgroundColor: colors.surface, borderColor: colors.borderSubtle }]}>
                   <View style={styles.kpiHeaderRow}>
                     <Text style={[styles.kpiLabel, { color: colors.textSecondary }]}>ERROR / FATAL</Text>
                     <View style={[styles.kpiIconCircle, { backgroundColor: 'rgba(239,68,68,0.12)' }]}>
@@ -484,11 +492,11 @@ export default function AnomaliesScreen({ navigation }) {
                 </View>
 
                 {/* KPI 4: Thông Lượng Logs/s */}
-                <View style={[styles.kpiCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+                <View style={[styles.kpiCard, { backgroundColor: colors.surface, borderColor: colors.borderSubtle }]}>
                   <View style={styles.kpiHeaderRow}>
                     <Text style={[styles.kpiLabel, { color: colors.textSecondary }]}>Logs / Giây</Text>
                     <View style={[styles.kpiIconCircle, { backgroundColor: 'rgba(16,185,129,0.12)' }]}>
-                      <Zap size={15} color="#10b981" />
+                      <TrendingUp size={15} color="#10b981" />
                     </View>
                   </View>
                   <Text style={[styles.kpiValue, { color: colors.success }]}>
@@ -833,8 +841,11 @@ export default function AnomaliesScreen({ navigation }) {
                     if (!a.timestamp) return false;
                     const d = new Date(a.timestamp);
                     const pad = n => String(n).padStart(2, '0');
-                    const dateStr = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
-                    return dateStr === selectedHeatmapCell.date && d.getHours() === selectedHeatmapCell.hour;
+                    const dateShort = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}`;
+                    const dateFull = `${dateShort}/${d.getFullYear()}`;
+                    const dateIso = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+                    const target = selectedHeatmapCell.date;
+                    return (dateShort === target || dateFull === target || dateIso === target) && d.getHours() === selectedHeatmapCell.hour;
                   });
 
                   if (matchingAnomalies.length === 0) {
@@ -915,7 +926,7 @@ const styles = StyleSheet.create({
   },
   subTabBarPill: {
     flexDirection: 'row',
-    borderRadius: 12,
+    borderRadius: 9999,
     padding: 4,
     borderWidth: 1,
     gap: 6,
@@ -927,7 +938,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     paddingVertical: 8,
-    borderRadius: 9,
+    borderRadius: 9999,
     backgroundColor: 'transparent',
   },
   subTabText: {
@@ -975,9 +986,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   card: {
-    borderRadius: 14,
+    borderRadius: 18,
     borderWidth: 1,
-    padding: 14,
+    padding: 16,
     marginBottom: 12,
   },
   cardHeader: {

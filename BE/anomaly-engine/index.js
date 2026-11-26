@@ -18,8 +18,8 @@
 
 import { detectRuleBased } from './rule-based/detector.js';
 import { detectStatistical } from './statistical/detector.js';
-import { vectorizeDataset } from './template-mining/vectorizer.js';
-import { writeFileSync } from 'fs';
+import { vectorizeDataset, vectorizeWithFrozenVocab } from './template-mining/vectorizer.js';
+import { writeFileSync, existsSync, readFileSync } from 'fs';
 import { Worker as WorkerThread } from 'worker_threads';
 import { fileURLToPath } from 'url';
 import path from 'path';
@@ -30,9 +30,22 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DRAIN_WORKER_PATH = path.join(__dirname, 'drain_worker.js');
+const FROZEN_VOCAB_PATH = path.join(__dirname, 'ml-models', 'drain_vocab.json');
 
 const ML_API_URL = process.env.ML_API_URL || 'http://localhost:8000';
 const ML_API_TIMEOUT_MS = parseInt(process.env.ML_API_TIMEOUT_MS || '3000', 10);
+
+function loadFrozenVocab() {
+  try {
+    if (existsSync(FROZEN_VOCAB_PATH)) {
+      const parsed = JSON.parse(readFileSync(FROZEN_VOCAB_PATH, 'utf-8'));
+      return Array.isArray(parsed.templates) ? parsed.templates : [];
+    }
+  } catch (err) {
+    console.warn(`[Anomaly Engine] Không thể đọc drain_vocab.json: ${err.message}`);
+  }
+  return [];
+}
 
 /**
  * Chạy Drain vectorization trong Worker Thread riêng để không block Event Loop.
@@ -137,15 +150,24 @@ export async function runAnomalyDetection(logs, {
     zThreshold
   });
 
-  // --- Tầng 3: Template Mining (Drain) trong Worker Thread + ML Prediction real-time ---
-  const singleSequence = [{ log_lines: logs, is_anomaly: false }];
+  // --- Tầng 3: Template Mining (Drain) + ML Prediction real-time ---
+  const frozenVocab = loadFrozenVocab();
+  let featureVector = [];
+  let templates = [];
 
-  // Drain chạy trong Worker Thread riêng — không block Event Loop
-  const { X, templates } = await vectorizeInWorker(singleSequence).catch(err => {
-    console.warn(`[Anomaly Engine] Drain Worker lỗi, fallback sync: ${err.message}`);
-    return vectorizeDataset(singleSequence); // fallback sang sync nếu worker lỗi
-  });
-  const featureVector = X[0] || [];
+  if (frozenVocab.length > 0) {
+    const frozenRes = vectorizeWithFrozenVocab(logs, frozenVocab);
+    featureVector = frozenRes.vector;
+    templates = frozenRes.matchedTemplates.map((tpl, idx) => ({ id: idx + 1, template: tpl }));
+  } else {
+    const singleSequence = [{ log_lines: logs, is_anomaly: false }];
+    const workerRes = await vectorizeInWorker(singleSequence).catch(err => {
+      console.warn(`[Anomaly Engine] Drain Worker lỗi, fallback sync: ${err.message}`);
+      return vectorizeDataset(singleSequence);
+    });
+    featureVector = workerRes.X[0] || [];
+    templates = workerRes.templates || [];
+  }
 
   // Gọi Python ML API để predict (graceful: nếu service down thì bỏ qua)
   const mlResult = await callMlPredict(featureVector);

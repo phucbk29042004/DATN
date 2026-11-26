@@ -342,9 +342,9 @@ export function initCronJobs() {
 }
 
 /**
- * Tái nạp lại toàn bộ lịch trình Cron Jobs khi cấu hình thay đổi
+ * Dừng toàn bộ các Cron Jobs đang chạy
  */
-export function reloadCronJobs() {
+export function stopCronJobs() {
   if (digestJob) {
     try { digestJob.stop(); } catch (e) {}
     digestJob = null;
@@ -353,6 +353,13 @@ export function reloadCronJobs() {
     try { cleanupJob.stop(); } catch (e) {}
     cleanupJob = null;
   }
+}
+
+/**
+ * Tái nạp lại toàn bộ lịch trình Cron Jobs khi cấu hình thay đổi
+ */
+export function reloadCronJobs() {
+  stopCronJobs();
   initCronJobs();
   console.log('[Cron Service] Đã tái nạp cấu hình các Cron Jobs thành công.');
 }

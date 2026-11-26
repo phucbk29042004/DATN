@@ -1,0 +1,4 @@
+# Loại trừ toàn bộ file Markdown khỏi đồ thị Graphify
+*.md
+**/*.md
+

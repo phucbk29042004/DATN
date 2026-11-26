@@ -55,20 +55,24 @@ def time_based_split(X, y, train_ratio=0.8):
     return X_train, X_test, y_train, y_test
 
 
-def evaluate_isolation_forest(X_train, X_test, y_test, contamination=0.1, save_dir=None):
+def evaluate_isolation_forest(X_train, X_test, y_train, y_test, contamination=0.1, save_dir=None):
     """
-    Isolation Forest — Phân loại không giám sát (Unsupervised)
-    contamination: Tỷ lệ ước tính anomaly trong tập train (mặc định 10%)
+    Isolation Forest — Phân loại không giám sát / một lớp (fit ưu tiên trên mẫu Normal)
+    contamination: Tỷ lệ ước tính anomaly (hoặc 'auto' khi fit trên mẫu Normal sạch)
     save_dir: Thư mục để lưu model .pkl (nếu được chỉ định)
     """
     print("\n[Isolation Forest] Đang huấn luyện...")
+    normal_mask = (y_train == 0)
+    X_fit = X_train[normal_mask] if np.sum(normal_mask) >= 5 else X_train
+    fit_contamination = 0.05 if np.sum(normal_mask) >= 5 else contamination
+
     scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
+    X_train_scaled = scaler.fit_transform(X_fit)
     X_test_scaled = scaler.transform(X_test)
 
     model = IsolationForest(
-        n_estimators=100,
-        contamination=contamination,
+        n_estimators=150,
+        contamination=fit_contamination,
         random_state=42,
         n_jobs=-1
     )
@@ -208,9 +212,9 @@ def main():
         "models": []
     }
 
-    # Isolation Forest (Unsupervised — không dùng nhãn khi train)
+    # Isolation Forest (Fit ưu tiên mẫu Normal)
     save_dir = args.model_dir if args.save_model else None
-    if_report = evaluate_isolation_forest(X_train, X_test, y_test, args.contamination, save_dir=save_dir)
+    if_report = evaluate_isolation_forest(X_train, X_test, y_train, y_test, args.contamination, save_dir=save_dir)
     results["models"].append(if_report)
 
     # Logistic Regression (Supervised — dùng nhãn khi train)

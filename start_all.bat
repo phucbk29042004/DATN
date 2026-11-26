@@ -59,8 +59,9 @@ echo   - Search API:        http://localhost:5000
 echo   - Log Collector:     http://localhost:4000
 echo   - OpenSearch Node:   http://localhost:9200
 echo   - Redis Queue:       localhost:6379
+echo   - ML FastAPI:        http://localhost:8000
 echo.
-echo   * Tai khoan dang nhap: admin / admin123 (hoac nut Quick Login)
+echo   * Tai khoan dang nhap mac dinh: admin / admin123 (nhap thu cong)
 echo   * De phat log mau: Mo terminal tai d:\DATN\BE va go: npm run stream:real
 echo   * De dung he thong: Nhan dup chuot vao file stop_all.bat
 echo ======================================================================

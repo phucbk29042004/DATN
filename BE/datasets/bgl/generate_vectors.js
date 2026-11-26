@@ -25,9 +25,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const LOG_FILE = path.join(__dirname, 'BGL_2k.log');
 const OUT_FILE = path.join(__dirname, 'vectors_bgl.json');
+const VOCAB_OUT_FILE = path.resolve(__dirname, '../../anomaly-engine/ml-models/drain_vocab.json');
 
-// Kích thước time window: 5 phút = 300,000 ms (theo BGL time window)
-const WINDOW_SIZE_MS = 300_000;
+// Kích thước time window: 1 phút = 60,000 ms (khớp đặc tả cửa sổ 60s)
+const WINDOW_SIZE_MS = 60_000;
 
 async function main() {
   console.log('=======================================================');
@@ -72,7 +73,9 @@ async function main() {
 
   try {
     fs.writeFileSync(OUT_FILE, JSON.stringify(output, null, 2), 'utf-8');
-    console.log(`\n[SUCCESS] Đã lưu: ${OUT_FILE}`);
+    fs.mkdirSync(path.dirname(VOCAB_OUT_FILE), { recursive: true });
+    fs.writeFileSync(VOCAB_OUT_FILE, JSON.stringify({ dataset: 'bgl', templates: output.templates }, null, 2), 'utf-8');
+    console.log(`\n[SUCCESS] Đã lưu: ${OUT_FILE} & ${VOCAB_OUT_FILE}`);
   } catch (err) {
     const tmpOut = path.join(os.tmpdir(), 'vectors_bgl.json');
     fs.writeFileSync(tmpOut, JSON.stringify(output, null, 2), 'utf-8');

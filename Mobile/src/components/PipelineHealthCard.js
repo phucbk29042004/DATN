@@ -25,17 +25,17 @@ export default function PipelineHealthCard({ healthData, onOpenDetails }) {
   ];
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.borderSubtle }]}>
       <View style={styles.header}>
         <View style={styles.titleRow}>
-          <Activity size={18} color={colors.success} />
+          <Activity size={17} color={colors.success} />
           <Text style={[styles.title, { color: colors.text }]}>Sức Khỏe Pipeline Xử Lý</Text>
         </View>
         <TouchableOpacity
           onPress={onOpenDetails}
           style={[styles.btnDetails, { backgroundColor: colors.surfaceVariant, borderColor: colors.borderSubtle }]}
         >
-          <Text style={[styles.btnDetailsText, { color: colors.primary }]}>Chi tiết</Text>
+          <Text style={[styles.btnDetailsText, { color: colors.link || colors.primary }]}>Chi tiết</Text>
         </TouchableOpacity>
       </View>
 
@@ -73,8 +73,8 @@ export default function PipelineHealthCard({ healthData, onOpenDetails }) {
 
 const styles = StyleSheet.create({
   card: {
-    padding: 14,
-    borderRadius: 14,
+    padding: 16,
+    borderRadius: 18,
     borderWidth: 1,
     marginVertical: 6,
   },
@@ -91,12 +91,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '600',
+    letterSpacing: -0.224,
   },
   btnDetails: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 9999,
     borderWidth: 1,
   },
   btnDetailsText: {

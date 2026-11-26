@@ -1,27 +1,27 @@
 {
   "title": "BÁO CÁO ĐÁNH GIÁ ĐỊNH LƯỢNG VÀ HIỆU NĂNG HỆ THỐNG LOGPULSE",
-  "generated_at": "2026-11-18T04:02:23.490Z",
+  "generated_at": "2026-11-26T07:44:34.064Z",
   "benchmark_throughput": {
     "parser": {
-      "throughput": 150376,
-      "avg": "0.006",
-      "p50": "0.004",
+      "throughput": 121101,
+      "avg": "0.008",
+      "p50": "0.005",
       "p90": "0.008",
-      "p99": "0.018"
+      "p99": "0.029"
     },
     "drain": {
-      "throughput": 202425,
+      "throughput": 205636,
       "avg": "0.005",
       "p50": "0.003",
       "p90": "0.005",
-      "p99": "0.025"
+      "p99": "0.020"
     },
     "rule_engine": {
-      "throughput": 936540,
+      "throughput": 712175,
       "avg": "0.001",
       "p50": "0.001",
       "p90": "0.002",
-      "p99": "0.003"
+      "p99": "0.004"
     }
   },
   "datasets_evaluation": {
@@ -30,70 +30,146 @@
       "actual_anomalies": 5,
       "models": {
         "rule_based": {
-          "precision": 1.0,
-          "recall": 1.0,
-          "f1_score": 1.0,
-          "accuracy": 1.0,
-          "confusion_matrix": { "TP": 5, "FP": 0, "FN": 0, "TN": 6 }
+          "precision": 1,
+          "recall": 1,
+          "f1_score": 1,
+          "accuracy": 1,
+          "confusion_matrix": {
+            "TP": 5,
+            "FP": 0,
+            "FN": 0,
+            "TN": 6
+          },
+          "total": 11,
+          "actual_anomalies": 5,
+          "predicted_anomalies": 5
         },
         "statistical_zscore": {
           "precision": 0.4,
           "recall": 0.4,
           "f1_score": 0.4,
           "accuracy": 0.4545,
-          "confusion_matrix": { "TP": 2, "FP": 3, "FN": 3, "TN": 3 }
+          "confusion_matrix": {
+            "TP": 2,
+            "FP": 3,
+            "FN": 3,
+            "TN": 3
+          },
+          "total": 11,
+          "actual_anomalies": 5,
+          "predicted_anomalies": 5
         },
         "isolation_forest": {
           "method": "isolation_forest",
-          "precision": 0.0,
-          "recall": 0.0,
-          "f1_score": 0.0,
-          "accuracy": 0.67,
-          "confusion_matrix": { "TP": 0, "FP": 0, "FN": 1, "TN": 2 }
+          "precision": 0,
+          "recall": 0,
+          "f1_score": 0,
+          "confusion_matrix": [
+            [
+              2,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ],
+          "test_size": 3,
+          "anomaly_count_actual": 1,
+          "anomaly_count_predicted": 0
         },
         "logistic_regression": {
           "method": "logistic_regression",
-          "precision": 1.0,
-          "recall": 1.0,
-          "f1_score": 1.0,
-          "accuracy": 1.0,
-          "confusion_matrix": { "TP": 1, "FP": 0, "FN": 0, "TN": 2 }
+          "precision": 1,
+          "recall": 1,
+          "f1_score": 1,
+          "confusion_matrix": [
+            [
+              2,
+              0
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "test_size": 3,
+          "anomaly_count_actual": 1,
+          "anomaly_count_predicted": 1
         }
       }
     },
     "bgl": {
-      "total_windows": 23,
+      "total_windows": 41,
       "actual_anomalies": 7,
       "models": {
         "rule_based": {
-          "precision": 1.0,
-          "recall": 1.0,
-          "f1_score": 1.0,
-          "accuracy": 1.0,
-          "confusion_matrix": { "TP": 7, "FP": 0, "FN": 0, "TN": 16 }
+          "precision": 1,
+          "recall": 1,
+          "f1_score": 1,
+          "accuracy": 1,
+          "confusion_matrix": {
+            "TP": 7,
+            "FP": 0,
+            "FN": 0,
+            "TN": 34
+          },
+          "total": 41,
+          "actual_anomalies": 7,
+          "predicted_anomalies": 7
         },
         "statistical_zscore": {
-          "precision": 0.5714,
+          "precision": 0.8,
           "recall": 0.5714,
-          "f1_score": 0.5714,
-          "accuracy": 0.7391,
-          "confusion_matrix": { "TP": 4, "FP": 3, "FN": 3, "TN": 13 }
+          "f1_score": 0.6667,
+          "accuracy": 0.9024,
+          "confusion_matrix": {
+            "TP": 4,
+            "FP": 1,
+            "FN": 3,
+            "TN": 33
+          },
+          "total": 41,
+          "actual_anomalies": 7,
+          "predicted_anomalies": 5
         },
         "isolation_forest": {
           "method": "isolation_forest",
-          "precision": 0.0,
-          "recall": 0.0,
-          "f1_score": 0.0,
-          "accuracy": 0.8,
-          "confusion_matrix": { "TP": 0, "FP": 0, "FN": 1, "TN": 4 }
+          "precision": 0,
+          "recall": 0,
+          "f1_score": 0,
+          "confusion_matrix": [
+            [
+              8,
+              0
+            ],
+            [
+              1,
+              0
+            ]
+          ],
+          "test_size": 9,
+          "anomaly_count_actual": 1,
+          "anomaly_count_predicted": 0
         },
         "logistic_regression": {
           "method": "logistic_regression",
-          "precision": 1.0,
-          "recall": 1.0,
-          "f1_score": 1.0,
-          "accuracy": 1.0,
-          "confusion_matrix": { "TP": 1, "FP": 0, "FN": 0, "TN": 4 }
+          "precision": 1,
+          "recall": 1,
+          "f1_score": 1,
+          "confusion_matrix": [
+            [
+              8,
+              0
+            ],
+            [
+              0,
+              1
+            ]
+          ],
+          "test_size": 9,
+          "anomaly_count_actual": 1,
+          "anomaly_count_predicted": 1
         }
       }
     }

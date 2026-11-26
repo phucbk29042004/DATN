@@ -119,41 +119,20 @@ const TAB_INFO = {
       }
     ]
   },
-  admin: {
-    titleVi: 'Hướng Dẫn: Quản Trị & Bảo Trì SRE (Maintenance)',
-    titleEn: 'Guide: SRE Administration & Maintenance',
-    icon: Wrench,
-    badgeVi: 'ENTERPRISE SRE',
-    descVi: 'Trung tâm cấu hình cảnh báo, quản lý chế độ bảo trì và các tác vụ tự động hóa nền.',
+  'sre-chat': {
+    titleVi: 'Hướng Dẫn: Kênh Trao Đổi SRE Nội Bộ (SRE Messenger)',
+    titleEn: 'Guide: Internal SRE Messenger',
+    icon: ShieldCheck,
+    badgeVi: 'SRE COLLABORATION',
+    descVi: 'Kênh trao đổi thời gian thực giữa Quản trị viên (Admin) và Giám sát viên (Viewer) kèm tính năng gắn thẻ trực tiếp bản ghi log sự cố.',
     sectionsVi: [
       {
-        heading: 'Cấu Hình Cảnh Báo Đa Kênh',
-        content: 'Tích hợp cảnh báo thời gian thực qua Discord Webhook và Email SMTP khi phát sinh log FATAL hoặc Anomaly vượt ngưỡng.'
+        heading: 'Chat Thời Gian Thực Qua Socket.IO',
+        content: 'Tin nhắn hiển thị phân biệt vai trò Admin/Viewer theo thời gian thực và tự đồng bộ lịch sử hội thoại lưu bền vững trong SQLite.'
       },
       {
-        heading: 'Chế Độ Bảo Trì (Maintenance Mode Silence)',
-        content: 'Bật chế độ bảo trì tạm thời (15p, 30p, 60p) để tạm ngưng gửi cảnh báo rác trong lúc đội kỹ thuật triển khai bản cập nhật.'
-      },
-      {
-        heading: 'Tự Động Dọn Dẹp Log (Retention Cleanup)',
-        content: 'Tác vụ Cron tự động lưu trữ và thanh trừng các bản ghi log quá hạn để tiết kiệm dung lượng ổ đĩa.'
-      }
-    ]
-  },
-  trace: {
-    titleVi: 'Hướng Dẫn: Truy Vết Phân Tán (Distributed Tracing)',
-    titleEn: 'Guide: Distributed Tracing & Span Tree',
-    icon: GitCommit,
-    badgeVi: 'DISTRIBUTED TRACING',
-    descVi: 'Truy vết hành trình của request qua các dịch vụ vi mô để xác định điểm nghẽn hiệu năng.',
-    sectionsVi: [
-      {
-        heading: 'Cây Span & Cuộc Gọi API',
-        content: 'Biểu diễn trực quan cây phân nhánh các lệnh gọi API giữa Gateway, Auth, Order, Payment và Database.'
-      },
-      {
-        heading: 'Thời Gian Thực Thi (Execution Duration)',
-        content: 'Đo lường thời gian xử lý chi tiết của từng mắt xích và tô màu đỏ các span bị nghẽn (bottleneck).'
+        heading: 'Đính Kèm & Soi Thẻ Log Sự Cố',
+        content: 'Nhấn "Gắn thẻ vào SRE Chat" từ danh sách bất thường hoặc chi tiết log để gửi kèm bản ghi lỗi và mở nhanh modal kiểm tra chỉ với một chạm.'
       }
     ]
   }

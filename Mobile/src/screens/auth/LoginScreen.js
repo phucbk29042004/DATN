@@ -62,11 +62,6 @@ export default function LoginScreen() {
     }
   };
 
-  const fillQuickAccount = (user, pass) => {
-    setUsername(user);
-    setPassword(pass);
-  };
-
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <KeyboardAvoidingView
@@ -105,7 +100,7 @@ export default function LoginScreen() {
               <User size={18} color={colors.textMuted} style={styles.fieldIcon} />
               <TextInput
                 style={[styles.textInput, { color: colors.text }]}
-                placeholder="Tài khoản (admin hoặc viewer)"
+                placeholder="Nhập tên tài khoản"
                 placeholderTextColor={colors.textMuted}
                 value={username}
                 onChangeText={setUsername}
@@ -155,31 +150,6 @@ export default function LoginScreen() {
               <Text style={styles.loginBtnText}>Truy cập hệ thống</Text>
             )}
           </TouchableOpacity>
-
-          {/* Quick Demo Credentials */}
-          <View style={styles.quickAccessSection}>
-            <Text style={[styles.quickAccessLabel, { color: colors.textMuted }]}>
-              Môi trường thử nghiệm nhanh
-            </Text>
-            <View style={styles.chipsRow}>
-              <TouchableOpacity
-                style={[styles.accountChip, { backgroundColor: colors.surfaceVariant, borderColor: colors.borderSubtle }]}
-                onPress={() => fillQuickAccount('admin', 'admin123')}
-                activeOpacity={0.75}
-              >
-                <Text style={[styles.chipRole, { color: colors.primary }]}>Quản trị viên</Text>
-                <Text style={[styles.chipUser, { color: colors.textSecondary }]}>admin</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.accountChip, { backgroundColor: colors.surfaceVariant, borderColor: colors.borderSubtle }]}
-                onPress={() => fillQuickAccount('viewer', 'viewer123')}
-                activeOpacity={0.75}
-              >
-                <Text style={[styles.chipRole, { color: colors.secondary }]}>Điều tra viên</Text>
-                <Text style={[styles.chipUser, { color: colors.textSecondary }]}>viewer</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
         </View>
 
         {/* Modal Cấu hình Server IP */}
@@ -278,29 +248,30 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
   mainTitle: {
-    fontSize: 28,
-    fontWeight: '800',
-    letterSpacing: -0.6,
+    fontSize: 32,
+    fontWeight: '600',
+    letterSpacing: -0.374,
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 15,
+    lineHeight: 22,
+    fontWeight: '400',
   },
   formGroup: {
     marginBottom: 16,
   },
   inputLabel: {
-    fontSize: 12.5,
+    fontSize: 13,
     fontWeight: '600',
     marginBottom: 6,
-    letterSpacing: 0.2,
+    letterSpacing: -0.12,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     height: 48,
-    borderRadius: 12,
+    borderRadius: 11,
     borderWidth: 1,
     paddingHorizontal: 14,
   },
@@ -310,55 +281,21 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     height: '100%',
-    fontSize: 14,
+    fontSize: 15,
+    fontWeight: '400',
   },
   loginBtn: {
     height: 48,
-    borderRadius: 12,
+    borderRadius: 9999,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 12,
-    shadowColor: '#4f46e5',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 3,
+    marginTop: 14,
   },
   loginBtnText: {
     color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '700',
-    letterSpacing: 0.2,
-  },
-  quickAccessSection: {
-    marginTop: 36,
-    alignItems: 'center',
-  },
-  quickAccessLabel: {
-    fontSize: 11.5,
-    fontWeight: '500',
-    marginBottom: 12,
-  },
-  chipsRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  accountChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-  },
-  chipRole: {
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  chipUser: {
-    fontSize: 12,
-    fontWeight: '500',
+    fontSize: 16,
+    fontWeight: '400',
+    letterSpacing: -0.224,
   },
   modalBackdrop: {
     flex: 1,

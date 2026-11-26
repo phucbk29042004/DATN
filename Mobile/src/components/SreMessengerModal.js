@@ -17,11 +17,12 @@ import io from 'socket.io-client';
 import { useTheme } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { apiClient } from '../api/client';
+import { apiClient, getAuthToken } from '../api/client';
 import { getServerUrl } from '../api/config';
 
 export default function SreMessengerModal({
-  visible,
+  visible = true,
+  embedded = false,
   onClose,
   taggedLog,
   onClearTaggedLog,
@@ -64,22 +65,24 @@ export default function SreMessengerModal({
 
   // Kết nối Socket.IO
   useEffect(() => {
-    if (!visible) return;
+    if (!visible && !embedded) return;
 
     fetchMessages();
 
     let isMounted = true;
     (async () => {
       const serverUrl = await getServerUrl();
+      const token = await getAuthToken();
       if (!isMounted) return;
 
       const socket = io(serverUrl, {
-        transports: ['websocket'],
+        transports: ['websocket', 'polling'],
         reconnectionAttempts: 5,
         reconnectionDelay: 1000,
+        ...(token ? { auth: { token } } : {}),
       });
 
-      socket.on('new_chat_message', (msg) => {
+      socket.on('sre_chat_message', (msg) => {
         if (!isMounted || !msg) return;
         setMessages((prev) => {
           if (prev.some((m) => m.id === msg.id)) return prev;
@@ -97,16 +100,16 @@ export default function SreMessengerModal({
         socketRef.current = null;
       }
     };
-  }, [visible, fetchMessages]);
+  }, [visible, embedded, fetchMessages]);
 
   // Cuộn xuống tin nhắn mới nhất
   useEffect(() => {
-    if (visible && messages.length > 0) {
+    if ((visible || embedded) && messages.length > 0) {
       setTimeout(() => {
         flatListRef.current?.scrollToEnd({ animated: true });
       }, 200);
     }
-  }, [messages, visible]);
+  }, [messages, visible, embedded]);
 
   // Gửi tin nhắn
   const handleSend = async () => {
@@ -114,10 +117,11 @@ export default function SreMessengerModal({
 
     const messageText = input.trim();
     const payload = {
-      sender_name: currentUser?.displayName || currentUser?.username || 'Mobile User',
-      sender_role: currentUser?.role || 'viewer',
-      message: messageText || 'Đã gửi một bản ghi log sự cố cần kiểm tra.',
-      tagged_log: activeTaggedLog || null,
+      sender: currentUser?.username || 'mobile-user',
+      displayName: currentUser?.displayName || currentUser?.username || 'Mobile User',
+      role: currentUser?.role || 'viewer',
+      content: messageText || 'Đã gửi một bản ghi log sự cố cần kiểm tra.',
+      logAttachment: activeTaggedLog || null,
     };
 
     setSending(true);
@@ -139,7 +143,7 @@ export default function SreMessengerModal({
         });
       }
     } catch (err) {
-      showToast('Không thể gửi tin nhắn. Vui lòng thử lại!', 'error');
+      showToast(err.message || 'Không thể gửi tin nhắn. Vui lòng thử lại!', 'error');
       setActiveTaggedLog(tempTaggedLog);
     } finally {
       setSending(false);
@@ -147,13 +151,20 @@ export default function SreMessengerModal({
   };
 
   const renderMessageItem = ({ item }) => {
-    const isMe = item.sender_name === (currentUser?.displayName || currentUser?.username);
-    const isAdmin = (item.sender_role || '').toLowerCase() === 'admin';
+    const senderUsername = item.nguoi_gui || item.sender_name || item.sender || '';
+    const senderDisplay = item.ten_hien_thi || item.sender_name || senderUsername || 'Người dùng';
+    const senderRole = (item.vai_tro || item.sender_role || 'viewer').toLowerCase();
+    const msgContent = item.noi_dung ?? item.message ?? '';
+    const msgTime = item.thoi_gian || item.created_at;
+    const rawAttachment = item.dinh_kem_log ?? item.tagged_log;
+
+    const isMe = senderUsername === (currentUser?.username || '') || senderDisplay === (currentUser?.displayName || '');
+    const isAdmin = senderRole === 'admin';
 
     let tagged = null;
-    if (item.tagged_log) {
+    if (rawAttachment) {
       try {
-        tagged = typeof item.tagged_log === 'string' ? JSON.parse(item.tagged_log) : item.tagged_log;
+        tagged = typeof rawAttachment === 'string' ? JSON.parse(rawAttachment) : rawAttachment;
       } catch {
         tagged = null;
       }
@@ -163,20 +174,20 @@ export default function SreMessengerModal({
       <View style={[styles.msgWrapper, isMe ? styles.msgWrapperMe : styles.msgWrapperOther]}>
         <View style={styles.msgHeader}>
           {isAdmin ? (
-            <Shield size={12} color="#a855f7" style={{ marginRight: 3 }} />
+            <Shield size={12} color={colors.link || colors.primary} style={{ marginRight: 3 }} />
           ) : (
-            <User size={12} color={colors.primary} style={{ marginRight: 3 }} />
+            <User size={12} color={colors.textSecondary} style={{ marginRight: 3 }} />
           )}
           <Text style={[styles.senderName, { color: colors.textSecondary }]}>
-            {item.sender_name}
+            {senderDisplay}
           </Text>
-          <View style={[styles.roleBadge, { backgroundColor: isAdmin ? 'rgba(168, 85, 247, 0.15)' : 'rgba(6, 182, 212, 0.15)' }]}>
-            <Text style={[styles.roleText, { color: isAdmin ? '#c084fc' : '#22d3ee' }]}>
+          <View style={[styles.roleBadge, { backgroundColor: isAdmin ? colors.primaryLight : colors.surfaceVariant }]}>
+            <Text style={[styles.roleText, { color: isAdmin ? (colors.link || colors.primary) : colors.textSecondary }]}>
               {isAdmin ? 'ADMIN' : 'VIEWER'}
             </Text>
           </View>
           <Text style={[styles.timeText, { color: colors.textMuted }]}>
-            {item.created_at ? new Date(item.created_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : ''}
+            {msgTime ? new Date(msgTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : ''}
           </Text>
         </View>
 
@@ -187,7 +198,7 @@ export default function SreMessengerModal({
             : { backgroundColor: colors.surfaceVariant, borderColor: colors.borderSubtle }
         ]}>
           <Text style={[styles.msgText, { color: isMe ? '#ffffff' : colors.text }]}>
-            {item.message}
+            {msgContent}
           </Text>
 
           {/* Tagged Log Attachment */}
@@ -216,98 +227,113 @@ export default function SreMessengerModal({
     );
   };
 
-  return (
-    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <KeyboardAvoidingView
-        style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top, paddingBottom: insets.bottom }]}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        {/* Header */}
-        <View style={[styles.modalHeader, { borderBottomColor: colors.borderSubtle, backgroundColor: colors.surface }]}>
-          <View style={styles.headerLeft}>
-            <View style={[styles.iconCircle, { backgroundColor: 'rgba(6, 182, 212, 0.15)' }]}>
-              <MessageSquare size={18} color="#06b6d4" />
-            </View>
-            <View>
-              <Text style={[styles.headerTitle, { color: colors.text }]}>Kênh Trao Đổi SRE</Text>
-              <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
-                Trao đổi nội bộ Admin & Viewer · Real-time
-              </Text>
-            </View>
+  const content = (
+    <KeyboardAvoidingView
+      style={[
+        styles.container,
+        {
+          backgroundColor: colors.background,
+          paddingTop: insets.top,
+          paddingBottom: embedded ? 62 + Math.max(insets.bottom, 8) : insets.bottom,
+        },
+      ]}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      {/* Header */}
+      <View style={[styles.modalHeader, { borderBottomColor: colors.borderSubtle, backgroundColor: colors.surface }]}>
+        <View style={styles.headerLeft}>
+          <View style={[styles.iconCircle, { backgroundColor: colors.primaryLight }]}>
+            <MessageSquare size={18} color={colors.link || colors.primary} />
           </View>
-          <View style={styles.headerRight}>
-            <TouchableOpacity onPress={fetchMessages} style={styles.actionBtn}>
-              <RefreshCw size={17} color={colors.textSecondary} />
-            </TouchableOpacity>
+          <View>
+            <Text style={[styles.headerTitle, { color: colors.text }]}>Kênh Trao Đổi SRE</Text>
+            <Text style={[styles.headerSubtitle, { color: colors.textMuted }]}>
+              Trao đổi nội bộ Admin & Viewer · Real-time
+            </Text>
+          </View>
+        </View>
+        <View style={styles.headerRight}>
+          <TouchableOpacity onPress={fetchMessages} style={styles.actionBtn}>
+            <RefreshCw size={17} color={colors.textSecondary} />
+          </TouchableOpacity>
+          {!embedded && onClose && (
             <TouchableOpacity onPress={onClose} style={styles.actionBtn}>
               <X size={20} color={colors.textSecondary} />
             </TouchableOpacity>
-          </View>
+          )}
         </View>
+      </View>
 
-        {/* Message List */}
-        {loading && messages.length === 0 ? (
-          <View style={styles.loadingBox}>
-            <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={[styles.loadingText, { color: colors.textMuted }]}>Đang kết nối kênh chat...</Text>
-          </View>
-        ) : messages.length === 0 ? (
-          <View style={styles.emptyBox}>
-            <MessageSquare size={36} color={colors.textMuted} style={{ opacity: 0.4, marginBottom: 8 }} />
-            <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-              Chưa có trao đổi nào. Hãy gửi tin nhắn đầu tiên!
-            </Text>
-          </View>
-        ) : (
-          <FlatList
-            ref={flatListRef}
-            data={messages}
-            keyExtractor={(item) => String(item.id)}
-            renderItem={renderMessageItem}
-            contentContainerStyle={styles.listContent}
-          />
-        )}
+      {/* Message List */}
+      {loading && messages.length === 0 ? (
+        <View style={styles.loadingBox}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={[styles.loadingText, { color: colors.textMuted }]}>Đang kết nối kênh chat...</Text>
+        </View>
+      ) : messages.length === 0 ? (
+        <View style={styles.emptyBox}>
+          <MessageSquare size={36} color={colors.textMuted} style={{ opacity: 0.4, marginBottom: 8 }} />
+          <Text style={[styles.emptyText, { color: colors.textMuted }]}>
+            Chưa có trao đổi nào. Hãy gửi tin nhắn đầu tiên!
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={renderMessageItem}
+          contentContainerStyle={styles.listContent}
+        />
+      )}
 
-        {/* Tagged Log Preview Banner */}
-        {activeTaggedLog && (
-          <View style={[styles.activeTagBanner, { backgroundColor: colors.surface, borderTopColor: colors.borderSubtle }]}>
-            <Paperclip size={13} color={colors.primary} />
-            <Text style={[styles.activeTagText, { color: colors.textSecondary }]} numberOfLines={1}>
-              Đính kèm log: <Text style={{ fontWeight: '700', color: colors.primary }}>{activeTaggedLog.service}</Text> - {activeTaggedLog.message || activeTaggedLog.template}
-            </Text>
-            <TouchableOpacity onPress={() => { setActiveTaggedLog(null); if (onClearTaggedLog) onClearTaggedLog(); }}>
-              <X size={15} color={colors.textMuted} />
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {/* Input Bar */}
-        <View style={[styles.inputBar, { borderTopColor: colors.borderSubtle, backgroundColor: colors.surface }]}>
-          <TextInput
-            style={[styles.inputField, { backgroundColor: colors.surfaceVariant, color: colors.text, borderColor: colors.borderSubtle }]}
-            placeholder="Nhập tin nhắn trao đổi SRE..."
-            placeholderTextColor={colors.textMuted}
-            value={input}
-            onChangeText={setInput}
-            multiline
-            maxLength={1000}
-          />
-          <TouchableOpacity
-            style={[
-              styles.sendBtn,
-              { backgroundColor: (!input.trim() && !activeTaggedLog) || sending ? colors.borderSubtle : colors.primary }
-            ]}
-            onPress={handleSend}
-            disabled={(!input.trim() && !activeTaggedLog) || sending}
-          >
-            {sending ? (
-              <ActivityIndicator size="small" color="#fff" />
-            ) : (
-              <Send size={16} color="#ffffff" />
-            )}
+      {/* Tagged Log Preview Banner */}
+      {activeTaggedLog && (
+        <View style={[styles.activeTagBanner, { backgroundColor: colors.surface, borderTopColor: colors.borderSubtle }]}>
+          <Paperclip size={13} color={colors.link || colors.primary} />
+          <Text style={[styles.activeTagText, { color: colors.textSecondary }]} numberOfLines={1}>
+            Đính kèm log: <Text style={{ fontWeight: '600', color: colors.link || colors.primary }}>{activeTaggedLog.service}</Text> - {activeTaggedLog.message || activeTaggedLog.template}
+          </Text>
+          <TouchableOpacity onPress={() => { setActiveTaggedLog(null); if (onClearTaggedLog) onClearTaggedLog(); }}>
+            <X size={15} color={colors.textMuted} />
           </TouchableOpacity>
         </View>
-      </KeyboardAvoidingView>
+      )}
+
+      {/* Input Bar */}
+      <View style={[styles.inputBar, { borderTopColor: colors.borderSubtle, backgroundColor: colors.surface }]}>
+        <TextInput
+          style={[styles.inputField, { backgroundColor: colors.surfaceVariant, color: colors.text, borderColor: colors.borderSubtle }]}
+          placeholder="Nhập tin nhắn trao đổi SRE..."
+          placeholderTextColor={colors.textMuted}
+          value={input}
+          onChangeText={setInput}
+          multiline
+          maxLength={1000}
+        />
+        <TouchableOpacity
+          style={[
+            styles.sendBtn,
+            { backgroundColor: (!input.trim() && !activeTaggedLog) || sending ? colors.borderSubtle : colors.primary }
+          ]}
+          onPress={handleSend}
+          disabled={(!input.trim() && !activeTaggedLog) || sending}
+        >
+          {sending ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Send size={16} color="#ffffff" />
+          )}
+        </TouchableOpacity>
+      </View>
+    </KeyboardAvoidingView>
+  );
+
+  if (embedded) return content;
+
+  return (
+    <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
+      {content}
     </Modal>
   );
 }

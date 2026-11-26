@@ -75,7 +75,7 @@ function calculateThroughput() {
  * Tính độ trễ trung bình của pipeline (ms)
  */
 function calculateAvgLatency() {
-  if (latencySamples.length === 0) return 120; // Giá trị baseline danh nghĩa khi chưa có log mới
+  if (latencySamples.length === 0) return 0; // Trả về 0ms khi chưa có mẫu log xử lý
   const sum = latencySamples.reduce((a, b) => a + b, 0);
   return Math.round(sum / latencySamples.length);
 }

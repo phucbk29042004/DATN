@@ -23,7 +23,9 @@ export const REDIS_PORT = parseInt(process.env.REDIS_PORT || '6379', 10);
 
 const redisOptions = {
   maxRetriesPerRequest: null,
+  lazyConnect: process.env.NODE_ENV === 'test',
   retryStrategy(times) {
+    if (process.env.NODE_ENV === 'test') return null;
     if (times > 10) return null; // Dừng retry nếu không kết nối được
     return Math.min(times * 1000, 3000);
   }

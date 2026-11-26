@@ -71,7 +71,9 @@ export default function IncidentDetailScreen({ route, navigation }) {
   const [submittingNote, setSubmittingNote] = useState(false);
 
   // Admin Resolve Modal state
-  const [resolveModalOpen, setResolveModalOpen] = useState(false);
+  const [resolveModalOpen, setResolveModalOpen] = useState(
+    Boolean(route.params?.openResolve) && isAdmin && (initialAnomaly.incident_status || 'NEW') !== 'RESOLVED'
+  );
   const [selectedRootCause, setSelectedRootCause] = useState(ROOT_CAUSES[0]);
   const [selectedActionTaken, setSelectedActionTaken] = useState(ACTIONS_TAKEN[0]);
   const [resolutionNote, setResolutionNote] = useState('');
@@ -309,12 +311,12 @@ export default function IncidentDetailScreen({ route, navigation }) {
 
         {/* Trao đổi trong SRE Chat */}
         <TouchableOpacity
-          style={[styles.btnAction, { backgroundColor: 'rgba(6, 182, 212, 0.12)', borderColor: 'rgba(6, 182, 212, 0.4)', borderWidth: 1, marginTop: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }]}
+          style={[styles.btnAction, { backgroundColor: colors.primaryLight, borderColor: colors.borderSubtle, borderWidth: 1, marginTop: 10, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 }]}
           onPress={() => setMessengerOpen(true)}
           activeOpacity={0.8}
         >
-          <MessageSquare size={16} color="#06b6d4" />
-          <Text style={[styles.btnActionText, { color: '#06b6d4', fontWeight: '700' }]}>Trao Đổi Trong SRE Chat</Text>
+          <MessageSquare size={16} color={colors.link || colors.primary} />
+          <Text style={[styles.btnActionText, { color: colors.link || colors.primary, fontWeight: '600' }]}>Trao Đổi Trong SRE Chat</Text>
         </TouchableOpacity>
 
         {/* Message Log */}
@@ -353,8 +355,8 @@ export default function IncidentDetailScreen({ route, navigation }) {
                       <Text style={[styles.noteUser, { color: isViewer ? colors.secondary : colors.primary }]}>
                         {authorName}
                       </Text>
-                      <View style={[styles.roleBadgeSmall, { backgroundColor: isViewer ? 'rgba(59,130,246,0.12)' : 'rgba(99,102,241,0.12)' }]}>
-                        <Text style={[styles.roleBadgeSmallText, { color: isViewer ? '#3b82f6' : '#6366f1' }]}>
+                      <View style={[styles.roleBadgeSmall, { backgroundColor: colors.primaryLight }]}>
+                        <Text style={[styles.roleBadgeSmallText, { color: colors.link || colors.primary }]}>
                           {isViewer ? 'Giám sát viên' : 'Quản trị viên'}
                         </Text>
                       </View>
@@ -417,7 +419,7 @@ export default function IncidentDetailScreen({ route, navigation }) {
                       style={[
                         styles.choicePill,
                         {
-                          backgroundColor: isSelected ? 'rgba(99,102,241,0.15)' : colors.surfaceVariant,
+                          backgroundColor: isSelected ? colors.primaryLight : colors.surfaceVariant,
                           borderColor: isSelected ? colors.primary : colors.borderSubtle,
                         },
                       ]}

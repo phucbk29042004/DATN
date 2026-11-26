@@ -1,9 +1,43 @@
 import React from 'react';
 import {
   Settings, X, Bell, Send, BellOff, ShieldAlert,
-  Calendar, Database, Plus, Trash2, RefreshCw, Eye, FileSpreadsheet
+  Calendar, Database, Plus, Trash2, RefreshCw, Eye, FileSpreadsheet, Download
 } from 'lucide-react';
 import { translations } from '../i18n.js';
+
+function ToggleSwitch({ id, checked, onChange, disabled, label, fontSize = '0.88rem' }) {
+  return (
+    <div className="form-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.75rem', marginBottom: 0 }}>
+      <label
+        htmlFor={id}
+        style={{ display: 'inline-flex', alignItems: 'center', cursor: disabled ? 'not-allowed' : 'pointer', position: 'relative', flexShrink: 0 }}
+      >
+        <input
+          id={id}
+          type="checkbox"
+          style={{ display: 'none' }}
+          checked={!!checked}
+          onChange={onChange}
+          disabled={disabled}
+        />
+        <div style={{
+          width: '40px', height: '22px', borderRadius: '11px',
+          background: checked ? 'var(--accent-primary)' : 'var(--border-color)',
+          position: 'relative', transition: 'background 0.2s', opacity: disabled ? 0.6 : 1
+        }}>
+          <div style={{
+            width: '18px', height: '18px', borderRadius: '50%', background: '#fff',
+            position: 'absolute', top: '2px', left: checked ? '20px' : '2px',
+            transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.3)'
+          }} />
+        </div>
+      </label>
+      <label htmlFor={id} className="form-label" style={{ marginBottom: 0, cursor: disabled ? 'not-allowed' : 'pointer', fontWeight: 600, fontSize }}>
+        {label}
+      </label>
+    </div>
+  );
+}
 
 export default function AdminSettingsModal({
   isOpen,
@@ -22,7 +56,8 @@ export default function AdminSettingsModal({
   isCleaningRetention,
   currentUser,
   formatVnDateTime,
-  handleExportCsv
+  handleExportCsv,
+  handleExportExcel
 }) {
   if (!isOpen) return null;
 
@@ -80,18 +115,14 @@ export default function AdminSettingsModal({
               </span>
             </div>
 
-            <div className="form-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-              <input
+            <div style={{ marginBottom: '0.75rem' }}>
+              <ToggleSwitch
                 id="modal-discord-check"
-                type="checkbox"
-                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                 checked={configState.discordEnabled}
                 onChange={e => setConfigState(p => ({ ...p, discordEnabled: e.target.checked }))}
                 disabled={currentUser?.role === 'viewer'}
+                label={t.configDiscordEnable || 'Bật cảnh báo qua Discord Webhook'}
               />
-              <label htmlFor="modal-discord-check" className="form-label" style={{ marginBottom: 0, cursor: 'pointer', fontWeight: 600 }}>
-                {t.configDiscordEnable || 'Bật cảnh báo qua Discord Webhook'}
-              </label>
             </div>
 
             {configState.discordEnabled && (
@@ -119,18 +150,14 @@ export default function AdminSettingsModal({
               </span>
             </div>
 
-            <div className="form-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
-              <input
+            <div style={{ marginBottom: '0.75rem' }}>
+              <ToggleSwitch
                 id="modal-email-check"
-                type="checkbox"
-                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                 checked={configState.emailEnabled}
                 onChange={e => setConfigState(p => ({ ...p, emailEnabled: e.target.checked }))}
                 disabled={currentUser?.role === 'viewer'}
+                label={t.configEmailEnable || 'Bật cảnh báo qua Email (SMTP)'}
               />
-              <label htmlFor="modal-email-check" className="form-label" style={{ marginBottom: 0, cursor: 'pointer', fontWeight: 600 }}>
-                {t.configEmailEnable || 'Bật cảnh báo qua Email (SMTP)'}
-              </label>
             </div>
 
             {configState.emailEnabled && (
@@ -325,19 +352,13 @@ export default function AdminSettingsModal({
             </p>
 
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
-              <div className="form-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.75rem', marginBottom: 0 }}>
-                <input
-                  id="modal-digest-check"
-                  type="checkbox"
-                  style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-                  checked={configState.dailyDigestEnabled}
-                  onChange={e => setConfigState(p => ({ ...p, dailyDigestEnabled: e.target.checked }))}
-                  disabled={currentUser?.role === 'viewer'}
-                />
-                <label htmlFor="modal-digest-check" className="form-label" style={{ marginBottom: 0, cursor: 'pointer', fontWeight: 600 }}>
-                  {t.digestEnable || 'Kích hoạt Daily Digest tự động'}
-                </label>
-              </div>
+              <ToggleSwitch
+                id="modal-digest-check"
+                checked={configState.dailyDigestEnabled}
+                onChange={e => setConfigState(p => ({ ...p, dailyDigestEnabled: e.target.checked }))}
+                disabled={currentUser?.role === 'viewer'}
+                label={t.digestEnable || 'Kích hoạt Daily Digest tự động'}
+              />
 
               {currentUser?.role === 'admin' && (
                 <button
@@ -396,31 +417,26 @@ export default function AdminSettingsModal({
               )}
             </div>
 
-            <div className="form-group" style={{ flexDirection: 'row', alignItems: 'center', gap: '0.75rem', marginBottom: 0 }}>
-              <input
-                id="modal-retention-auto-check"
-                type="checkbox"
-                style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-                checked={configState.autoCleanupEnabled}
-                onChange={e => setConfigState(p => ({ ...p, autoCleanupEnabled: e.target.checked }))}
-                disabled={currentUser?.role === 'viewer'}
-              />
-              <label htmlFor="modal-retention-auto-check" className="form-label" style={{ marginBottom: 0, cursor: 'pointer', fontSize: '0.82rem' }}>
-                {t.retentionAutoCleanup || 'Bật tự động dọn dẹp log quá hạn'}
-              </label>
-            </div>
+            <ToggleSwitch
+              id="modal-retention-auto-check"
+              checked={configState.autoCleanupEnabled}
+              onChange={e => setConfigState(p => ({ ...p, autoCleanupEnabled: e.target.checked }))}
+              disabled={currentUser?.role === 'viewer'}
+              label={t.retentionAutoCleanup || 'Bật tự động dọn dẹp log quá hạn'}
+              fontSize="0.82rem"
+            />
           </div>
 
-          {/* ── Kênh 7: Xuất Báo Cáo Dữ Liệu Excel (.xlsx) ── */}
+          {/* ── Kênh 7: Xuất Báo Cáo Dữ Liệu CSV & Excel ── */}
           <div style={{ background: 'var(--bg-input)', padding: '1rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.75rem' }}>
               <FileSpreadsheet size={18} color="#10b981" />
               <span style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text-primary)' }}>
-                Xuất Báo Cáo Dữ Liệu Excel (.xlsx)
+                Xuất Báo Cáo Dữ Liệu (CSV & Excel)
               </span>
             </div>
             <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
-              Tải xuống tập tin báo cáo định dạng Excel (.xlsx) chứa danh sách log hoặc sự kiện Anomaly để phân tích offline.
+              Tải xuống tập tin báo cáo định dạng CSV (UTF-8) hoặc Excel (.xlsx) chứa danh sách log / sự kiện Anomaly.
             </p>
             <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
               <button
@@ -429,7 +445,7 @@ export default function AdminSettingsModal({
                 style={{ padding: '0.45rem 1rem', fontSize: '0.82rem', gap: '0.4rem' }}
                 onClick={() => handleExportCsv && handleExportCsv('anomalies')}
               >
-                <FileSpreadsheet size={14} color="#10b981" /> Xuất Danh Sách Anomaly (.xlsx)
+                <Download size={14} color="var(--accent-primary)" /> Xuất Anomaly (.csv)
               </button>
               <button
                 type="button"
@@ -437,7 +453,23 @@ export default function AdminSettingsModal({
                 style={{ padding: '0.45rem 1rem', fontSize: '0.82rem', gap: '0.4rem' }}
                 onClick={() => handleExportCsv && handleExportCsv('logs')}
               >
-                <FileSpreadsheet size={14} color="#10b981" /> Xuất Danh Sách Log (.xlsx)
+                <Download size={14} color="var(--accent-primary)" /> Xuất Log (.csv)
+              </button>
+              <button
+                type="button"
+                className="toggle-btn"
+                style={{ padding: '0.45rem 1rem', fontSize: '0.82rem', gap: '0.4rem' }}
+                onClick={() => (handleExportExcel || handleExportCsv)?.('anomalies')}
+              >
+                <FileSpreadsheet size={14} color="#10b981" /> Xuất Anomaly (.xlsx)
+              </button>
+              <button
+                type="button"
+                className="toggle-btn"
+                style={{ padding: '0.45rem 1rem', fontSize: '0.82rem', gap: '0.4rem' }}
+                onClick={() => (handleExportExcel || handleExportCsv)?.('logs')}
+              >
+                <FileSpreadsheet size={14} color="#10b981" /> Xuất Log (.xlsx)
               </button>
             </div>
           </div>

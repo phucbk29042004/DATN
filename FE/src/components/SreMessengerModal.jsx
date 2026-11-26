@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, Send, X, Shield, User, Paperclip, ChevronDown, CheckCheck, RefreshCw, Terminal } from 'lucide-react';
-
-const API_BASE = import.meta.env.VITE_SEARCH_API_URL || 'http://localhost:5000/api/v1';
+import { API_BASE } from '../config.js';
 
 export default function SreMessengerModal({
   isOpen,
@@ -10,7 +9,8 @@ export default function SreMessengerModal({
   socket,
   taggedLog,
   onClearTaggedLog,
-  onInspectLog
+  onInspectLog,
+  isTabMode = false
 }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -91,7 +91,7 @@ export default function SreMessengerModal({
     } else {
       // 2. Fallback qua REST API
       try {
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('logpulse_auth_token') || localStorage.getItem('logpulse_auth_token');
         await fetch(`${API_BASE}/chat/messages`, {
           method: 'POST',
           headers: {
@@ -110,8 +110,22 @@ export default function SreMessengerModal({
 
   return (
     <div
-      className="sre-messenger-window"
-      style={{
+      className={`sre-messenger-window ${isTabMode ? 'is-tab-mode' : ''}`}
+      style={isTabMode ? {
+        position: 'relative',
+        width: '100%',
+        maxWidth: '1200px',
+        margin: '0 auto',
+        height: 'calc(100vh - 150px)',
+        minHeight: '560px',
+        display: 'flex',
+        flexDirection: 'column',
+        borderRadius: '16px',
+        border: '1px solid var(--border-color)',
+        background: 'var(--bg-card)',
+        boxShadow: 'var(--shadow-card)',
+        overflow: 'hidden'
+      } : {
         position: 'fixed',
         bottom: '24px',
         right: '90px',
@@ -196,20 +210,22 @@ export default function SreMessengerModal({
           >
             <RefreshCw size={14} className={loading ? 'spin' : ''} />
           </button>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              color: 'var(--text-secondary)',
-              cursor: 'pointer',
-              padding: '0.3rem',
-              borderRadius: '6px'
-            }}
-            title="Đóng chat"
-          >
-            <X size={18} />
-          </button>
+          {!isTabMode && (
+            <button
+              onClick={onClose}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                padding: '0.3rem',
+                borderRadius: '6px'
+              }}
+              title="Đóng chat"
+            >
+              <X size={18} />
+            </button>
+          )}
         </div>
       </div>
 

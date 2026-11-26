@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url';
 import { Server as SocketIOServer } from 'socket.io';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import jwt from 'jsonwebtoken';
 import {
   searchLogs,
   getLogStats,
@@ -18,8 +19,8 @@ import {
 } from './opensearchQueries.js';
 import { chatWithAI, explainLog } from './aiService.js';
 import { alertConfig, dispatchAlerts, sendDiscordAlert, sendEmailAlert, setMaintenanceMode, getMaintenanceMode, saveConfigToSqlite } from './alertService.js';
-import db, { ghiNhatKyHeThong, luuTinNhanNoiBo, layDanhSachTinNhanNoiBo } from '../database/sqlite.js';
-import { loginUser, changePassword, authenticateToken, requireAdmin, optionalAuth } from './authService.js';
+import db, { ghiNhatKyHeThong, luuTinNhanNoiBo, layDanhSachTinNhanNoiBo, luuLogDuPhong } from '../database/sqlite.js';
+import { loginUser, changePassword, authenticateToken, requireAdmin, optionalAuth, JWT_SECRET } from './authService.js';
 import { getPipelineHealth, recordPipelineLog } from './pipelineMetrics.js';
 import { updateIncidentStatus, addIncidentNote, enrichAnomaliesWithIncidentState } from './incidentService.js';
 import { cronConfig, sendDailyDigestReport, runLogRetentionCleanup, initCronJobs, reloadCronJobs } from './cronService.js';
@@ -48,6 +49,7 @@ let streamInterval = null;
 let currentLogIndex = 0;
 
 function startCloudLogStreamer() {
+  if (process.env.ENABLE_DEMO_STREAMER !== 'true') return;
   const pool = getRealLogsPool();
   if (streamInterval || pool.length === 0) return;
   console.log('[Realtime Streamer] Bắt đầu phát sóng log HDFS/BGL định kỳ cho client trực tuyến.');
@@ -76,11 +78,19 @@ const app = express();
 const httpServer = http.createServer(app);
 
 // --- CORS cho FE dev server (port 3000), Vercel & Mobile (ngrok tunnel) ---
+const envCorsOrigins = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean);
+
 const allowedOrigins = [
   'http://localhost:3000',
   'http://127.0.0.1:3000',
+  'http://localhost:5173',
+  'http://localhost:8081',
   'https://fedatn-xi.vercel.app',
-  'https://job-observing-corporal.ngrok-free.dev'
+  'https://job-observing-corporal.ngrok-free.dev',
+  ...envCorsOrigins
 ];
 
 const corsOptions = {
@@ -88,23 +98,78 @@ const corsOptions = {
     if (
       !origin ||
       allowedOrigins.includes(origin) ||
+      /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
       origin.endsWith('.vercel.app') ||
       origin.endsWith('.ngrok-free.dev') ||
       origin.endsWith('.ngrok-free.app')
     ) {
       return callback(null, true);
     }
-    return callback(null, true);
+    return callback(new Error(`Origin không được phép bởi CORS: ${origin}`));
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   credentials: true
 };
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  next();
+});
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Lightweight in-memory rate limiter cho Auth & AI endpoints
+function createRateLimiter({ windowMs, max, message }) {
+  const hits = new Map();
+  return (req, res, next) => {
+    const key = req.ip || req.socket?.remoteAddress || 'unknown';
+    const now = Date.now();
+    const record = hits.get(key);
+    if (!record || now > record.resetAt) {
+      hits.set(key, { count: 1, resetAt: now + windowMs });
+      return next();
+    }
+    record.count += 1;
+    if (record.count > max) {
+      return res.status(429).json({ error: message });
+    }
+    return next();
+  };
+}
+
+const authLimiter = createRateLimiter({
+  windowMs: 60 * 1000,
+  max: parseInt(process.env.AUTH_RATE_LIMIT_MAX || '15', 10),
+  message: 'Quá nhiều yêu cầu đăng nhập, vui lòng thử lại sau ít phút.'
+});
+
+const aiLimiter = createRateLimiter({
+  windowMs: 60 * 1000,
+  max: parseInt(process.env.AI_RATE_LIMIT_MAX || '30', 10),
+  message: 'Đã vượt giới hạn gọi AI Assistant, vui lòng thử lại sau.'
+});
 
 // --- Socket.IO setup ---
 const io = new SocketIOServer(httpServer, {
   cors: corsOptions
+});
+
+// Xác thực JWT tùy chọn trên Socket.IO handshake (bắt buộc cho ghi/chat)
+io.use((socket, next) => {
+  const authHeader = socket.handshake.headers?.authorization;
+  const token = socket.handshake.auth?.token || (authHeader && authHeader.split(' ')[1]);
+  if (token) {
+    try {
+      socket.user = jwt.verify(token, JWT_SECRET);
+    } catch {
+      socket.user = null;
+    }
+  } else {
+    socket.user = null;
+  }
+  next();
 });
 
 // Cache in-memory để broadcast log mới qua Socket.IO
@@ -130,13 +195,15 @@ export function broadcastNewLog(logEntry) {
 }
 
 // Lắng nghe log realtime từ Parser Worker qua Redis Pub/Sub
-redisSub.subscribe(REALTIME_LOG_CHANNEL, (err) => {
-  if (err) {
-    console.error('[Redis PubSub] Lỗi đăng ký kênh realtime log:', err.message);
-  } else {
-    console.log(`[Redis PubSub] Đã kết nối kênh '${REALTIME_LOG_CHANNEL}' để nhận log realtime từ Parser Worker`);
-  }
-});
+if (process.env.NODE_ENV !== 'test') {
+  redisSub.subscribe(REALTIME_LOG_CHANNEL, (err) => {
+    if (err) {
+      console.error('[Redis PubSub] Lỗi đăng ký kênh realtime log:', err.message);
+    } else {
+      console.log(`[Redis PubSub] Đã kết nối kênh '${REALTIME_LOG_CHANNEL}' để nhận log realtime từ Parser Worker`);
+    }
+  });
+}
 
 redisSub.on('message', (channel, message) => {
   if (channel === REALTIME_LOG_CHANNEL) {
@@ -160,15 +227,23 @@ io.on('connection', (socket) => {
     socket.emit('log_buffer', recentLogBuffer.slice(0, 50));
   }
 
-  // Lắng nghe chat nội bộ SRE (Admin <-> Viewer)
+  // Lắng nghe chat nội bộ SRE (Admin <-> Viewer) — yêu cầu JWT hợp lệ qua handshake
   socket.on('sre_chat_send', (data) => {
     try {
+      if (!socket.user) {
+        socket.emit('sre_chat_error', { error: 'Phiên đăng nhập không hợp lệ, vui lòng đăng nhập lại để nhắn tin.' });
+        return;
+      }
+      const content = (data?.content || '').toString().trim();
+      const logAttachment = data?.logAttachment || null;
+      if (!content && !logAttachment) return;
+
       const saved = luuTinNhanNoiBo({
-        nguoiGui: data.sender || 'anonymous',
-        vaiTro: data.role || 'viewer',
-        tenHienThi: data.displayName || data.sender || 'Người dùng',
-        noiDung: data.content || '',
-        dinhKemLog: data.logAttachment || null
+        nguoiGui: socket.user.username,
+        vaiTro: socket.user.role || 'viewer',
+        tenHienThi: socket.user.displayName || socket.user.username,
+        noiDung: content || 'Đã đính kèm thẻ log sự cố',
+        dinhKemLog: logAttachment
       });
       if (saved) {
         io.emit('sre_chat_message', saved);
@@ -191,7 +266,7 @@ app.get('/health', (req, res) => {
 });
 
 // ── AUTHENTICATION ROUTES ────────────────────────────────────────────────────
-app.post('/api/v1/auth/login', async (req, res) => {
+app.post('/api/v1/auth/login', authLimiter, async (req, res) => {
   try {
     const { username, password } = req.body;
     const result = await loginUser(username, password, req.ip);
@@ -323,12 +398,11 @@ app.get('/api/v1/anomalies', async (req, res) => {
  * Cập nhật trạng thái sự cố (NEW -> ACKNOWLEDGED -> RESOLVED)
  * PATCH /api/v1/anomalies/:id/status
  */
-app.patch('/api/v1/anomalies/:id/status', optionalAuth, (req, res) => {
+app.patch('/api/v1/anomalies/:id/status', requireAdmin, (req, res) => {
   try {
     const { id } = req.params;
     const { status, note, priority, root_cause, action_taken } = req.body;
-    const user = req.user || { username: 'admin', displayName: 'Quản Trị Viên', role: 'admin' };
-    const updated = updateIncidentStatus(id, status, user, note, { priority, root_cause, action_taken });
+    const updated = updateIncidentStatus(id, status, req.user, note, { priority, root_cause, action_taken });
     return res.status(200).json({ success: true, incident: updated });
   } catch (err) {
     return res.status(400).json({ error: err.message });
@@ -336,15 +410,14 @@ app.patch('/api/v1/anomalies/:id/status', optionalAuth, (req, res) => {
 });
 
 /**
- * Thêm ghi chú xử lý sự cố (Incident Notes)
+ * Thêm ghi chú xử lý sự cố (Incident Notes — Admin & Viewer đã xác thực)
  * POST /api/v1/anomalies/:id/notes
  */
-app.post('/api/v1/anomalies/:id/notes', optionalAuth, (req, res) => {
+app.post('/api/v1/anomalies/:id/notes', authenticateToken, (req, res) => {
   try {
     const { id } = req.params;
     const { note, type = 'NOTE' } = req.body;
-    const user = req.user || { username: 'operator', displayName: 'Giám Sát Viên', role: 'viewer' };
-    const newNote = addIncidentNote(id, user, note, type);
+    const newNote = addIncidentNote(id, req.user, note, type);
     return res.status(200).json({ success: true, note: newNote });
   } catch (err) {
     return res.status(400).json({ error: err.message });
@@ -356,12 +429,9 @@ app.get('/api/v1/alerts/maintenance', (req, res) => {
   return res.status(200).json(getMaintenanceMode());
 });
 
-app.post('/api/v1/alerts/maintenance', optionalAuth, (req, res) => {
-  if (req.user && req.user.role !== 'admin') {
-    return res.status(403).json({ error: 'Chỉ tài khoản Admin mới có quyền bật/tắt chế độ bảo trì.' });
-  }
+app.post('/api/v1/alerts/maintenance', requireAdmin, (req, res) => {
   const { enabled, minutes, reason } = req.body;
-  const createdBy = req.user ? req.user.displayName || req.user.username : 'Admin';
+  const createdBy = req.user.displayName || req.user.username;
   const updated = setMaintenanceMode({ enabled, minutes, reason, createdBy });
   return res.status(200).json({ success: true, maintenance: updated });
 });
@@ -383,19 +453,18 @@ app.get('/api/v1/templates', async (req, res) => {
 });
 
 // ── GET /api/v1/config & POST /api/v1/config ──────────────────────────────────
-app.get('/api/v1/config', (req, res) => {
+app.get('/api/v1/config', authenticateToken, (req, res) => {
+  const isAdmin = req.user?.role === 'admin';
   res.status(200).json({
     ...alertConfig,
-    ...cronConfig
+    ...cronConfig,
+    smtpPass: alertConfig.smtpPass ? '********' : '',
+    discordWebhookUrl: isAdmin ? alertConfig.discordWebhookUrl : (alertConfig.discordWebhookUrl ? '********' : ''),
+    smtpUser: isAdmin ? alertConfig.smtpUser : (alertConfig.smtpUser ? '********' : '')
   });
 });
 
-app.post('/api/v1/config', optionalAuth, (req, res) => {
-  // Kiểm tra phân quyền: Nếu là Viewer thì không được phép sửa cấu hình
-  if (req.user && req.user.role !== 'admin') {
-    return res.status(403).json({ error: 'Tài khoản Viewer chỉ có quyền xem, không được phép chỉnh sửa cấu hình hệ thống.' });
-  }
-
+app.post('/api/v1/config', requireAdmin, (req, res) => {
   const {
     anomalyThreshold,
     discordEnabled,
@@ -419,7 +488,10 @@ app.post('/api/v1/config', optionalAuth, (req, res) => {
   if (smtpHost !== undefined) alertConfig.smtpHost = String(smtpHost).trim();
   if (smtpPort !== undefined) alertConfig.smtpPort = parseInt(smtpPort, 10);
   if (smtpUser !== undefined) alertConfig.smtpUser = String(smtpUser).trim();
-  if (smtpPass !== undefined) alertConfig.smtpPass = String(smtpPass).trim().replace(/\s+/g, '');
+  const nextSmtpPass = smtpPass !== undefined && String(smtpPass).trim() !== '********'
+    ? String(smtpPass).trim().replace(/\s+/g, '')
+    : undefined;
+  if (nextSmtpPass !== undefined) alertConfig.smtpPass = nextSmtpPass;
   if (receiverEmail !== undefined) alertConfig.receiverEmail = String(receiverEmail).trim();
   if (Array.isArray(alertKeywords)) alertConfig.alertKeywords = alertKeywords;
   
@@ -443,13 +515,13 @@ app.post('/api/v1/config', optionalAuth, (req, res) => {
     smtpHost,
     smtpPort,
     smtpUser,
-    smtpPass,
+    ...(nextSmtpPass !== undefined ? { smtpPass: nextSmtpPass } : {}),
     receiverEmail,
     alertKeywords
   });
 
   ghiNhatKyHeThong(
-    req.user ? (req.user.displayName || req.user.username) : 'Admin',
+    req.user.displayName || req.user.username,
     'UPDATE_CONFIG',
     'SystemConfig',
     { updatedKeys: Object.keys(req.body) },
@@ -461,11 +533,18 @@ app.post('/api/v1/config', optionalAuth, (req, res) => {
     ...cronConfig,
     smtpPass: alertConfig.smtpPass ? '********' : '' // Ẩn mật khẩu khi log
   });
-  res.status(200).json({ status: 'OK', config: { ...alertConfig, ...cronConfig } });
+  res.status(200).json({
+    status: 'OK',
+    config: {
+      ...alertConfig,
+      ...cronConfig,
+      smtpPass: alertConfig.smtpPass ? '********' : ''
+    }
+  });
 });
 
 // ── ENTERPRISE AUDIT & CRON HISTORY ENDPOINTS ───────────────────────────────
-app.get('/api/v1/audit/logs', optionalAuth, (req, res) => {
+app.get('/api/v1/audit/logs', requireAdmin, (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit || '100', 10), 500);
     const logs = db.prepare('SELECT * FROM nhat_ky_he_thong ORDER BY id DESC LIMIT ?').all(limit);
@@ -475,7 +554,7 @@ app.get('/api/v1/audit/logs', optionalAuth, (req, res) => {
   }
 });
 
-app.get('/api/v1/cron/history', optionalAuth, (req, res) => {
+app.get('/api/v1/cron/history', requireAdmin, (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit || '50', 10), 200);
     const history = db.prepare('SELECT * FROM lich_su_cron ORDER BY id DESC LIMIT ?').all(limit);
@@ -489,7 +568,7 @@ app.get('/api/v1/cron/history', optionalAuth, (req, res) => {
 /**
  * Nút bấm gửi ngay báo cáo Daily Digest 24h (Manual trigger phục vụ demo)
  */
-app.post('/api/v1/reports/digest/trigger', async (req, res) => {
+app.post('/api/v1/reports/digest/trigger', requireAdmin, async (req, res) => {
   try {
     const data = await sendDailyDigestReport();
     return res.status(200).json({
@@ -506,10 +585,7 @@ app.post('/api/v1/reports/digest/trigger', async (req, res) => {
 /**
  * Nút bấm dọn dẹp log cũ ngay lập tức (Retention Cleanup)
  */
-app.post('/api/v1/storage/retention/cleanup', optionalAuth, async (req, res) => {
-  if (req.user && req.user.role !== 'admin') {
-    return res.status(403).json({ error: 'Chỉ tài khoản Admin mới có quyền dọn dẹp log lưu trữ.' });
-  }
+app.post('/api/v1/storage/retention/cleanup', requireAdmin, async (req, res) => {
   const { days } = req.body;
   const targetDays = days ? parseInt(days, 10) : cronConfig.retentionDays;
   const result = await runLogRetentionCleanup(targetDays);
@@ -517,7 +593,7 @@ app.post('/api/v1/storage/retention/cleanup', optionalAuth, async (req, res) => 
 });
 
 // ── GET /api/v1/export/csv ───────────────────────────────────────────────────
-app.get('/api/v1/export/csv', async (req, res) => {
+app.get('/api/v1/export/csv', authenticateToken, async (req, res) => {
   try {
     const { from, to, type = 'anomalies' } = req.query;
     const timeFrom = from || new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
@@ -557,7 +633,7 @@ app.get('/api/v1/export/csv', async (req, res) => {
  * AI Chatbot — Hỏi đáp tự do về giám sát hệ thống (Hỗ trợ Multimodal Vision)
  * Body: { messages: [{role, content}], systemContext?: string, image?: { base64, mimeType } }
  */
-app.post('/api/v1/ai/chat', async (req, res) => {
+app.post('/api/v1/ai/chat', aiLimiter, async (req, res) => {
   try {
     let { messages, query, systemContext, image } = req.body;
     if (!messages && query) {
@@ -575,7 +651,7 @@ app.post('/api/v1/ai/chat', async (req, res) => {
 });
 
 // Alias cho các client có thể còn gọi /api/v1/ai/query
-app.post('/api/v1/ai/query', (req, res) => {
+app.post('/api/v1/ai/query', aiLimiter, (req, res) => {
   let { messages, query, systemContext, image } = req.body;
   if (!messages && query) {
     messages = [{ role: 'user', content: query }];
@@ -602,20 +678,17 @@ app.get('/api/v1/chat/messages', (req, res) => {
 /**
  * Gửi tin nhắn nội bộ SRE (hỗ trợ đính kèm thẻ log sự cố)
  */
-app.post('/api/v1/chat/messages', optionalAuth, (req, res) => {
+app.post('/api/v1/chat/messages', authenticateToken, (req, res) => {
   try {
-    const { content, logAttachment, displayName, sender, role } = req.body;
+    const { content, logAttachment } = req.body;
     if (!content && !logAttachment) {
       return res.status(400).json({ error: 'Nội dung tin nhắn hoặc đính kèm không được để trống' });
     }
-    const userRole = req.user ? req.user.role : (role || 'viewer');
-    const userDisplay = req.user ? (req.user.displayName || req.user.username) : (displayName || sender || 'Người dùng');
-    const userName = req.user ? req.user.username : (sender || 'anonymous');
 
     const saved = luuTinNhanNoiBo({
-      nguoiGui: userName,
-      vaiTro: userRole,
-      tenHienThi: userDisplay,
+      nguoiGui: req.user.username,
+      vaiTro: req.user.role || 'viewer',
+      tenHienThi: req.user.displayName || req.user.username,
       noiDung: content || '',
       dinhKemLog: logAttachment || null
     });
@@ -635,7 +708,7 @@ app.post('/api/v1/chat/messages', optionalAuth, (req, res) => {
  * AI phân tích nguyên nhân 1 dòng log cụ thể
  * Body: { log: {message, level, service, anomaly_score, ...} }
  */
-app.post('/api/v1/ai/explain-log', async (req, res) => {
+app.post('/api/v1/ai/explain-log', aiLimiter, async (req, res) => {
   try {
     const { log } = req.body;
     if (!log || !log.message) {
@@ -735,7 +808,7 @@ app.post('/api/v1/simulator/generate', async (req, res) => {
     }
 
     if (!collectorSuccess) {
-      // Direct ingestion fallback: phát tán ngay vào runtime buffer, Socket.IO & tính toán anomaly
+      // Direct ingestion fallback: lưu bền vững vào SQLite log_du_phong + phát Socket.IO & tính toán anomaly
       for (const log of logs) {
         const isAnomaly = log.level === 'FATAL' || log.level === 'ERROR' || log.level === 'WARN';
         const enrichedLog = {
@@ -745,13 +818,14 @@ app.post('/api/v1/simulator/generate', async (req, res) => {
           anomaly_score: log.level === 'FATAL' ? 0.95 : log.level === 'ERROR' ? 0.85 : log.level === 'WARN' ? 0.65 : 0.05,
           is_anomaly: isAnomaly
         };
+        luuLogDuPhong(enrichedLog);
         broadcastNewLog(enrichedLog);
       }
       return res.status(200).json({
         success: true,
         count: logs.length,
-        mode: 'direct_ingestion',
-        message: 'Đã phát sinh và phân phối log trực tiếp thành công.'
+        mode: 'sqlite_fallback_ingestion',
+        message: 'Collector offline — Đã lưu log dự phòng vào SQLite và phát sóng trực tiếp.'
       });
     }
 
@@ -774,5 +848,5 @@ if (isMainModule) {
   });
 }
 
-export { io };
+export { app, httpServer, io };
 

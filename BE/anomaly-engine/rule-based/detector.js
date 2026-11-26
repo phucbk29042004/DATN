@@ -6,7 +6,7 @@
  *  2. Xuất hiện từ khóa nghiêm trọng trong nội dung log message
  */
 
-// Danh sách từ khóa nghiêm trọng cần phát hiện ngay lập tức
+// Danh sách từ khóa nghiêm trọng mặc định cần phát hiện ngay lập tức
 const CRITICAL_KEYWORDS = [
   'fatal error',
   'db connection failed',
@@ -24,6 +24,35 @@ const CRITICAL_KEYWORDS = [
   'deadlock',
   'stack overflow'
 ];
+
+let cachedDynamicKeywords = [];
+let lastKeywordFetchAt = 0;
+
+/**
+ * Cập nhật bộ nhớ đệm từ khóa động từ SQLite (gọi bất đồng bộ từ Parser Worker để không chặn/lỗi benchmark thuần)
+ */
+export async function refreshDynamicKeywords() {
+  const now = Date.now();
+  if (now - lastKeywordFetchAt < 10_000) return cachedDynamicKeywords;
+  lastKeywordFetchAt = now;
+  try {
+    const { default: db } = await import('../../database/sqlite.js');
+    const row = db.prepare("SELECT gia_tri FROM cau_hinh_he_thong WHERE khoa = 'alertKeywords'").get();
+    if (row?.gia_tri) {
+      const parsed = JSON.parse(row.gia_tri);
+      if (Array.isArray(parsed)) {
+        cachedDynamicKeywords = parsed.map(k => String(k).trim().toLowerCase()).filter(Boolean);
+      }
+    }
+  } catch {
+    // Giữ cache cũ nếu DB chưa sẵn sàng hoặc đang chạy chế độ standalone
+  }
+  return cachedDynamicKeywords;
+}
+
+function getEffectiveKeywords() {
+  return Array.from(new Set([...CRITICAL_KEYWORDS, ...cachedDynamicKeywords]));
+}
 
 // Mức log được coi là cần theo dõi tần suất
 const ALERT_LEVELS = new Set(['ERROR', 'FATAL', 'CRITICAL']);
@@ -45,10 +74,12 @@ export function detectRuleBased(logs, { errorThreshold = 10, windowMs = 60_000 }
     keywordMatches: []
   };
 
-  // --- Kiểm tra 1: Từ khóa nghiêm trọng ---
+  const effectiveKeywords = getEffectiveKeywords();
+
+  // --- Kiểm tra 1: Từ khóa nghiêm trọng (tĩnh + động từ Admin) ---
   for (const log of logs) {
     const msgLower = (log.message || '').toLowerCase();
-    for (const kw of CRITICAL_KEYWORDS) {
+    for (const kw of effectiveKeywords) {
       if (msgLower.includes(kw)) {
         stats.keywordMatches.push({ keyword: kw, message: log.message, timestamp: log.timestamp });
         reasons.push(`Từ khóa nghiêm trọng phát hiện: "${kw}" trong log lúc ${log.timestamp}`);
@@ -91,7 +122,7 @@ export function detectRuleBased(logs, { errorThreshold = 10, windowMs = 60_000 }
  */
 export function checkLogLineSingle(log) {
   const msgLower = (log.message || '').toLowerCase();
-  for (const kw of CRITICAL_KEYWORDS) {
+  for (const kw of getEffectiveKeywords()) {
     if (msgLower.includes(kw)) {
       return { is_anomaly: true, keyword: kw };
     }

@@ -12,11 +12,15 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const DATA_DIR = path.resolve(__dirname, '../data');
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+const DB_PATH = process.env.SQLITE_DB_PATH
+  ? path.resolve(process.env.SQLITE_DB_PATH)
+  : path.resolve(DATA_DIR, 'sre_enterprise.sqlite');
+
+const dbDir = path.dirname(DB_PATH);
+if (!fs.existsSync(dbDir)) {
+  fs.mkdirSync(dbDir, { recursive: true });
 }
 
-const DB_PATH = path.resolve(DATA_DIR, 'sre_enterprise.sqlite');
 const db = new Database(DB_PATH);
 
 // Tối ưu hóa hiệu năng và toàn vẹn dữ liệu
@@ -116,10 +120,23 @@ export function initDatabase() {
       thoi_gian DATETIME DEFAULT CURRENT_TIMESTAMP
     );
 
+    -- 9. Bảng log dự phòng khi Collector / OpenSearch gián đoạn (Ingestion Fallback)
+    CREATE TABLE IF NOT EXISTS log_du_phong (
+      id TEXT PRIMARY KEY,
+      timestamp TEXT NOT NULL,
+      service TEXT NOT NULL,
+      level TEXT NOT NULL,
+      message TEXT NOT NULL,
+      raw_payload TEXT,
+      da_dong_bo INTEGER DEFAULT 0,
+      thoi_gian_tao DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
     CREATE INDEX IF NOT EXISTS idx_su_co_trang_thai ON su_co(trang_thai);
     CREATE INDEX IF NOT EXISTS idx_ghi_chu_su_co ON ghi_chu_su_co(su_co_id);
     CREATE INDEX IF NOT EXISTS idx_nhat_ky_thoi_gian ON nhat_ky_he_thong(thoi_gian);
     CREATE INDEX IF NOT EXISTS idx_tin_nhan_thoi_gian ON tin_nhan_noi_bo(thoi_gian);
+    CREATE INDEX IF NOT EXISTS idx_log_du_phong_sync ON log_du_phong(da_dong_bo, thoi_gian_tao);
   `;
 
   db.exec(schema);
@@ -165,7 +182,7 @@ function seedInitialData() {
     `);
 
     const defaultConfigs = [
-      ['anomalyThreshold', '0.5', 'Ngưỡng điểm bất thường kích hoạt cảnh báo'],
+      ['anomalyThreshold', '0.75', 'Ngưỡng điểm bất thường kích hoạt cảnh báo'],
       ['discordEnabled', 'true', 'Bật / tắt kênh cảnh báo Discord Webhook'],
       ['discordWebhookUrl', '', 'Webhook URL kênh cảnh báo Discord'],
       ['emailEnabled', 'false', 'Bật / tắt gửi email cảnh báo qua SMTP'],
@@ -328,15 +345,17 @@ export function luuTinNhanNoiBo({ id, nguoiGui, vaiTro, tenHienThi, noiDung, din
 }
 
 /**
- * Lấy danh sách tin nhắn nội bộ gần nhất
+ * Lấy danh sách tin nhắn nội bộ gần nhất (lấy N tin mới nhất, sắp xếp tăng dần để render chat)
  */
 export function layDanhSachTinNhanNoiBo(limit = 50) {
   try {
     const rows = db.prepare(`
-      SELECT id, nguoi_gui, vai_tro, ten_hien_thi, noi_dung, dinh_kem_log, thoi_gian
-      FROM tin_nhan_noi_bo
-      ORDER BY thoi_gian ASC
-      LIMIT ?
+      SELECT id, nguoi_gui, vai_tro, ten_hien_thi, noi_dung, dinh_kem_log, thoi_gian FROM (
+        SELECT rowid AS _rid, id, nguoi_gui, vai_tro, ten_hien_thi, noi_dung, dinh_kem_log, thoi_gian
+        FROM tin_nhan_noi_bo
+        ORDER BY thoi_gian DESC, rowid DESC
+        LIMIT ?
+      ) ORDER BY thoi_gian ASC, _rid ASC
     `).all(limit);
 
     return rows.map(r => ({
@@ -346,6 +365,56 @@ export function layDanhSachTinNhanNoiBo(limit = 50) {
   } catch (err) {
     console.error('[SQLite] Lỗi khi lấy tin nhắn nội bộ:', err.message);
     return [];
+  }
+}
+
+/**
+ * Lưu bản ghi log dự phòng vào SQLite khi Collector hoặc OpenSearch gián đoạn
+ */
+export function luuLogDuPhong(logEntry) {
+  try {
+    const logId = logEntry.id || logEntry.hash_id || `fb_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+    db.prepare(`
+      INSERT OR IGNORE INTO log_du_phong (id, timestamp, service, level, message, raw_payload, da_dong_bo)
+      VALUES (?, ?, ?, ?, ?, ?, 0)
+    `).run(
+      logId,
+      logEntry.timestamp || new Date().toISOString(),
+      logEntry.service || logEntry.service_name || 'unknown',
+      (logEntry.level || 'INFO').toUpperCase(),
+      logEntry.message || '',
+      JSON.stringify(logEntry)
+    );
+    return logId;
+  } catch (err) {
+    console.error('[SQLite] Lỗi lưu log dự phòng:', err.message);
+    return null;
+  }
+}
+
+export function layLogDuPhongChuaDongBo(limit = 100) {
+  try {
+    return db.prepare(`
+      SELECT * FROM log_du_phong WHERE da_dong_bo = 0 ORDER BY thoi_gian_tao ASC LIMIT ?
+    `).all(limit);
+  } catch (err) {
+    console.error('[SQLite] Lỗi đọc log dự phòng:', err.message);
+    return [];
+  }
+}
+
+export function danhDauLogDuPhongDaDongBo(ids = []) {
+  if (!Array.isArray(ids) || ids.length === 0) return 0;
+  try {
+    const stmt = db.prepare('UPDATE log_du_phong SET da_dong_bo = 1 WHERE id = ?');
+    const tx = db.transaction((idList) => {
+      for (const id of idList) stmt.run(id);
+    });
+    tx(ids);
+    return ids.length;
+  } catch (err) {
+    console.error('[SQLite] Lỗi đánh dấu log dự phòng:', err.message);
+    return 0;
   }
 }
 

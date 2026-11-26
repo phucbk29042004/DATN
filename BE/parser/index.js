@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import { redisConnection, LOG_QUEUE_NAME, redisPub, REALTIME_LOG_CHANNEL } from '../queue/config.js';
 import { parseLog } from './normalizer.js';
 import { bulkIndexLogs } from '../storage/opensearch.js';
-import { checkLogLineSingle } from '../anomaly-engine/rule-based/detector.js';
+import { checkLogLineSingle, refreshDynamicKeywords } from '../anomaly-engine/rule-based/detector.js';
 import { runAnomalyDetection } from '../anomaly-engine/index.js';
 
 dotenv.config();
@@ -28,6 +28,32 @@ async function flushBuffer() {
   clearTimeout(flushTimer);
   flushTimer = null;
 
+  // Đồng bộ từ khóa cảnh báo động và chạy phân tích 3 tầng trước khi ghi OpenSearch & broadcast
+  try {
+    await refreshDynamicKeywords();
+    const result = await runAnomalyDetection(batch);
+    if (result?.is_anomaly) {
+      const mlScore = result.detections?.template_mining?.ml_prediction?.anomaly_score || 0;
+      const tierFlags = [
+        result.detections?.rule_based?.is_anomaly ? 'rule' : null,
+        result.detections?.statistical?.is_anomaly ? 'z-score' : null,
+        result.detections?.template_mining?.ml_prediction?.is_anomaly ? 'ml' : null
+      ].filter(Boolean);
+
+      for (const log of batch) {
+        const isLineSuspect = log.is_anomaly || log.level === 'ERROR' || log.level === 'FATAL' || tierFlags.includes('ml');
+        if (isLineSuspect) {
+          log.is_anomaly = true;
+          log.anomaly_score = Math.max(log.anomaly_score || 0, mlScore, tierFlags.includes('rule') ? 0.85 : 0.75);
+          log.detection_tiers = tierFlags;
+        }
+      }
+      console.log(`[Anomaly Engine] [ALERT] Batch anomaly detected | Tiers: ${tierFlags.join(',')} | Latency: ${result.detection_latency_ms}ms`);
+    }
+  } catch (err) {
+    console.warn(`[Anomaly Engine] Batch detection error: ${err.message}`);
+  }
+
   const { indexed, errors, fallback } = await bulkIndexLogs(batch);
   console.log(`[Parser Worker] Bulk flush: ${indexed} indexed, ${errors} errors, fallback=${fallback}`);
 
@@ -39,15 +65,6 @@ async function flushBuffer() {
       console.warn('[Parser Worker] Lỗi publish realtime log qua Redis:', err.message);
     }
   }
-
-  // Fire-and-forget: chạy đầy đủ 3 tầng Anomaly Detection trên batch (không block pipeline)
-  runAnomalyDetection(batch).then(result => {
-    if (result.is_anomaly) {
-      console.log(`[Anomaly Engine] [ALERT] Batch anomaly detected | Rule: ${result.detections.rule_based?.is_anomaly} | Stat: ${result.detections.statistical?.is_anomaly} | ML: ${result.detections.template_mining?.ml_prediction?.is_anomaly}`);
-    }
-  }).catch(err => {
-    console.warn(`[Anomaly Engine] Batch detection error: ${err.message}`);
-  });
 }
 
 /**

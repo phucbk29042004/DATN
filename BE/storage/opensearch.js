@@ -1,5 +1,6 @@
 import { Client } from '@opensearch-project/opensearch';
 import dotenv from 'dotenv';
+import { luuLogDuPhong } from '../database/sqlite.js';
 
 dotenv.config();
 
@@ -38,9 +39,9 @@ export async function indexLogDocument(normalizedLog) {
     });
     return response;
   } catch (error) {
-    // Nếu OpenSearch chưa bật hoặc không kết nối được, fallback log console để dev không bị ngắt quãng
+    // Nếu OpenSearch chưa bật hoặc không kết nối được, ghi vào bảng SQLite log_du_phong để không mất dữ liệu
     console.warn(`[OpenSearch Storage Warning] Không thể kết nối tới OpenSearch (${OPENSEARCH_NODE}): ${error.message}`);
-    console.log(`[Storage Fallback Log Record]:`, JSON.stringify(normalizedLog));
+    luuLogDuPhong(normalizedLog);
     return { fallback: true };
   }
 }

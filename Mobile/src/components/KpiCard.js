@@ -9,7 +9,7 @@ export default function KpiCard({ title, value, icon: Icon, color, subtitle, onP
 
   return (
     <ContainerComponent
-      style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}
+      style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.borderSubtle }]}
       onPress={onPress}
       activeOpacity={0.75}
     >
@@ -18,8 +18,8 @@ export default function KpiCard({ title, value, icon: Icon, color, subtitle, onP
           {title}
         </Text>
         {Icon && (
-          <View style={[styles.iconWrapper, { backgroundColor: color ? `${color}18` : colors.primaryLight }]}>
-            <Icon size={15} color={color || colors.primary} />
+          <View style={[styles.iconWrapper, { backgroundColor: color ? `${color}14` : colors.primaryLight }]}>
+            <Icon size={15} color={color || colors.link || colors.primary} />
           </View>
         )}
       </View>
@@ -38,8 +38,8 @@ export default function KpiCard({ title, value, icon: Icon, color, subtitle, onP
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    padding: 12,
-    borderRadius: 12,
+    padding: 14,
+    borderRadius: 18,
     borderWidth: 1,
     margin: 4,
   },
@@ -51,20 +51,20 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '400',
     flex: 1,
   },
   iconWrapper: {
-    width: 26,
-    height: 26,
-    borderRadius: 7,
+    width: 28,
+    height: 28,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
   value: {
-    fontSize: 19,
-    fontWeight: '700',
-    letterSpacing: -0.5,
+    fontSize: 20,
+    fontWeight: '600',
+    letterSpacing: -0.374,
   },
   subtitle: {
     fontSize: 10.5,

@@ -5,11 +5,7 @@ import Svg, {
   Line,
   Circle,
   Text as SvgText,
-  Defs,
-  LinearGradient,
-  Stop,
   G,
-  Rect,
 } from 'react-native-svg';
 import { useTheme } from '../theme/ThemeContext';
 
@@ -17,7 +13,7 @@ export default function SvgLineChart({
   data = [], // [{ label: '14:20', value: 12, value2: 2 }]
   valueKey = 'value',
   valueKey2 = null,
-  color = '#6366f1',
+  color = '#0066cc',
   color2 = '#ef4444',
   height = 180,
   showThreshold = false,
@@ -129,13 +125,6 @@ export default function SvgLineChart({
   return (
     <View style={styles.container}>
       <Svg width={chartWidth} height={height}>
-        <Defs>
-          <LinearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0%" stopColor={color} stopOpacity="0.32" />
-            <Stop offset="100%" stopColor={color} stopOpacity="0.0" />
-          </LinearGradient>
-        </Defs>
-
         {/* Horizontal Grid lines */}
         {yTicks.map((tick, i) => (
           <G key={`ytick-${i}`}>
@@ -152,9 +141,9 @@ export default function SvgLineChart({
               x={paddingLeft - 6}
               y={tick.y + 4}
               fontSize="10"
-              fill={colors.textMuted || '#9ca3af'}
+              fill={colors.textMuted || '#7a7a7a'}
               textAnchor="end"
-              fontWeight="500"
+              fontWeight="400"
             >
               {Number(tick.val).toFixed(maxY < 2 ? 1 : 0)}
               {unit}
@@ -180,15 +169,15 @@ export default function SvgLineChart({
               fontSize="9.5"
               fill="#ef4444"
               textAnchor="end"
-              fontWeight="700"
+              fontWeight="600"
             >
               Ngưỡng {thresholdValue}
             </SvgText>
           </G>
         )}
 
-        {/* Gradient Area Fill under Line 1 */}
-        {areaD ? <Path d={areaD} fill="url(#lineGrad)" /> : null}
+        {/* Flat Translucent Area Fill under Line 1 (No Gradient) */}
+        {areaD ? <Path d={areaD} fill={color} fillOpacity={isDark ? 0.08 : 0.06} /> : null}
 
         {/* Primary Line */}
         {pathD ? (
@@ -238,9 +227,9 @@ export default function SvgLineChart({
             x={getX(lbl.index)}
             y={height - 6}
             fontSize="10"
-            fill={colors.textMuted || '#9ca3af'}
+            fill={colors.textMuted || '#7a7a7a'}
             textAnchor="middle"
-            fontWeight="500"
+            fontWeight="400"
           >
             {lbl.text}
           </SvgText>

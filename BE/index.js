@@ -16,18 +16,22 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const services = [
-  { name: 'Search API', script: 'search-api/index.js' },
-  { name: 'Collector', script: 'collector/index.js' },
-  { name: 'Parser Worker', script: 'parser/index.js' },
-  { name: 'Log Generator', script: 'log_generator.js' }
+  { name: 'Search API', script: 'search-api/index.js', cmd: 'node' },
+  { name: 'Collector', script: 'collector/index.js', cmd: 'node' },
+  { name: 'Parser Worker', script: 'parser/index.js', cmd: 'node' },
+  { name: 'Log Generator', script: 'log_generator.js', cmd: 'node' }
 ];
+
+if (process.env.ENABLE_ML_API !== 'false') {
+  services.push({ name: 'ML FastAPI', script: 'anomaly-engine/ml-models/ml_api.py', cmd: 'python' });
+}
 
 
 
 const children = [];
 
 services.forEach(service => {
-  const child = spawn('node', [service.script], {
+  const child = spawn(service.cmd, [service.script], {
     cwd: __dirname,
     stdio: 'inherit',
     shell: true,

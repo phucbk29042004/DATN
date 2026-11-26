@@ -64,6 +64,56 @@ select.select-filter option,
 }
 
 /* ── Modern SaaS Custom Date & Time Picker ────────────────────────────────── */
+/* ── SRE Messenger Tab Unread Badges (Messenger / Zalo style) ── */
+.nav-badge-unread {
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  line-height: 1.2;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+  margin-left: auto;
+}
+
+.sidebar-collapsed-badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.5);
+  border: 1.5px solid var(--bg-sidebar);
+}
+
+.mobile-tab-badge {
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  background: #ef4444;
+  color: #ffffff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 2px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(239, 68, 68, 0.4);
+}
+
 .modern-datepicker-container {
   position: relative;
   width: 100%;
@@ -278,6 +328,71 @@ select.select-filter option,
   justify-content: space-between;
   gap: 0.5rem;
   margin-bottom: 0.65rem;
+}
+
+.modern-datepicker-time-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.28rem 0.55rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-input, var(--bg-card));
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modern-datepicker-time-btn:hover,
+.modern-datepicker-time-btn.active {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  background: var(--bg-card);
+}
+
+.modern-datepicker-time-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 58px;
+  max-height: 135px;
+  overflow-y: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  z-index: 10005;
+  padding: 3px;
+}
+
+[data-theme="light"] .modern-datepicker-time-dropdown {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+.modern-datepicker-time-option {
+  padding: 0.25rem 0.4rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  text-align: center;
+  border-radius: 5px;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.modern-datepicker-time-option:hover {
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--accent-primary);
+}
+
+.modern-datepicker-time-option.selected {
+  background: var(--accent-primary);
+  color: #ffffff;
+  font-weight: 700;
 }
 
 .modern-datepicker-select {

@@ -176,7 +176,7 @@ export default function QuickActionScreen() {
       {/* Search Input Box */}
       <View style={[styles.searchBox, { backgroundColor: colors.surface, borderBottomColor: colors.borderSubtle }]}>
         {/* Input input search */}
-        <View style={[styles.inputRow, { backgroundColor: colors.surfaceVariant, borderColor: colors.border }]}>
+        <View style={[styles.inputRow, { backgroundColor: colors.surfaceVariant, borderColor: colors.borderSubtle }]}>
           <Search size={15} color={colors.textMuted} />
           <TextInput
             style={[styles.input, { color: colors.text }]}
@@ -448,15 +448,16 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   title: {
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '600',
+    letterSpacing: -0.25,
   },
   realtimePill: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: 9999,
     borderWidth: 1,
     gap: 4,
   },
@@ -472,10 +473,10 @@ const styles = StyleSheet.create({
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 10,
-    borderRadius: 8,
+    paddingHorizontal: 14,
+    borderRadius: 9999,
     borderWidth: 1,
-    height: 38,
+    height: 42,
     marginBottom: 8,
   },
   input: {
@@ -506,9 +507,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   chipBtn: {
-    paddingHorizontal: 8,
-    paddingVertical: 3.5,
-    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 9999,
     borderWidth: 1,
   },
   chipBtnText: {
@@ -521,11 +522,11 @@ const styles = StyleSheet.create({
     marginTop: 4,
     paddingTop: 6,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.05)',
+    borderTopColor: 'rgba(0, 0, 0, 0.06)',
   },
   resultCountText: {
     fontSize: 11.5,
-    fontWeight: '500',
+    fontWeight: '400',
   },
   actionButtonsRight: {
     flexDirection: 'row',
@@ -536,22 +537,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 6,
+    borderRadius: 9999,
     borderWidth: 1,
   },
   btnResetText: {
     fontSize: 11.5,
-    fontWeight: '500',
+    fontWeight: '400',
   },
   btnSearch: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     paddingVertical: 5,
-    borderRadius: 6,
+    borderRadius: 9999,
   },
   btnSearchText: {
     color: '#ffffff',
@@ -581,8 +582,8 @@ const styles = StyleSheet.create({
   logRow: {
     marginHorizontal: 12,
     marginBottom: 6,
-    padding: 10,
-    borderRadius: 10,
+    padding: 12,
+    borderRadius: 18,
     borderWidth: 1,
   },
   logMetaRow: {

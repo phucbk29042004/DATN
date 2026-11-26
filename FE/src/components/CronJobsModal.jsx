@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   CalendarClock, X, Play, RefreshCw, Trash2, 
-  Clock, Mail, MessageSquare, Database, Sparkles, Send
+  Clock, Mail, MessageSquare, Database, Sparkles, Send, History
 } from 'lucide-react';
+import { API_BASE } from '../config.js';
 
 export default function CronJobsModal({
   isOpen,
@@ -17,11 +18,30 @@ export default function CronJobsModal({
   currentUser
 }) {
   const [isTriggeringDigest, setIsTriggeringDigest] = useState(false);
-
-  if (!isOpen) return null;
+  const [cronHistory, setCronHistory] = useState([]);
+  const [auditLogs, setAuditLogs] = useState([]);
 
   const isVi = lang === 'vi';
   const isAdmin = currentUser?.role === 'admin';
+
+  useEffect(() => {
+    if (!isOpen || !isAdmin) return;
+    const token = sessionStorage.getItem('logpulse_auth_token') || localStorage.getItem('logpulse_auth_token');
+    if (!token) return;
+    const headers = { Authorization: `Bearer ${token}` };
+
+    fetch(`${API_BASE}/cron/history?limit=10`, { headers })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.history) setCronHistory(data.history); })
+      .catch(() => {});
+
+    fetch(`${API_BASE}/audit/logs?limit=10`, { headers })
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.logs) setAuditLogs(data.logs); })
+      .catch(() => {});
+  }, [isOpen, isAdmin]);
+
+  if (!isOpen) return null;
 
   const onTriggerDigestClick = async () => {
     setIsTriggeringDigest(true);
@@ -155,7 +175,8 @@ export default function CronJobsModal({
                 className="toggle-btn"
                 style={{ padding: '0.35rem 0.8rem', fontSize: '0.78rem', gap: '0.4rem', borderColor: 'rgba(99, 102, 241, 0.4)' }}
                 onClick={onTriggerDigestClick}
-                disabled={isTriggeringDigest}
+                disabled={!isAdmin || isTriggeringDigest}
+                title={!isAdmin ? (isVi ? 'Chỉ Admin mới có quyền chạy thử' : 'Admin only') : ''}
               >
                 {isTriggeringDigest ? <RefreshCw size={13} className="spin" /> : <Play size={13} color="#6366f1" />}
                 {isVi ? 'Chạy Thử Ngay' : 'Trigger Now'}
@@ -241,7 +262,8 @@ export default function CronJobsModal({
                 className="toggle-btn"
                 style={{ padding: '0.35rem 0.8rem', fontSize: '0.78rem', gap: '0.4rem', borderColor: 'rgba(239, 68, 68, 0.4)' }}
                 onClick={handleRunRetentionCleanup}
-                disabled={isCleaningRetention}
+                disabled={!isAdmin || isCleaningRetention}
+                title={!isAdmin ? (isVi ? 'Chỉ Admin mới có quyền dọn dẹp' : 'Admin only') : ''}
               >
                 {isCleaningRetention ? <RefreshCw size={13} className="spin" /> : <Trash2 size={13} color="#ef4444" />}
                 {isVi ? 'Dọn Dẹp Ngay' : 'Clean Now'}
@@ -249,25 +271,63 @@ export default function CronJobsModal({
             </div>
           </div>
 
-          {/* Section 3: Đề xuất mở rộng tương lai */}
-          <div style={{
-            background: 'rgba(245, 158, 11, 0.05)',
-            border: '1px dashed rgba(245, 158, 11, 0.3)',
-            borderRadius: '12px',
-            padding: '0.9rem 1.1rem'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
-              <Sparkles size={15} color="#f59e0b" />
-              <span style={{ fontWeight: 700, fontSize: '0.84rem', color: '#f59e0b' }}>
-                {isVi ? 'Khả Năng Mở Rộng Thêm Cho Hệ Thống Cron Job' : 'Extensible Cron Capabilities'}
-              </span>
+          {/* Section 3: Lịch sử Cron & Nhật ký Audit gần nhất (Admin) */}
+          {isAdmin && (
+            <div style={{
+              background: 'var(--bg-input)',
+              border: '1px solid var(--border-color)',
+              borderRadius: '12px',
+              padding: '0.9rem 1.1rem',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.75rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <History size={15} color="var(--accent-primary)" />
+                <span style={{ fontWeight: 700, fontSize: '0.84rem', color: 'var(--text-primary)' }}>
+                  {isVi ? 'Lịch Sử Chạy Cron & Nhật Ký Kiểm Toán (10 bản ghi gần nhất)' : 'Recent Cron History & Audit Trail'}
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '0.75rem' }}>
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color-subtle)', borderRadius: '8px', padding: '0.6rem 0.75rem' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#06b6d4', marginBottom: '0.4rem' }}>
+                    {isVi ? 'Tác vụ Cron (lich_su_cron)' : 'Cron Executions'}
+                  </div>
+                  {cronHistory.length === 0 ? (
+                    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>{isVi ? 'Chưa có lượt chạy nào' : 'No executions yet'}</div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', maxHeight: '130px', overflowY: 'auto' }}>
+                      {cronHistory.map((item) => (
+                        <div key={item.id} style={{ fontSize: '0.73rem', display: 'flex', justifyContent: 'space-between', gap: '0.4rem', borderBottom: '1px dashed var(--border-color-subtle)', paddingBottom: '0.2rem' }}>
+                          <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{item.ten_tac_vu}</span>
+                          <span style={{ color: item.trang_thai === 'SUCCESS' ? '#10b981' : '#ef4444', fontWeight: 700 }}>{item.trang_thai}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border-color-subtle)', borderRadius: '8px', padding: '0.6rem 0.75rem' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#818cf8', marginBottom: '0.4rem' }}>
+                    {isVi ? 'Kiểm toán thao tác (nhat_ky_he_thong)' : 'Audit Trail'}
+                  </div>
+                  {auditLogs.length === 0 ? (
+                    <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>{isVi ? 'Chưa có nhật ký nào' : 'No audit logs yet'}</div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', maxHeight: '130px', overflowY: 'auto' }}>
+                      {auditLogs.map((log) => (
+                        <div key={log.id} style={{ fontSize: '0.73rem', display: 'flex', justifyContent: 'space-between', gap: '0.4rem', borderBottom: '1px dashed var(--border-color-subtle)', paddingBottom: '0.2rem' }}>
+                          <span style={{ color: 'var(--text-primary)' }}><b>{log.ten_nguoi_dung}</b>: {log.hanh_dong}</span>
+                          <span style={{ color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{log.doi_tuong}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-            <ul style={{ margin: 0, paddingLeft: '1.2rem', fontSize: '0.76rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-              <li><b>Weekly Executive Digest</b>: {isVi ? 'Báo cáo tổng kết tuần (08:00 sáng thứ Hai) so sánh tỷ lệ sự cố so với tuần trước.' : 'Weekly trend summary every Monday morning.'}</li>
-              <li><b>Pipeline Heartbeat Lag Monitor</b>: {isVi ? 'Kiểm tra độ trễ dòng log 10 phút/lần, phát cảnh báo nếu pipeline bị treo.' : 'Checks ingestion lag every 10 minutes.'}</li>
-              <li><b>Drain Template Pruner</b>: {isVi ? 'Định kỳ quét và tối ưu bộ nhớ cho các mẫu template log không còn xuất hiện.' : 'Prunes inactive Drain templates periodically.'}</li>
-            </ul>
-          </div>
+          )}
 
         </div>
 

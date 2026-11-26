@@ -73,6 +73,9 @@ async function main() {
 
   try {
     fs.writeFileSync(OUT_FILE, JSON.stringify(output, null, 2), 'utf-8');
+    const vocabFile = path.resolve(__dirname, '../../anomaly-engine/ml-models/drain_vocab_hdfs.json');
+    fs.mkdirSync(path.dirname(vocabFile), { recursive: true });
+    fs.writeFileSync(vocabFile, JSON.stringify({ dataset: 'hdfs', templates: output.templates }, null, 2), 'utf-8');
     console.log(`\n[SUCCESS] Đã lưu: ${OUT_FILE}`);
   } catch (err) {
     const tmpOut = path.join(os.tmpdir(), 'vectors_hdfs.json');

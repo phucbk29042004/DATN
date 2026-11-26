@@ -9,7 +9,10 @@ import db, { ghiNhatKyHeThong } from '../database/sqlite.js';
 
 dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET || 'logpulse_default_secret_key_change_in_prod';
+export const JWT_SECRET = process.env.JWT_SECRET || 'logpulse_default_secret_key_change_in_prod';
+if (!process.env.JWT_SECRET) {
+  console.warn('[Auth Security Warning] JWT_SECRET chưa được cấu hình trong .env, đang dùng khóa mặc định phát triển.');
+}
 const TOKEN_EXPIRES_IN = '24h';
 
 /**

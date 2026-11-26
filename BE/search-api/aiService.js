@@ -14,8 +14,8 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 
-const GROQ_MODEL = 'qwen/qwen3.8-27b';
-const GEMINI_MODEL = 'gemini-2.5-flash-lite';
+const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
 
 const REQUEST_TIMEOUT_MS = 15000;
 
@@ -212,19 +212,19 @@ export async function explainLog(logEntry) {
   const score = ((logEntry.anomaly_score ?? logEntry.anomalyScore ?? 0) * 100).toFixed(0);
   const prompt = `Hãy phân tích dòng log hệ thống sau và đưa ra đánh giá chuyên sâu:
 
-**Thông tin log:**
-- **Thời gian:** ${logEntry.timestamp || 'N/A'}
-- **Dịch vụ:** ${logEntry.service || logEntry.service_name || 'Không rõ'}
-- **Mức độ:** ${logEntry.level || 'INFO'}
-- **Anomaly Score:** ${score}%
-- **Rule kích hoạt:** ${logEntry.rule_triggered || 'Không có'}
-- **Nội dung log:** ${logEntry.message || logEntry.content || 'N/A'}
+[Thông tin log]:
+- Thời gian: ${logEntry.timestamp || 'N/A'}
+- Dịch vụ: ${logEntry.service || logEntry.service_name || 'Không rõ'}
+- Mức độ: ${logEntry.level || 'INFO'}
+- Anomaly Score: ${score}%
+- Rule kích hoạt: ${logEntry.rule_triggered || 'Không có'}
+- Nội dung log: ${logEntry.message || logEntry.content || 'N/A'}
 
 Hãy trả lời theo cấu trúc:
-1. **Ý nghĩa:** Dòng log này nói về vấn đề gì?
-2. **Nguyên nhân gốc rễ (Root Cause):** Các nguyên nhân có thể gây ra lỗi/cảnh báo này
-3. **Mức độ nghiêm trọng:** Đánh giá mức ảnh hưởng (Thấp / Trung bình / Cao / Nghiêm trọng)
-4. **Cách khắc phục:** Các bước xử lý cụ thể, ưu tiên theo thứ tự`;
+1. Ý nghĩa: Dòng log này nói về vấn đề gì?
+2. Nguyên nhân gốc rễ (Root Cause): Các nguyên nhân có thể gây ra lỗi/cảnh báo này
+3. Mức độ nghiêm trọng: Đánh giá mức ảnh hưởng (Thấp / Trung bình / Cao / Nghiêm trọng)
+4. Cách khắc phục: Các bước xử lý cụ thể, ưu tiên theo thứ tự`;
 
   const messages = [
     { role: 'system', content: SYSTEM_PROMPT },

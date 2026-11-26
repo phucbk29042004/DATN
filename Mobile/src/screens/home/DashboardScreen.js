@@ -13,7 +13,7 @@ import {
   Database,
   AlertTriangle,
   Layers,
-  Zap,
+  TrendingUp,
   RefreshCw,
   Activity,
   X,
@@ -26,10 +26,11 @@ import {
 import { useTheme } from '../../theme/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { apiClient } from '../../api/client';
+import { apiClient, getAuthToken } from '../../api/client';
+import { getServerUrl } from '../../api/config';
+import io from 'socket.io-client';
 import KpiCard from '../../components/KpiCard';
 import PipelineHealthCard from '../../components/PipelineHealthCard';
-import SreMessengerModal from '../../components/SreMessengerModal';
 
 export default function DashboardScreen({ navigation }) {
   const insets = useSafeAreaInsets();
@@ -45,7 +46,36 @@ export default function DashboardScreen({ navigation }) {
   const [recentLogs, setRecentLogs] = useState([]);
   const [healthModalOpen, setHealthModalOpen] = useState(false);
   const [selectedLog, setSelectedLog] = useState(null);
-  const [messengerOpen, setMessengerOpen] = useState(false);
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
+
+  useEffect(() => {
+    let socket;
+    let isMounted = true;
+    (async () => {
+      try {
+        const baseUrl = await getServerUrl();
+        const token = await getAuthToken();
+        if (!isMounted) return;
+        socket = io(baseUrl, {
+          transports: ['websocket', 'polling'],
+          timeout: 4000,
+          ...(token ? { auth: { token } } : {}),
+        });
+        socket.on('sre_chat_message', (msg) => {
+          const senderUsername = msg?.nguoi_gui || msg?.sender;
+          if (senderUsername !== currentUser?.username) {
+            setUnreadChatCount(prev => prev + 1);
+          }
+        });
+      } catch {
+        // Socket offline
+      }
+    })();
+    return () => {
+      isMounted = false;
+      if (socket) socket.disconnect();
+    };
+  }, [currentUser]);
 
   const fetchDashboardData = useCallback(async (isUserAction = false) => {
     try {
@@ -148,11 +178,21 @@ export default function DashboardScreen({ navigation }) {
         </View>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <TouchableOpacity
-            style={[styles.reloadBtn, { backgroundColor: 'rgba(6, 182, 212, 0.15)', borderColor: 'rgba(6, 182, 212, 0.4)' }]}
-            onPress={() => setMessengerOpen(true)}
+            style={[styles.reloadBtn, { backgroundColor: colors.primaryLight, borderColor: colors.borderSubtle, position: 'relative' }]}
+            onPress={() => {
+              setUnreadChatCount(0);
+              navigation.navigate('SreChat');
+            }}
             activeOpacity={0.7}
           >
-            <MessageSquare size={16} color="#06b6d4" />
+            <MessageSquare size={16} color={colors.link || colors.primary} />
+            {unreadChatCount > 0 && (
+              <View style={styles.chatBadge}>
+                <Text style={styles.chatBadgeText}>
+                  {unreadChatCount > 99 ? '99+' : unreadChatCount}
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.reloadBtn, { backgroundColor: colors.surfaceVariant, borderColor: colors.borderSubtle }]}
@@ -202,7 +242,7 @@ export default function DashboardScreen({ navigation }) {
           <KpiCard
             title="Logs/phút"
             value={getLogsPerMinute()}
-            icon={Zap}
+            icon={TrendingUp}
             color={colors.warning}
             subtitle="Tốc độ pipeline • Xem log"
             onPress={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
@@ -218,7 +258,7 @@ export default function DashboardScreen({ navigation }) {
         </View>
 
         {/* Level Distribution Summary */}
-        <View style={[styles.summaryCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={[styles.summaryCard, { backgroundColor: colors.surface, borderColor: colors.borderSubtle }]}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Phân Phối Mức Độ Log (24h)</Text>
           <View style={styles.levelsRow}>
             {['INFO', 'WARN', 'ERROR', 'FATAL'].map((lvl) => {
@@ -246,7 +286,7 @@ export default function DashboardScreen({ navigation }) {
         </View>
 
         {/* Bảng Danh Sách Luồng Log Thời Gian Thực (Full Width) */}
-        <View style={[styles.logStreamCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+        <View style={[styles.logStreamCard, { backgroundColor: colors.surface, borderColor: colors.borderSubtle }]}>
           <View style={styles.logStreamHeader}>
             <View style={styles.titleWithIcon}>
               <FileText size={16} color={colors.primary} />
@@ -381,23 +421,23 @@ export default function DashboardScreen({ navigation }) {
 
             <View style={styles.modalBody}>
               <View style={[styles.healthItem, { borderColor: colors.borderSubtle }]}>
-                <Text style={[styles.healthItemTitle, { color: colors.text }]}>1. Log Collector (Port 4000)</Text>
-                <Text style={[styles.healthItemStatus, { color: colors.success }]}>
-                  • Hoạt động bình thường — Tiếp nhận HTTP & TCP streams
+                <Text style={[styles.healthItemTitle, { color: colors.text }]}>1. Trạng Thái Hệ Thống Tổng Thể</Text>
+                <Text style={[styles.healthItemStatus, { color: healthData?.status === 'DEGRADED' ? colors.danger : healthData?.status === 'WARNING' ? colors.warning : colors.success }]}>
+                  • {healthData?.status ? `Trạng thái: ${healthData.status} | Throughput: ${healthData.throughput_per_sec ?? 0} log/s | Latency: ${healthData.avg_latency_ms ?? 0} ms` : 'Đang chờ dữ liệu từ Search API...'}
                 </Text>
               </View>
 
               <View style={[styles.healthItem, { borderColor: colors.borderSubtle }]}>
                 <Text style={[styles.healthItemTitle, { color: colors.text }]}>2. Parser Worker (BullMQ + Redis)</Text>
-                <Text style={[styles.healthItemStatus, { color: colors.success }]}>
-                  • Đang chạy bóc tách Drain & tính điểm bất thường
+                <Text style={[styles.healthItemStatus, { color: healthData?.redis_connected === false ? colors.danger : colors.success }]}>
+                  • {healthData?.queue ? `Chờ: ${healthData.queue.waiting ?? 0} | Đang xử lý: ${healthData.queue.active ?? 0} | Hoàn tất: ${healthData.queue.completed ?? 0} | Lỗi: ${healthData.queue.failed ?? 0}` : 'Chưa kết nối được Redis Queue'}
                 </Text>
               </View>
 
               <View style={[styles.healthItem, { borderColor: colors.borderSubtle }]}>
-                <Text style={[styles.healthItemTitle, { color: colors.text }]}>3. OpenSearch Cluster (Port 9200)</Text>
-                <Text style={[styles.healthItemStatus, { color: colors.success }]}>
-                  • Chỉ mục logpulse-logs sẵn sàng tìm kiếm tốc độ cao
+                <Text style={[styles.healthItemTitle, { color: colors.text }]}>3. OpenSearch & SQLite Fallback</Text>
+                <Text style={[styles.healthItemStatus, { color: healthData?.opensearch_connected === false ? colors.warning : colors.success }]}>
+                  • {healthData?.opensearch_connected ? 'OpenSearch Cluster đang trực tuyến (port 9200)' : 'OpenSearch ngoại tuyến — Đang dùng bộ đệm dự phòng'}
                 </Text>
               </View>
             </View>
@@ -411,12 +451,6 @@ export default function DashboardScreen({ navigation }) {
           </View>
         </View>
       </Modal>
-
-      <SreMessengerModal
-        visible={messengerOpen}
-        onClose={() => setMessengerOpen(false)}
-        onInspectLog={(log) => setSelectedLog(log)}
-      />
     </View>
   );
 }
@@ -438,7 +472,7 @@ const styles = StyleSheet.create({
   },
   greetingText: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '400',
   },
   roleRow: {
     flexDirection: 'row',
@@ -474,14 +508,15 @@ const styles = StyleSheet.create({
     marginVertical: 4,
   },
   summaryCard: {
-    padding: 14,
-    borderRadius: 12,
+    padding: 16,
+    borderRadius: 18,
     borderWidth: 1,
     marginTop: 6,
   },
   sectionTitle: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '600',
+    letterSpacing: -0.224,
     marginBottom: 10,
   },
   levelsRow: {
@@ -506,7 +541,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   logStreamCard: {
-    borderRadius: 12,
+    borderRadius: 18,
     borderWidth: 1,
     marginTop: 10,
     overflow: 'hidden',
@@ -515,10 +550,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 14,
+    paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.06)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.06)',
   },
   titleWithIcon: {
     flexDirection: 'row',
@@ -526,9 +561,9 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   viewAllBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 9999,
     borderWidth: 1,
   },
   viewAllText: {
@@ -661,5 +696,25 @@ const styles = StyleSheet.create({
     fontSize: 11.5,
     fontFamily: 'monospace',
     lineHeight: 16,
+  },
+  chatBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#ef4444',
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 2,
+    borderWidth: 1.5,
+    borderColor: '#ffffff',
+  },
+  chatBadgeText: {
+    color: '#ffffff',
+    fontSize: 9,
+    fontWeight: '700',
+    lineHeight: 11,
   },
 });

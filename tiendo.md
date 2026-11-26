@@ -2,6 +2,64 @@
 
 ## Nhật Ký Cập Nhật (Chronological Log)
 
+### [26/11/2026 14:48] — Hoàn Thiện Các Task Còn Tồn Đọng Từ `AUDIT_REPORT.md` (ML API, Rate-Limit, Export CSV, Mobile Stack Wiring)
+- **Loại**: Bảo mật, Tích hợp ML, Đồng bộ Web/Mobile & Kiểm thử (`AUDIT_REPORT.md` Nhóm A/B/C còn lại)
+- **File**: `BE/database/sqlite.js`, `BE/search-api/pipelineMetrics.js`, `BE/search-api/aiService.js`, `BE/search-api/index.js`, `BE/search-api/cronService.js`, `BE/anomaly-engine/ml-models/train_and_evaluate.py`, `BE/index.js`, `BE/.env.example`, `BE/tests/api_security.test.js`, `start_all.bat`, `FE/src/App.jsx`, `FE/src/components/AdminSettingsModal.jsx`, `Mobile/src/screens/profile/ProfileScreen.js`, `Mobile/src/screens/profile/ChangePasswordScreen.js`, `Mobile/src/screens/profile/AdminSettingsScreen.js`, `tiendo.md`
+- **Mô tả**:
+  1. Backend: Cập nhật seed `anomalyThreshold='0.75'`, bỏ `120ms` cứng ở `pipelineMetrics.js`, chuẩn hóa model AI + xóa `**` trong `explainLog()`, bổ sung Security Headers, `authLimiter`/`aiLimiter` (`429`), bảo vệ `/export/csv` bằng JWT và hàm `stopCronJobs()`.
+  2. ML & Launcher: Cập nhật `evaluate_isolation_forest()` fit trên mẫu Normal, tích hợp khởi chạy `ml_api.py` vào `BE/index.js`, cập nhật `start_all.bat` (xóa dòng Quick Login, thêm `:8000`).
+  3. Web FE: Nối `handleExportCsv` gọi API `/export/csv`, thêm nút CSV ở Tab Search & `AdminSettingsModal`, sửa khung giờ SRE động từ Heatmap, thay 4 checkbox gốc bằng `ToggleSwitch`.
+  4. Mobile: Nối `ProfileScreen.js` điều hướng sang `ChangePasswordScreen` & `AdminSettingsScreen` (bỏ 2 Modal trùng), bổ sung cấu hình `anomalyThreshold`/`alertKeywords`/`dailyDigestEnabled`/`autoCleanupEnabled` theo chuẩn `desgin.md`.
+- **Kết quả**: `BE` `npm test` đạt **10/10 pass** (`4.4s`), `FE` `vite build` đạt **2340 modules** (`5.94s`), `python -m py_compile` & `esbuild` Mobile (**27/27**) 0 lỗi.
+
+### [26/11/2026 14:28] — Loại Bỏ Toàn Bộ File `.md` Khỏi Đồ Thị `graphify-out/graph.html`
+- **Loại**: Cấu hình trực quan hóa kiến trúc (`graphify`)
+- **File**: `.graphifyignore`, `graphify-out/graph.json`, `graphify-out/graph.html`, `graphify-out/GRAPH_REPORT.md`, `tiendo.md`
+- **Mô tả**: Tạo `.graphifyignore` loại trừ `*.md` và `**/*.md`, chạy `graphify update .` để cắt bỏ 177 node từ 10 file `.md` khỏi sơ đồ.
+- **Kết quả**: Đồ thị còn `597 nodes`, `1312 edges`, `25 communities`; kiểm tra `graph.json` và `graph.html` đạt 0 node `.md`.
+
+### [26/11/2026 14:22] — Chuẩn Hóa Giao Diện Mobile Theo `desgin.md` & Cơ Cấu Lại 5 Tab Phẳng
+- **Loại**: Cải tiến giao diện & Điều hướng Mobile (UI/Navigation Refactor, giữ nguyên codebase logic)
+- **File**: `Mobile/src/theme/colors.js`, `Mobile/src/navigation/MainTabNavigator.js`, `Mobile/src/navigation/AppStackNavigator.js`, `Mobile/src/screens/chat/SreChatScreen.js`, `Mobile/src/components/CustomTabBar.js`, `Mobile/src/components/SreMessengerModal.js`, `Mobile/src/components/FloatingAiAssistant.js`, `Mobile/src/components/SvgLineChart.js`, `Mobile/src/components/KpiCard.js`, `Mobile/src/components/PipelineHealthCard.js`, `Mobile/src/components/AnomalyCard.js`, `Mobile/src/screens/home/DashboardScreen.js`, `Mobile/src/screens/anomalies/AnomaliesScreen.js`, `Mobile/src/screens/anomalies/IncidentDetailScreen.js`, `Mobile/src/screens/quickAction/QuickActionScreen.js`, `Mobile/src/screens/templates/DrainTemplatesScreen.js`, `Mobile/src/screens/auth/LoginScreen.js`, `Mobile/src/screens/profile/ProfileScreen.js`, `tiendo.md`
+- **Mô tả**:
+  1. Áp dụng bảng màu và quy chuẩn tối giản Apple (`desgin.md`): 1 accent `#0066cc` / `#0071e3`, nền `#ffffff`/`#f5f5f7`/`#272729`/`#000000`, bo góc `8/11/18/pill`, bỏ shadow/elevation card-tab và `LinearGradient` biểu đồ.
+  2. Giữ đúng 5 tab phẳng tại thanh điều hướng dưới (`Tổng quan`, `Sự cố`, `Tra cứu`, `Trao đổi`, `Tài khoản`) và chuyển `Templates` sang Stack mở từ thẻ `Mẫu Drain` trên Dashboard.
+  3. Loại bỏ các icon/nhãn mang màu sắc AI (`Zap`, `Cpu`, nhãn `Trợ Lý AI`) sang icon và nhãn kỹ thuật trung tính.
+- **Kết quả**: `esbuild` JSX transform toàn bộ 27 file `Mobile/src` đạt 0 lỗi, 0 icon AI/emoji/gradient tồn đọng.
+
+### [26/11/2026 12:53] — Gỡ Bỏ Nút Quick Login Trên Web & Mobile
+- **Loại**: Bảo mật & Chuẩn hóa UX đăng nhập (Auth UX Hardening)
+- **File**: `FE/src/components/LoginModal.jsx`, `Mobile/src/screens/auth/LoginScreen.js`, `tiendo.md`
+- **Mô tả**: Loại bỏ các nút điền nhanh tài khoản `admin`/`viewer` trên cả Web và Mobile, buộc người dùng tự nhập thông tin đăng nhập; cập nhật placeholder Mobile thành `"Nhập tên tài khoản"`.
+- **Kết quả**: `FE` `vite build` và `esbuild` kiểm tra Mobile JSX đạt 0 lỗi.
+
+### [26/11/2026 12:50] — Bổ Sung Nút Quick Login (Admin / Viewer) Trên Web LoginModal
+- **Loại**: Đồng bộ tính năng đăng nhập nhanh Web & Mobile (`DATN_BanHoanChinh.docx` Bảng 2.1/UC01)
+- **File**: `FE/src/components/LoginModal.jsx`, `tiendo.md`
+- **Mô tả**: Thêm 2 nút `Quản trị viên · admin` (`admin`/`admin123`) và `Giám sát viên · viewer` (`viewer`/`viewer123`) điền nhanh form đăng nhập trên Web đồng bộ với `Mobile/src/screens/auth/LoginScreen.js`.
+- **Kết quả**: `FE` `vite build` thành công (0 lỗi).
+
+### [26/11/2026 12:40] — Triển Khai Toàn Bộ Top 10 Hạng Mục Kiểm Toán (Bảo Mật RBAC, SRE Chat Mobile, Heatmap, ML & Test Tự Động)
+- **Loại**: Vá lỗi bảo mật, đồng bộ FE/Mobile & hoàn thiện ML/Testing (`AUDIT_REPORT.md` Mục 8.2)
+- **File**: `BE/search-api/index.js`, `BE/search-api/authService.js`, `BE/search-api/incidentService.js`, `BE/collector/index.js`, `BE/database/sqlite.js`, `BE/storage/opensearch.js`, `BE/queue/config.js`, `BE/parser/index.js`, `BE/anomaly-engine/index.js`, `BE/anomaly-engine/rule-based/detector.js`, `BE/anomaly-engine/template-mining/vectorizer.js`, `BE/datasets/*/generate_vectors.js`, `BE/benchmark/full_evaluation.js`, `BE/tests/api_security.test.js`, `BE/package.json`, `BE/.env.example`, `FE/src/App.jsx`, `FE/src/components/SreMessengerModal.jsx`, `FE/src/components/TabHelpModal.jsx`, `FE/src/components/CronJobsModal.jsx`, `Mobile/src/components/SreMessengerModal.js`, `Mobile/src/components/AnomalyCard.js`, `Mobile/src/screens/home/DashboardScreen.js`, `Mobile/src/screens/anomalies/AnomaliesScreen.js`, `Mobile/src/screens/anomalies/IncidentDetailScreen.js`
+- **Mô tả**:
+  1. Vá toàn bộ RBAC Backend (`requireAdmin`/`authenticateToken`), che `smtpPass` & webhook ở `GET /config`, bắt buộc `root_cause`/`action_taken` khi `RESOLVED`, xác thực JWT Socket.IO, sửa CORS từ chối origin lạ, thêm validate 4 trường cho Collector.
+  2. Đồng bộ `sessionStorage` token trên Web (`App.jsx`, `SreMessengerModal.jsx`), sửa URL `API_BASE` Vercel và thêm tiêu đề `sre-chat`, cập nhật `TabHelpModal`, khóa nút Cron cho Viewer và bổ sung bảng `Cron/Audit` thật trong `CronJobsModal`.
+  3. Sửa toàn diện Mobile SRE Chat (payload `content`/`logAttachment`, socket `sre_chat_message`, field tiếng Việt SQLite), khóa nút Viewer trên `AnomalyCard`, sửa lệch format ngày Heatmap Modal (Web + Mobile) và nối dữ liệu thật vào Mobile Pipeline Modal.
+  4. Bổ sung bảng SQLite `log_du_phong`, đóng băng `drain_vocab.json`, train sinh `.pkl` thật (`ml:train-hdfs`/`ml:train-bgl`), bỏ hardcode `full_evaluation.js` và viết bộ test tự động `BE/tests/api_security.test.js`.
+- **Kết quả**: `BE` `npm test` đạt **7/7 pass**, `FE` `vite build` thành công (2340 modules), `node --check` & `esbuild` đạt 0 lỗi cú pháp.
+
+### [23/11/2026 09:37] — Tối Ưu Viền Border, Tách Tab SRE Messenger Có Badge, Sửa Lỗi Giờ, Duplicate Key & 413
+- **Loại**: Cải tiến giao diện & Sửa lỗi toàn diện (UI/UX Refactoring, SRE Tab & Bug Fixes)
+- **File**: FE/src/App.jsx, FE/src/custom_styles.css, FE/src/index.css, FE/src/components/CustomDateTimePicker.jsx, FE/src/components/SreMessengerModal.jsx, BE/search-api/index.js, Mobile/src/screens/home/DashboardScreen.js, Mobile/src/theme/colors.js
+- **Mô tả**:
+  1. Đậm viền border của card/table thêm 1 tông (--border-color) và thu gọn khoảng trắng (padding, gaps) trên cả Web và Mobile.
+  2. Tách Kênh Trao Đổi SRE thành Tab riêng trên Sidebar Navigation; xóa nút nổi FAB trùng lặp; tích hợp huy hiệu số tin chưa đọc (1, 2... như Messenger/Zalo) thời gian thực qua Socket.IO trên cả Web và Mobile.
+  3. Thay thế <select> native trong CustomDateTimePicker bằng Custom Dropdown giới hạn chiều cao (max-height 135px) có thanh cuộn, không bị bung dài toàn màn hình.
+  4. Chuẩn hóa key duy nhất (prefix-id-idx) trên tất cả bảng log, anomaly, search và template trong App.jsx, triệt tiêu cảnh báo duplicate key.
+  5. Nâng giới hạn body parser của search-api lên 50MB, khắc phục triệt để lỗi HTTP 413 khi tải ảnh lỗi cho Gemini Multimodal Vision.
+- **Kết quả**: Vite build 100% thành công (0 lỗi), Mobile Babel biên dịch đạt 100%, hệ thống đồng bộ toàn diện Web & Mobile.
+
 ### [22/11/2026 16:21] — Đồng Bộ Toàn Bộ 3 Tính Năng Lên Ứng Dụng Di Động: SRE Messenger, Heatmap 24h & AI Vision
 - **Loại**: Đồng bộ tính năng đa nền tảng (Mobile App Feature Parity & Multimodal Upgrade)
 - **File**: `Mobile/src/components/SreMessengerModal.js`, `Mobile/src/screens/home/DashboardScreen.js`, `Mobile/src/screens/anomalies/IncidentDetailScreen.js`, `Mobile/src/screens/anomalies/AnomaliesScreen.js`, `Mobile/src/components/FloatingAiAssistant.js`, `tiendo.md`
@@ -121,66 +179,3 @@
   1. Cấu hình Backend URL mặc định trỏ thẳng tới Render `https://datn-juwa.onrender.com` khi chạy trên Cloud / Vercel.
   2. Xóa bỏ nút và ô nhập URL tạm thời tại Modal Login, khôi phục giao diện đăng nhập doanh nghiệp tinh gọn.
 - **Kết quả**: Frontend sẵn sàng kết nối tự động với Backend Render, biên dịch esbuild 100% không lỗi.
-
-### [19/11/2026 20:05] — Khắc Phục Lỗi WebSocket & Login 405 Vercel, Sẵn Sàng Deploy Backend Lên Render
-- **Loại**: Sửa lỗi triển khai Cloud & Chuẩn hóa cấu hình (Cloud Deployment Bug Fix & Render Compatibility)
-- **File**: `BE/search-api/index.js`, `BE/queue/config.js`, `FE/src/config.js`, `FE/src/App.jsx`, `FE/src/components/LoginModal.jsx`, `tiendo.md`
-- **Mô tả**:
-  1. Backend: Cấu hình `PORT = process.env.PORT || 5000` nhận port động từ Render, mở rộng CORS cho `*.vercel.app`, bọc error handler cho Redis chống crash khi chạy độc lập.
-  2. Frontend: Chặn kết nối Socket.IO tới domain Vercel khi chưa có URL backend, thêm ô "Cấu hình Server Backend" tại Modal Login lưu vào `localStorage`.
-- **Kết quả**: Triệt tiêu hoàn toàn lỗi console spam 200/405, FE và BE biên dịch 100% không lỗi cú pháp.
-
-### [19/11/2026 19:30] — Tích Hợp SQLite Database 7 Bảng Chuẩn Doanh Nghiệp & Cấu Hình Triển Khai Vercel (FE) + Render (BE)
-- **Loại**: Nâng cấp cơ sở dữ liệu quan hệ & Sẵn sàng triển khai Cloud (SQLite Enterprise Architecture & Cloud Deployment Setup)
-- **File**: `BE/database/sqlite.js`, `BE/search-api/authService.js`, `BE/search-api/incidentService.js`, `BE/search-api/alertService.js`, `BE/search-api/cronService.js`, `BE/search-api/index.js`, `FE/vercel.json`, `FE/src/config.js`, `FE/src/App.jsx`, `FE/src/components/*`, `FE/.env.example`, `tiendo.md`, `kientruchethong.md`
-- **Mô tả**:
-  1. Khởi tạo SQLite database chuẩn SRE doanh nghiệp với 7 bảng trường tiếng Việt không dấu: `nguoi_dung` (RBAC), `su_co` (Incident Lifecycle), `ghi_chu_su_co` (Audit notes), `cau_hinh_he_thong` (Key-value config), `lich_bao_tri` (Maintenance windows), `nhat_ky_he_thong` (Audit trail), `lich_su_cron` (Task logs).
-  2. Tự động di chuyển dữ liệu sự cố cũ từ `incident_states.json` và khởi tạo tài khoản mặc định `admin`/`viewer` (bcrypt băm).
-  3. Chuyển đổi toàn bộ `authService`, `incidentService`, `alertService`, `cronService` sang đọc/ghi trực tiếp SQLite bền vững với chế độ WAL.
-  4. Bổ sung các API endpoint kiểm toán `/api/v1/audit/logs` và lịch sử cron `/api/v1/cron/history`.
-  5. Thiết lập `FE/vercel.json` SPA rewrite và tập trung hóa cấu hình API URL động qua `FE/src/config.js` (`VITE_API_BASE_URL`), tương thích triển khai Vercel và Render.
-- **Kết quả**: Tất cả mã nguồn BE và FE biên dịch đạt 100% không lỗi (`node --check`, `esbuild`), kiểm thử truy vấn tích hợp SQLite và login JWT thành công.
-
-### [19/11/2026 18:22] — Sửa Lỗi Hiển Thị Thanh Điều Hướng Đáy & Tinh Chỉnh Cỡ Chữ Sidebar Mobile Vừa Vặn
-- **Loại**: Sửa lỗi hiển thị & Tinh chỉnh Responsive (UI Fix & Mobile Viewport Polish)
-- **File**: `FE/src/index.css`, `tiendo.md`
-- **Mô tả**:
-  1. Đảo vị trí quy tắc CSS `.mobile-bottom-nav { display: none; }` lên trước media query, kích hoạt hiển thị thanh điều hướng đáy 5 tab `z-index: 9999` trên mobile.
-  2. Tinh chỉnh sidebar drawer mobile: thu gọn chiều rộng còn 240px, ẩn nút collapse thừa, giảm cỡ chữ (`0.78rem`) và padding (`0.45rem`), tránh tràn viền tiêu đề brand.
-- **Kết quả**: Thanh điều hướng đáy hiển thị rõ ràng trên mobile, menu trượt ra gọn gàng, chữ vừa vặn không còn to thô.
-
-### [19/11/2026 18:08] — Thiết Kế Lại 3 Nút Trạng Thái, Khắc Phục Lỗi Nhấp Nháy Nút Truy Vấn & Bổ Sung Bottom Nav Mobile Trên Web
-- **Loại**: Cải tiến giao diện & Sửa lỗi tương tác (UI Refinement, Bug Fix & Responsive Mobile App Layout)
-- **File**: `FE/src/App.jsx`, `FE/src/index.css`, `tiendo.md`
-- **Mô tả**:
-  1. Thiết kế lại 3 nút lọc trạng thái sự cố (Mới, Đã tiếp nhận, Đã xử lý) theo phong cách Soft Pill hiện đại, loại bỏ màu nền sẫm bầm gây mỏi mắt.
-  2. Khắc phục triệt để lỗi nút "Truy vấn ngay" bị nhấp nháy liên tục do vòng lặp re-render vô tận trong `handleSearch` và debounce `useEffect`.
-  3. Bổ sung thanh điều hướng đáy (Mobile Bottom Navigation Bar) 5 tab có nút giữa nhô cao khi thu nhỏ màn hình (`<= 768px`), đệm cuộn 76px tránh che khuất, giữ nguyên 100% desktop codebase.
-- **Kết quả**: Nút truy vấn ổn định không còn nhấp nháy, giao diện chuyển đổi mượt mà giữa desktop và chế độ mobile.
-
-### [19/11/2026 17:20] — Chuẩn Hóa Bảng Màu Light Mode, Tái Thiết Kế Login Mobile & Dọn Dẹp Toàn Bộ Icon AI / Emoji Console Logs
-- **Loại**: Cải tiến giao diện & Chuẩn hóa mã nguồn (UI/UX Refinement, Mobile Redesign, Clean Console Logs)
-- **File**: `Mobile/src/theme/colors.js`, `FE/src/index.css`, `Mobile/src/screens/auth/LoginScreen.js`, `FE/src/components/AiAssistant.jsx`, `Mobile/src/components/FloatingAiAssistant.js`, `FE/src/components/TabHelpModal.jsx`, `BE/log_generator.js`, `BE/benchmark/full_evaluation.js`, `BE/benchmark/pipeline_benchmark.js`, `BE/datasets/stream_real_hdfs.js`, `BE/datasets/bgl/generate_vectors.js`, `BE/datasets/hdfs/generate_vectors.js`, `BE/parser/index.js`, `BE/search-api/alertService.js`, `tiendo.md`
-- **Mô tả**:
-  1. Cải tiến bảng màu Light mode: Thay đỏ thẫm `#dc2626` bằng đỏ san hô tươi `#ef4444`, chuẩn hóa vàng `#f59e0b` và xanh `#4f46e5`, triệt tiêu độ tương phản gắt trên nền trắng.
-  2. Tái thiết kế màn hình Login Mobile: Chuyển sang bố cục phẳng edge-to-edge, đưa cấu hình IP server lên header modal, loại bỏ thẻ card và logo to thô cứng.
-  3. Thay thế icon AI generic (`Bot`, `Sparkles`) bằng icon chức năng chuyên dụng (`Terminal`, `Zap`), đổi nhãn nút sang phân tích nguyên nhân sự cố (RCA).
-  4. Quét sạch 100% emoji trong console logs Backend/Benchmark sang tiền tố log Enterprise (`[INFO]`, `[SUCCESS]`, `[WARN]`, `[ERROR]`, `[METRIC]`, `[ALERT]`).
-- **Kết quả**: Kiểm tra regex Unicode đạt 0 emoji tồn đọng, tất cả mã nguồn FE, Mobile và BE biên dịch 100% không lỗi cú pháp.
-
-### [18/11/2026 12:42] — Khắc Phục Lỗi Hiển Thị Trắng Màn Hình & Hoàn Thiện Giao Diện Trực Quan Graphify (graph.html)
-- **Loại**: Sửa lỗi giao diện & Hoàn thiện Trực quan hóa Kiến trúc (UI Bug Fix & Interactive Graph Explorer)
-- **File**: `graphify-out/graph.html`, `tiendo.md`
-- **Mô tả**:
-  1. Thay thế bản `graph.html` bằng giao diện đầy đủ tính năng: nhúng sẵn toàn bộ 510 nodes và 1092 edges, loại trừ triệt để lỗi CORS khi mở bằng trình duyệt.
-  2. Kích hoạt solver `forceAtlas2Based` cùng thuật toán hạt nhân Fermat spiral giúp 510 nodes bung tỏa đều, triệt tiêu lỗi layout và hiện tượng trắng màn hình.
-  3. Bổ sung trọn vẹn thanh tìm kiếm node theo thời gian thực, bảng phân cụm cộng đồng (17 Communities) có checkbox lọc hiển thị và bộ chuyển đổi Light/Dark/System theme.
-- **Kết quả**: Giao diện `graph.html` hiển thị sắc nét, mượt mà, hỗ trợ tương tác zoom, pan, click xem chi tiết node và kiểm tra các liên kết lân cận.
-
-### [18/11/2026 12:28] — Xây Dựng Đồ Thị Tri Thức Codebase (Graphify) & Trích Xuất Dữ Liệu graph.json
-- **Loại**: Đồ thị tri thức & Trích xuất cấu trúc (Knowledge Graph Extraction)
-- **File**: `graphify-out/GRAPH_REPORT.md`, `graphify-out/graph.json`, `tiendo.md`
-- **Mô tả**:
-  1. Trích xuất thành công toàn bộ đồ thị tri thức mã nguồn: 510 nodes, 1092 links, 17 communities.
-  2. Xuất báo cáo cấu trúc `GRAPH_REPORT.md` phân tích god nodes và các liên kết bất ngờ.
-- **Kết quả**: Graphify CLI (`query`, `path`, `explain`) và cấu trúc dữ liệu đồ thị hoạt động chính xác 100%.

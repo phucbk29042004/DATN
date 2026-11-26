@@ -172,8 +172,12 @@ export default function App() {
   const [displayedTemplatesCount, setDisplayedTemplatesCount] = useState(10);
 
   // ── SRE Messenger & Tagged Log ──
-  const [isMessengerOpen, setIsMessengerOpen] = useState(false);
+  const [unreadSreCount, setUnreadSreCount] = useState(0);
   const [taggedLogForChat, setTaggedLogForChat] = useState(null);
+  const activeTabRef = useRef(activeTab);
+  useEffect(() => {
+    activeTabRef.current = activeTab;
+  }, [activeTab]);
 
   // ── Heatmap Modal & Selection ──
   const [selectedHeatmapCell, setSelectedHeatmapCell] = useState(null);
@@ -265,12 +269,15 @@ export default function App() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const getAuthToken = () =>
+    sessionStorage.getItem('logpulse_auth_token') || localStorage.getItem('logpulse_auth_token');
+
   const handleToggleMaintenance = async (enabled, minutes = 30) => {
     if (currentUser?.role !== 'admin') {
       addToast('Chỉ Admin mới có quyền bật/tắt chế độ bảo trì', 'error');
       return;
     }
-    const token = localStorage.getItem('logpulse_auth_token');
+    const token = getAuthToken();
     try {
       const res = await fetch(`${API_BASE}/alerts/maintenance`, {
         method: 'POST',
@@ -293,7 +300,7 @@ export default function App() {
   };
 
   const handleUpdateAnomalyStatus = async (anomalyId, newStatus, meta = {}) => {
-    const token = localStorage.getItem('logpulse_auth_token');
+    const token = getAuthToken();
     try {
       const res = await fetch(`${API_BASE}/anomalies/${anomalyId}/status`, {
         method: 'PATCH',
@@ -355,7 +362,7 @@ export default function App() {
   };
 
   const handleAddIncidentNote = async (anomalyId, noteText, noteType = 'NOTE') => {
-    const token = localStorage.getItem('logpulse_auth_token');
+    const token = getAuthToken();
     try {
       const res = await fetch(`${API_BASE}/anomalies/${anomalyId}/notes`, {
         method: 'POST',
@@ -425,8 +432,14 @@ export default function App() {
 
   const handleTriggerDailyDigest = async () => {
     setIsTriggeringDigest(true);
+    const token = getAuthToken();
     try {
-      const res = await fetch(`${API_BASE}/reports/digest/trigger`, { method: 'POST' });
+      const res = await fetch(`${API_BASE}/reports/digest/trigger`, {
+        method: 'POST',
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      });
       const data = await res.json();
       if (res.ok) {
         addToast(data.message || 'Đã gửi báo cáo Daily Digest 24h thành công!', 'success');
@@ -451,7 +464,7 @@ export default function App() {
     }
 
     setIsCleaningRetention(true);
-    const token = localStorage.getItem('logpulse_auth_token');
+    const token = getAuthToken();
     try {
       const res = await fetch(`${API_BASE}/storage/retention/cleanup`, {
         method: 'POST',
@@ -475,8 +488,14 @@ export default function App() {
   };
 
   const fetchConfig = useCallback(async () => {
+    const token = getAuthToken();
+    if (!token) return;
     try {
-      const res = await fetch(`${API_BASE}/config`);
+      const res = await fetch(`${API_BASE}/config`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       if (res.ok) {
         const data = await res.json();
         setConfigState(data);
@@ -491,7 +510,7 @@ export default function App() {
       addToast(t.viewerNotice || 'Tài khoản Viewer chỉ có quyền xem, không thể lưu cấu hình.', 'error');
       return;
     }
-    const token = localStorage.getItem('logpulse_auth_token');
+    const token = getAuthToken();
     try {
       const res = await fetch(`${API_BASE}/config`, {
         method: 'POST',
@@ -587,8 +606,29 @@ export default function App() {
     }
   };
 
-  const handleExportCsv = (type = 'anomalies') => {
-    handleExportExcel(type);
+  const handleExportCsv = async (type = 'anomalies') => {
+    const token = getAuthToken();
+    try {
+      const res = await fetch(`${API_BASE}/export/csv?type=${encodeURIComponent(type)}`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `HTTP ${res.status}`);
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `logpulse_${type}_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      addToast(lang === 'vi' ? 'Đã xuất báo cáo CSV thành công' : 'Exported CSV report successfully', 'success');
+    } catch (err) {
+      addToast(lang === 'vi' ? `Lỗi xuất CSV: ${err.message}` : `CSV export failed: ${err.message}`, 'error');
+    }
   };
 
   const handleGenerateSampleLogs = async () => {
@@ -649,10 +689,12 @@ export default function App() {
       return;
     }
 
+    const token = getAuthToken();
     const socket = io(SOCKET_URL, {
       transports: ['websocket', 'polling'],
       reconnectionAttempts: 5,
-      timeout: 5000
+      timeout: 5000,
+      ...(token ? { auth: { token } } : {})
     });
     socketRef.current = socket;
 
@@ -719,8 +761,15 @@ export default function App() {
       });
     });
 
+    // Lắng nghe tin nhắn mới từ Kênh Trao Đổi SRE để hiển thị badge thông báo
+    socket.on('sre_chat_message', (msg) => {
+      if (activeTabRef.current !== 'sre-chat') {
+        setUnreadSreCount(prev => prev + 1);
+      }
+    });
+
     return () => socket.disconnect();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentUser?.username]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Luôn nạp trước 50 log gần nhất từ OpenSearch ngay khi vừa vào trang
   useEffect(() => {
@@ -952,10 +1001,14 @@ export default function App() {
     { id: 'search', icon: Search, label: t.navSearch },
     { id: 'templates', icon: Layers, label: t.navTemplates },
     { id: 'pipeline', icon: Cpu, label: isVi ? 'Sức Khỏe Pipeline' : 'Pipeline Health' },
+    { id: 'sre-chat', icon: MessageSquare, label: isVi ? 'Kênh Trao Đổi SRE' : 'SRE Messenger', badge: unreadSreCount },
   ];
 
   const handleNavClick = (id) => {
     setActiveTab(id);
+    if (id === 'sre-chat') {
+      setUnreadSreCount(0);
+    }
     setSidebarOpen(false);
   };
 
@@ -1016,7 +1069,7 @@ export default function App() {
         </div>
 
         <ul className="nav-menu" role="navigation" aria-label="Menu chính">
-          {navItems.map(({ id, icon: Icon, label }) => (
+          {navItems.map(({ id, icon: Icon, label, badge }) => (
             <li
               key={id}
               className={`nav-item ${activeTab === id ? 'active' : ''}`}
@@ -1028,8 +1081,16 @@ export default function App() {
               data-tooltip={label}
               title={isSidebarCollapsed ? label : undefined}
             >
-              <Icon size={18} />
-              {!isSidebarCollapsed && <span>{label}</span>}
+              <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                <Icon size={18} />
+                {isSidebarCollapsed && badge > 0 && (
+                  <span className="sidebar-collapsed-badge">{badge > 99 ? '99+' : badge}</span>
+                )}
+              </div>
+              {!isSidebarCollapsed && <span style={{ flex: 1 }}>{label}</span>}
+              {!isSidebarCollapsed && badge > 0 && (
+                <span className="nav-badge-unread">{badge > 99 ? '99+' : badge}</span>
+              )}
               {!isSidebarCollapsed && activeTab === id && <ChevronRight size={14} style={{ marginLeft: 'auto' }} />}
             </li>
           ))}
@@ -1274,6 +1335,7 @@ export default function App() {
               {activeTab === 'search' && t.headerTitleSearch}
               {activeTab === 'templates' && t.headerTitleTemplates}
               {activeTab === 'pipeline' && (isVi ? 'Sức Khỏe Pipeline & Hạ Tầng Xử Lý' : 'Pipeline Health & Metrics')}
+              {activeTab === 'sre-chat' && (isVi ? 'Kênh Trao Đổi SRE Nội Bộ' : 'Internal SRE Messenger')}
             </h1>
             <button
               type="button"
@@ -1842,7 +1904,7 @@ export default function App() {
                           const ts = log.timestamp || '—';
                           const level = log.level || 'INFO';
                           return (
-                            <tr key={log.id || `${ts}-${idx}`} className="clickable-row" onClick={() => setSelectedLog(log)}>
+                            <tr key={`rt-${log.id || log.hash_id || 'log'}-${idx}`} className="clickable-row" onClick={() => setSelectedLog(log)}>
                               <td style={{ whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
                                 {formatVnDateTime(ts)}
                               </td>
@@ -2021,10 +2083,9 @@ export default function App() {
                             {filteredAnomalies.slice(0, visibleAnomalyCount).map((a, idx) => {
                               const score = a.anomaly_score ?? 0;
                               const status = a.incident_status || 'NEW';
-                              const aid = a.id || a.hash_id || idx;
 
                               return (
-                                <tr key={aid} className="clickable-row" onClick={() => setSelectedLog(a)}>
+                                <tr key={`anomaly-${a.id || a.hash_id || 'item'}-${idx}`} className="clickable-row" onClick={() => setSelectedLog(a)}>
                                   <td style={{ whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
                                     {formatVnDateTime(a.timestamp)}
                                   </td>
@@ -2535,31 +2596,38 @@ export default function App() {
                               </div>
 
                               {/* Tối ưu UX/UI khoảng trắng: Khung giờ cao điểm & Phân bổ SRE */}
-                              <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem' }}>
-                                <div style={{ padding: '0.65rem 0.85rem', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-                                  <div style={{ fontSize: '0.72rem', color: '#ef4444', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                                    <AlertCircle size={13} /> Khung Giờ Cao Điểm Lỗi
-                                  </div>
-                                  <div style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '0.2rem' }}>
-                                    {dates[0] || 'Gần nhất'} · {hours.reduce((maxH, h) => (heatmapMap[`${dates[0]}-${h}`] || 0) > (heatmapMap[`${dates[0]}-${maxH}`] || 0) ? h : maxH, 0)}:00h
-                                  </div>
-                                  <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.1rem' }}>
-                                    Đỉnh điểm {maxCount} lỗi / giờ phát sinh
-                                  </div>
-                                </div>
+                              {(() => {
+                                const peakHour = hours.reduce((maxH, h) => (heatmapMap[`${dates[0]}-${h}`] || 0) > (heatmapMap[`${dates[0]}-${maxH}`] || 0) ? h : maxH, 0);
+                                const shiftStart = String(peakHour).padStart(2, '0');
+                                const shiftEnd = String((peakHour + 2) % 24).padStart(2, '0');
+                                return (
+                                  <div style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.75rem' }}>
+                                    <div style={{ padding: '0.65rem 0.85rem', borderRadius: '10px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                                      <div style={{ fontSize: '0.72rem', color: '#ef4444', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                        <AlertCircle size={13} /> Khung Giờ Cao Điểm Lỗi
+                                      </div>
+                                      <div style={{ fontSize: '0.92rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '0.2rem' }}>
+                                        {dates[0] || 'Gần nhất'} · {shiftStart}:00h
+                                      </div>
+                                      <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.1rem' }}>
+                                        Đỉnh điểm {maxCount} lỗi / giờ phát sinh
+                                      </div>
+                                    </div>
 
-                                <div style={{ padding: '0.65rem 0.85rem', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
-                                  <div style={{ fontSize: '0.72rem', color: '#f59e0b', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                                    <TrendingUp size={13} /> Khuyến Nghị SRE
+                                    <div style={{ padding: '0.65rem 0.85rem', borderRadius: '10px', background: 'rgba(245, 158, 11, 0.08)', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
+                                      <div style={{ fontSize: '0.72rem', color: '#f59e0b', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                                        <TrendingUp size={13} /> Khuyến Nghị SRE
+                                      </div>
+                                      <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '0.2rem' }}>
+                                        {maxCount > 0 ? `Tập trung ca trực khung ${shiftStart}:00 - ${shiftEnd}:00` : 'Hệ thống ổn định chưa có khung cao điểm'}
+                                      </div>
+                                      <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.1rem' }}>
+                                        Hạn chế release tính năng vào giờ cao điểm
+                                      </div>
+                                    </div>
                                   </div>
-                                  <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '0.2rem' }}>
-                                    Tập trung ca trực khung 14:00 - 18:00
-                                  </div>
-                                  <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.1rem' }}>
-                                    Hạn chế release tính năng vào giờ cao điểm
-                                  </div>
-                                </div>
-                              </div>
+                                );
+                              })()}
                             </div>
                           </div>
                         );
@@ -2784,9 +2852,14 @@ export default function App() {
                       <Search size={16} color="var(--accent-primary)" />
                       Kết quả: {searchResults.total.toLocaleString()} log
                     </span>
-                    <button className="toggle-btn btn-export" style={{ fontSize: '0.78rem', padding: '0.25rem 0.6rem' }} onClick={() => handleExportExcel('logs')}>
-                      <FileSpreadsheet size={13} color="#10b981" /> {isVi ? 'Xuất Excel (.xlsx)' : 'Export Excel'}
-                    </button>
+                    <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center' }}>
+                      <button className="toggle-btn btn-export" style={{ fontSize: '0.78rem', padding: '0.25rem 0.6rem' }} onClick={() => handleExportCsv('logs')}>
+                        <Download size={13} color="var(--accent-primary)" /> {isVi ? 'Xuất CSV (.csv)' : 'Export CSV'}
+                      </button>
+                      <button className="toggle-btn btn-export" style={{ fontSize: '0.78rem', padding: '0.25rem 0.6rem' }} onClick={() => handleExportExcel('logs')}>
+                        <FileSpreadsheet size={13} color="#10b981" /> {isVi ? 'Xuất Excel (.xlsx)' : 'Export Excel'}
+                      </button>
+                    </div>
                   </div>
                   {searchResults.logs.length > 0 ? (
                     <>
@@ -2815,7 +2888,7 @@ export default function App() {
                             {searchResults.logs.map((log, idx) => {
                               const score = log.anomaly_score ?? 0;
                               return (
-                                <tr key={log.id || idx} className="clickable-row" onClick={() => setSelectedLog(log)}>
+                                <tr key={`search-${log.id || log.hash_id || 'log'}-${idx}`} className="clickable-row" onClick={() => setSelectedLog(log)}>
                                   <td style={{ whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.82rem' }}>
                                     {formatVnDateTime(log.timestamp)}
                                   </td>
@@ -3110,7 +3183,7 @@ export default function App() {
                         </div>
 
                         {visibleList.map((tmpl, idx) => (
-                          <div key={tmpl.id || idx} className="template-row">
+                          <div key={`tmpl-${tmpl.id || tmpl.template_id || 'tpl'}-${idx}`} className="template-row">
                             <div className="template-id">T{String(idx + 1).padStart(3, '0')}</div>
                             <div className="template-content">
                               <span className="template-pattern">{tmpl.template}</span>
@@ -3161,6 +3234,21 @@ export default function App() {
             </div>
           )}
 
+          {/* ── TAB 6: SRE MESSENGER (KÊNH TRAO ĐỔI SRE) ──────────────────── */}
+          {activeTab === 'sre-chat' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', height: '100%' }}>
+              <SreMessengerModal
+                isOpen={true}
+                isTabMode={true}
+                currentUser={currentUser}
+                socket={socketRef.current}
+                taggedLog={taggedLogForChat}
+                onClearTaggedLog={() => setTaggedLogForChat(null)}
+                onInspectLog={log => setSelectedLog(log)}
+              />
+            </div>
+          )}
+
         </div>
       </main>
 
@@ -3192,7 +3280,8 @@ export default function App() {
                   className="toggle-btn"
                   onClick={() => {
                     setTaggedLogForChat(selectedLog);
-                    setIsMessengerOpen(true);
+                    setActiveTab('sre-chat');
+                    setUnreadSreCount(0);
                     setSelectedLog(null);
                     addToast(lang === 'vi' ? 'Đã đính kèm thẻ log vào Kênh Chat SRE' : 'Log attached to SRE Chat', 'success');
                   }}
@@ -3245,9 +3334,13 @@ export default function App() {
                 const cellLogs = (anomalies?.anomalies || []).filter(a => {
                   if (!a.timestamp) return false;
                   const d = new Date(a.timestamp);
-                  const dateStr = d.toISOString().slice(0, 10);
+                  const pad = n => String(n).padStart(2, '0');
+                  const dateShort = `${pad(d.getDate())}/${pad(d.getMonth() + 1)}`;
+                  const dateFull = `${dateShort}/${d.getFullYear()}`;
+                  const dateIso = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+                  const target = selectedHeatmapCell.date;
                   const hour = d.getHours();
-                  return dateStr === selectedHeatmapCell.date && hour === selectedHeatmapCell.hour;
+                  return (dateShort === target || dateFull === target || dateIso === target) && hour === selectedHeatmapCell.hour;
                 });
 
                 if (cellLogs.length === 0) {
@@ -3289,44 +3382,6 @@ export default function App() {
           </div>
         </div>
       )}
-
-      {/* ── SRE INTERNAL CHAT TRIGGER BUTTON & MODAL ───────────────────────── */}
-      <button
-        className="sre-messenger-fab"
-        onClick={() => setIsMessengerOpen(!isMessengerOpen)}
-        style={{
-          position: 'fixed',
-          bottom: '24px',
-          right: '84px',
-          zIndex: 9997,
-          width: 44,
-          height: 44,
-          borderRadius: '12px',
-          background: 'linear-gradient(135deg, rgba(6, 182, 212, 0.9), rgba(59, 130, 246, 0.9))',
-          color: '#fff',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          boxShadow: '0 8px 20px rgba(6, 182, 212, 0.35)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
-        }}
-        title="Mở Kênh Trao Đổi Sự Cố SRE (Admin <-> Viewer)"
-        aria-label="SRE Messenger"
-      >
-        <MessageSquare size={19} />
-      </button>
-
-      <SreMessengerModal
-        isOpen={isMessengerOpen}
-        onClose={() => setIsMessengerOpen(false)}
-        currentUser={currentUser}
-        socket={socketRef.current}
-        taggedLog={taggedLogForChat}
-        onClearTaggedLog={() => setTaggedLogForChat(null)}
-        onInspectLog={log => setSelectedLog(log)}
-      />
 
       {/* ── AI ASSISTANT FLOATING CHATBOT ──────────────────────────────────── */}
       <AiAssistant
@@ -3386,6 +3441,7 @@ export default function App() {
         currentUser={currentUser}
         formatVnDateTime={formatVnDateTime}
         handleExportCsv={handleExportCsv}
+        handleExportExcel={handleExportExcel}
       />
 
       {/* ── CRON JOBS MANAGER MODAL ─────────────────────────────────────────── */}
@@ -3420,7 +3476,7 @@ export default function App() {
 
       {/* ── MOBILE BOTTOM NAVIGATION BAR (CHUẨN GIAO DIỆN MOBILE APP) ── */}
       <nav className="mobile-bottom-nav" aria-label="Thanh điều hướng di động">
-        {navItems.map(({ id, icon: Icon, label }) => {
+        {navItems.map(({ id, icon: Icon, label, badge }) => {
           const isActive = activeTab === id;
           const isCenter = id === 'search';
           return (
@@ -3435,13 +3491,18 @@ export default function App() {
               aria-label={label}
               title={label}
             >
-              {isCenter ? (
-                <div className="mobile-tab-center-icon">
-                  <Icon size={20} />
-                </div>
-              ) : (
-                <Icon size={19} className="mobile-tab-icon" />
-              )}
+              <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                {isCenter ? (
+                  <div className="mobile-tab-center-icon">
+                    <Icon size={20} />
+                  </div>
+                ) : (
+                  <Icon size={19} className="mobile-tab-icon" />
+                )}
+                {badge > 0 && (
+                  <span className="mobile-tab-badge">{badge > 99 ? '99+' : badge}</span>
+                )}
+              </div>
               <span className="mobile-tab-label">{label}</span>
             </button>
           );
