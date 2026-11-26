@@ -6,12 +6,12 @@
 - Unclassified: 17 file(s) not represented in the graph (top: .pkl 4, (none) 3, .example 2)
 
 ## Summary
-- 602 nodes · 1303 edges · 20 communities (17 shown, 3 thin omitted)
+- 602 nodes · 1312 edges · 21 communities (19 shown, 2 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 16 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c947db57`
+- Built from commit: `ac6baa28`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -26,13 +26,14 @@
 - parser/index.js
 - search-api/index.js
 - scripts
-- dotenv
+- authService.js
 - expo
 - bgl/generate_vectors.js
-- pipelineMetrics.js
+- sqlite.js
 - opensearch.js
 - opensearchQueries.js
-- api_security.test.js
+- cronService.js
+- alertService.js
 - vercel.json
 - log_generator.js
 
@@ -40,38 +41,38 @@
 1. `useTheme()` - 37 edges
 2. `apiClient()` - 21 edges
 3. `react-native` - 21 edges
-4. `App()` - 19 edges
+4. `App()` - 20 edges
 5. `useAuth()` - 19 edges
-6. `lucide-react-native` - 17 edges
-7. `scripts` - 17 edges
+6. `scripts` - 17 edges
+7. `lucide-react-native` - 17 edges
 8. `react-native-safe-area-context` - 16 edges
 9. `lucide-react` - 14 edges
 10. `useToast()` - 13 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `App()` --calls--> `CronJobsModal()`  [EXTRACTED]
-  FE/src/App.jsx → FE/src/components/CronJobsModal.jsx
-- `App()` --calls--> `CustomDateTimePicker()`  [EXTRACTED]
-  FE/src/App.jsx → FE/src/components/CustomDateTimePicker.jsx
-- `App()` --calls--> `PasswordChangeModal()`  [EXTRACTED]
-  FE/src/App.jsx → FE/src/components/PasswordChangeModal.jsx
-- `App()` --calls--> `PipelineHealthWidget()`  [EXTRACTED]
-  FE/src/App.jsx → FE/src/components/PipelineHealthWidget.jsx
-- `App()` --calls--> `TabHelpModal()`  [EXTRACTED]
-  FE/src/App.jsx → FE/src/components/TabHelpModal.jsx
+- `flushBuffer()` --calls--> `runAnomalyDetection()`  [EXTRACTED]
+  BE/parser/index.js → BE/anomaly-engine/index.js
+- `exportVectorsForML()` --calls--> `vectorizeDataset()`  [EXTRACTED]
+  BE/anomaly-engine/index.js → BE/anomaly-engine/template-mining/vectorizer.js
+- `logParserWorker` --calls--> `checkLogLineSingle()`  [EXTRACTED]
+  BE/parser/index.js → BE/anomaly-engine/rule-based/detector.js
+- `main()` --calls--> `vectorizeDataset()`  [EXTRACTED]
+  BE/datasets/bgl/generate_vectors.js → BE/anomaly-engine/template-mining/vectorizer.js
+- `main()` --calls--> `vectorizeDataset()`  [EXTRACTED]
+  BE/datasets/hdfs/generate_vectors.js → BE/anomaly-engine/template-mining/vectorizer.js
 
 ## Import Cycles
 - None detected.
 
-## Communities (20 total, 3 thin omitted)
+## Communities (21 total, 2 thin omitted)
 
 ### Community 0 - "useTheme"
 Cohesion: 0.07
 Nodes (74): App(), MainApp(), apiClient(), getAuthToken(), setAuthToken(), CURRENT_LAN_IP, DEFAULT_API_BASE, DEFAULT_COLLECTOR_BASE (+66 more)
 
 ### Community 1 - "BE/package.json"
-Cohesion: 0.12
-Nodes (22): dependencies, bcryptjs@^3.0.3, better-sqlite3@^13.2.0, cors@^2.8.5, ioredis@^5.3.2, jsonwebtoken@^9.0.3, node-cron@^4.6.0, nodemailer@^10.3.1 (+14 more)
+Cohesion: 0.10
+Nodes (28): dependencies, bcryptjs@^3.0.3, better-sqlite3@^13.2.0, bullmq@^5.1.0, cors@^2.8.5, express@^4.19.2, ioredis@^5.3.2, jsonwebtoken@^9.0.3 (+20 more)
 
 ### Community 2 - "full_evaluation.js"
 Cohesion: 0.06
@@ -83,7 +84,7 @@ Nodes (12): health(), lifespan(), _load_models(), predict(), PredictRequest, Pre
 
 ### Community 4 - "App.jsx"
 Cohesion: 0.08
-Nodes (33): App(), formatVnDateTime(), KpiSkeleton(), LEVEL_COLORS, Skeleton(), ToastContainer(), toLocalDatetimeInputString(), useToast() (+25 more)
+Nodes (34): App(), formatVnDateTime(), KpiSkeleton(), LEVEL_COLORS, Skeleton(), ToastContainer(), toLocalDatetimeInputString(), useToast() (+26 more)
 
 ### Community 5 - "Mobile/package.json"
 Cohesion: 0.07
@@ -94,20 +95,20 @@ Cohesion: 0.09
 Nodes (29): dependencies, lucide-react@^0.380.0, react@^18.3.1, react-dom@^18.3.1, recharts@^2.12.7, socket.io-client@^4.8.3, xlsx@^0.18.5, devDependencies (+21 more)
 
 ### Community 7 - "parser/index.js"
-Cohesion: 0.17
-Nodes (13): refreshDynamicKeywords(), bullmq@^5.1.0, addToBuffer(), flushBuffer(), logBuffer, logParserWorker, LOG_QUEUE_NAME, REALTIME_LOG_CHANNEL (+5 more)
+Cohesion: 0.08
+Nodes (23): refreshDynamicKeywords(), app, VALID_LEVELS, addToBuffer(), flushBuffer(), logBuffer, logParserWorker, LOG_QUEUE_NAME (+15 more)
 
 ### Community 8 - "search-api/index.js"
-Cohesion: 0.05
-Nodes (63): DATA_DIR, db, dbDir, __dirname, __filename, ghiLichSuCron(), ghiNhatKyHeThong(), initDatabase() (+55 more)
+Cohesion: 0.11
+Nodes (20): aiLimiter, allowedOrigins, app, authLimiter, broadcastNewLog(), corsOptions, currentFile, __dirname (+12 more)
 
 ### Community 9 - "scripts"
 Cohesion: 0.12
 Nodes (17): scripts, benchmark, benchmark:full, generate:logs, generate:vectors-bgl, generate:vectors-hdfs, ml:train-bgl, ml:train-hdfs (+9 more)
 
-### Community 10 - "dotenv"
-Cohesion: 0.22
-Nodes (7): app, VALID_LEVELS, dotenv@^16.4.5, express@^4.19.2, rawLogsQueue, dotenv, express
+### Community 10 - "authService.js"
+Cohesion: 0.19
+Nodes (14): db, ghiNhatKyHeThong(), authenticateToken(), changePassword(), JWT_SECRET, loginUser(), optionalAuth(), requireAdmin() (+6 more)
 
 ### Community 11 - "expo"
 Cohesion: 0.13
@@ -117,17 +118,25 @@ Nodes (14): backgroundColor, adaptiveIcon, expo, android, ios, name, orientation
 Cohesion: 0.06
 Nodes (41): buildBglTimeWindows(), loadBglDataset(), parseBglLogFile(), __dirname, LOG_FILE, main(), OUT_FILE, VOCAB_OUT_FILE (+33 more)
 
-### Community 13 - "pipelineMetrics.js"
-Cohesion: 0.28
-Nodes (8): REDIS_HOST, REDIS_PORT, redisConnection, calculateAvgLatency(), calculateThroughput(), getPipelineHealth(), latencySamples, secondBuckets
+### Community 13 - "sqlite.js"
+Cohesion: 0.20
+Nodes (9): DATA_DIR, dbDir, __dirname, __filename, initDatabase(), layDanhSachTinNhanNoiBo(), luuTinNhanNoiBo(), migrateOldIncidentsFile() (+1 more)
 
 ### Community 14 - "opensearch.js"
 Cohesion: 0.39
-Nodes (7): luuLogDuPhong(), @opensearch-project/opensearch@^2.6.0, bulkIndexLogs(), getDailyIndexName(), indexLogDocument(), opensearchClient, @opensearch-project/opensearch
+Nodes (7): luuLogDuPhong(), dotenv@^16.4.5, bulkIndexLogs(), getDailyIndexName(), indexLogDocument(), opensearchClient, dotenv
 
 ### Community 15 - "opensearchQueries.js"
 Cohesion: 0.19
 Nodes (17): __dirname, extractDrainTemplate(), fallbackAnomalyAnalytics(), fallbackDrainTemplates(), fallbackKpiStats(), fallbackLogStats(), fallbackRecentAnomalies(), fallbackSearchLogs() (+9 more)
+
+### Community 17 - "cronService.js"
+Cohesion: 0.35
+Nodes (10): ghiLichSuCron(), cronConfig, generate24hDigestData(), initCronJobs(), reloadCronJobs(), runLogRetentionCleanup(), sendDailyDigestReport(), sendDiscordDigest() (+2 more)
+
+### Community 18 - "alertService.js"
+Cohesion: 0.29
+Nodes (10): alertConfig, alertDeduplicationMap, checkDeduplication(), dispatchAlerts(), getMaintenanceMode(), loadConfigFromSqlite(), saveConfigToSqlite(), sendDiscordAlert() (+2 more)
 
 ### Community 39 - "log_generator.js"
 Cohesion: 0.33
@@ -135,23 +144,23 @@ Nodes (5): generateRandomBatch(), LEVELS, MESSAGES, sendLogsToCollector(), SERVI
 
 ## Knowledge Gaps
 - **1 isolated node(s):** `RFC-3164`
-  These have ≤1 connection - possible missing edges. (Counts symbols only; 201 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **3 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+  These have ≤1 connection - possible missing edges. (Counts symbols only; 200 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **2 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `dotenv` connect `dotenv` to `BE/package.json`, `full_evaluation.js`, `parser/index.js`, `search-api/index.js`, `bgl/generate_vectors.js`, `opensearch.js`?**
+- **Why does `dotenv` connect `opensearch.js` to `BE/package.json`, `full_evaluation.js`, `parser/index.js`, `search-api/index.js`, `authService.js`, `bgl/generate_vectors.js`, `cronService.js`, `alertService.js`?**
   _High betweenness centrality (0.028) - this node is a cross-community bridge._
 - **What connects `RFC-3164` to the rest of the system?**
   _1 weakly-connected nodes found - possible missing edges._
 - **Should `useTheme` be split into smaller, more focused modules?**
-  _Cohesion score 0.06758775205377147 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06833457804331591 - nodes in this community are weakly interconnected._
 - **Why does `scripts` connect `scripts` to `BE/package.json`?**
   _High betweenness centrality (0.027) - this node is a cross-community bridge._
 - **Should `BE/package.json` be split into smaller, more focused modules?**
-  _Cohesion score 0.11857707509881422 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.0960591133004926 - nodes in this community are weakly interconnected._
 - **Why does `lucide-react` connect `App.jsx` to `FE/package.json`?**
-  _High betweenness centrality (0.022) - this node is a cross-community bridge._
+  _High betweenness centrality (0.021) - this node is a cross-community bridge._
 - **Should `full_evaluation.js` be split into smaller, more focused modules?**
   _Cohesion score 0.06057945566286216 - nodes in this community are weakly interconnected._
