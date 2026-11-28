@@ -16,6 +16,7 @@ const { redisConnection, redisPub, redisSub, rawLogsQueue } = await import('../q
 const { default: db, luuTinNhanNoiBo, layDanhSachTinNhanNoiBo, luuLogDuPhong } = await import('../database/sqlite.js');
 const { vectorizeWithFrozenVocab } = await import('../anomaly-engine/template-mining/vectorizer.js');
 const { stopCronJobs } = await import('../search-api/cronService.js');
+const { alertConfig, loadConfigFromSqlite } = await import('../search-api/alertService.js');
 
 let apiBaseUrl;
 let collectorServer;
@@ -255,6 +256,34 @@ test('Pipeline Health: Trả về 0ms thay vì số giả lập cứng khi chưa
   const res = await reqJson(`${apiBaseUrl}/pipeline/health`);
   assert.equal(res.status, 200);
   assert.equal(res.body.latency.avgLatencyMs, 0);
+});
+
+test('Alert Config: Kế thừa SMTP / Receiver Email từ env khi SQLite rỗng', () => {
+  const prevUser = process.env.SMTP_USERNAME;
+  const prevPass = process.env.SMTP_PASSWORD;
+  const prevAdmin = process.env.ADMIN_EMAIL;
+  try {
+    db.prepare("UPDATE cau_hinh_he_thong SET gia_tri = '' WHERE khoa IN ('smtpUser', 'smtpPass', 'receiverEmail')").run();
+    db.prepare("UPDATE cau_hinh_he_thong SET gia_tri = 'false' WHERE khoa = 'emailEnabled'").run();
+    alertConfig.smtpUser = '';
+    alertConfig.smtpPass = '';
+    alertConfig.receiverEmail = '';
+    alertConfig.emailEnabled = false;
+
+    process.env.SMTP_USERNAME = 'bot@gmail.com';
+    process.env.SMTP_PASSWORD = 'app_password_16';
+    process.env.ADMIN_EMAIL = 'admin@gmail.com';
+    loadConfigFromSqlite();
+
+    assert.equal(alertConfig.smtpUser, 'bot@gmail.com');
+    assert.equal(alertConfig.smtpPass, 'app_password_16');
+    assert.equal(alertConfig.receiverEmail, 'admin@gmail.com');
+    assert.equal(alertConfig.emailEnabled, true);
+  } finally {
+    if (prevUser === undefined) delete process.env.SMTP_USERNAME; else process.env.SMTP_USERNAME = prevUser;
+    if (prevPass === undefined) delete process.env.SMTP_PASSWORD; else process.env.SMTP_PASSWORD = prevPass;
+    if (prevAdmin === undefined) delete process.env.ADMIN_EMAIL; else process.env.ADMIN_EMAIL = prevAdmin;
+  }
 });
 
 test('Rate Limiter: Trả HTTP 429 khi vượt ngưỡng đăng nhập liên tiếp', async () => {

@@ -181,16 +181,19 @@ function seedInitialData() {
       VALUES (?, ?, ?)
     `);
 
+    const envEmailEnabled = process.env.EMAIL_ALERT_ENABLED === 'true' ||
+      Boolean(process.env.SMTP_USERNAME && process.env.SMTP_PASSWORD && process.env.ADMIN_EMAIL);
+
     const defaultConfigs = [
       ['anomalyThreshold', '0.75', 'Ngưỡng điểm bất thường kích hoạt cảnh báo'],
-      ['discordEnabled', 'true', 'Bật / tắt kênh cảnh báo Discord Webhook'],
-      ['discordWebhookUrl', '', 'Webhook URL kênh cảnh báo Discord'],
-      ['emailEnabled', 'false', 'Bật / tắt gửi email cảnh báo qua SMTP'],
-      ['smtpHost', 'smtp.gmail.com', 'Máy chủ SMTP gửi mail'],
-      ['smtpPort', '587', 'Cổng SMTP'],
-      ['smtpUser', '', 'Tài khoản người dùng SMTP'],
-      ['smtpPass', '', 'Mật khẩu ứng dụng SMTP'],
-      ['receiverEmail', '', 'Email người nhận thông báo cảnh báo'],
+      ['discordEnabled', process.env.DISCORD_ENABLED === 'false' ? 'false' : 'true', 'Bật / tắt kênh cảnh báo Discord Webhook'],
+      ['discordWebhookUrl', process.env.DISCORD_WEBHOOK_URL || '', 'Webhook URL kênh cảnh báo Discord'],
+      ['emailEnabled', envEmailEnabled ? 'true' : 'false', 'Bật / tắt gửi email cảnh báo qua SMTP'],
+      ['smtpHost', process.env.SMTP_HOST || 'smtp.gmail.com', 'Máy chủ SMTP gửi mail'],
+      ['smtpPort', process.env.SMTP_PORT || '587', 'Cổng SMTP'],
+      ['smtpUser', process.env.SMTP_USERNAME || '', 'Tài khoản người dùng SMTP'],
+      ['smtpPass', process.env.SMTP_PASSWORD || '', 'Mật khẩu ứng dụng SMTP'],
+      ['receiverEmail', process.env.ADMIN_EMAIL || '', 'Email người nhận thông báo cảnh báo'],
       ['alertKeywords', JSON.stringify(['FATAL', 'Out of Memory', 'Connection refused', 'Database connection failed']), 'Từ khóa ưu tiên cảnh báo']
     ];
 

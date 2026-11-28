@@ -1225,7 +1225,6 @@ body {
     justify-content: space-around !important;
     align-items: center !important;
     padding: 0 0.4rem !important;
-    box-shadow: 0 -2px 14px rgba(0, 0, 0, 0.25) !important;
   }
 
   .mobile-tab-item {
@@ -1237,9 +1236,9 @@ body {
     border: none;
     color: var(--text-muted);
     font-size: 0.68rem;
-    font-weight: 500;
+    font-weight: 400;
     padding: 4px 6px;
-    gap: 3px;
+    gap: 2px;
     cursor: pointer;
     flex: 1;
     transition: color 0.18s ease, transform 0.15s ease;
@@ -1248,47 +1247,34 @@ body {
   }
 
   .mobile-tab-item:active {
-    transform: scale(0.92);
+    transform: scale(0.95);
   }
 
   .mobile-tab-item.active {
     color: var(--accent-primary);
-    font-weight: 700;
+    font-weight: 600;
   }
 
-  .mobile-tab-item .mobile-tab-icon {
-    transition: transform 0.18s ease;
-  }
-
-  .mobile-tab-item.active .mobile-tab-icon {
-    transform: scale(1.1);
-  }
-
-  /* Nút Trung Tâm (Tra cứu log - Search) nhô cao tương tự Mobile App */
-  .mobile-tab-item.center-tab .mobile-tab-center-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--accent-primary);
-    color: #ffffff;
-    display: flex;
+  .mobile-tab-icon-wrap {
+    position: relative;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-top: -16px;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
-    border: 3px solid var(--bg-secondary);
-    transition: transform 0.18s ease;
+    width: 40px;
+    height: 26px;
+    border-radius: 9999px;
+    transition: background-color 0.18s ease;
   }
 
-  .mobile-tab-item.center-tab:active .mobile-tab-center-icon {
-    transform: scale(0.92);
+  .mobile-tab-item.active .mobile-tab-icon-wrap {
+    background: rgba(0, 102, 204, 0.12);
   }
 
   .mobile-tab-label {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 60px;
+    max-width: 64px;
     font-size: 0.65rem;
   }
 }

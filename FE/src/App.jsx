@@ -9,7 +9,7 @@ import {
   Settings, Download, Send, FileText, Eye, Shield, LogIn, LogOut,
   BellOff, Plus, Trash2, Check, KeyRound, ListFilter,
   CheckCircle2, XCircle, AlertCircle, RotateCcw, HelpCircle, Play, FileSpreadsheet,
-  BarChart3, CalendarClock, Server, MessageSquare
+  BarChart3, CalendarClock, Server, MessageSquare, User
 } from 'lucide-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -956,22 +956,6 @@ export default function App() {
   const handleSearchRef = useRef();
   handleSearchRef.current = handleSearch;
 
-  // ── Debounce Live Search on Web (chỉ khi người dùng gõ / đổi filter) ──
-  const isSearchMountedRef = useRef(false);
-  useEffect(() => {
-    if (activeTab !== 'search') return;
-    if (!isSearchMountedRef.current) {
-      isSearchMountedRef.current = true;
-      return;
-    }
-    const timer = setTimeout(() => {
-      if (handleSearchRef.current) {
-        handleSearchRef.current(false, true);
-      }
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [searchQuery, searchLevel, searchFrom, searchTo, activeTab]);
-
   useEffect(() => {
     if (activeTab === 'anomalies' && anomalies === null) fetchAnomalies();
     if (activeTab === 'templates' && templates === null) fetchTemplates();
@@ -1004,7 +988,21 @@ export default function App() {
     { id: 'sre-chat', icon: MessageSquare, label: isVi ? 'Kênh Trao Đổi SRE' : 'SRE Messenger', badge: unreadSreCount },
   ];
 
+  // Chế độ di động chỉ giữ 5 tab cốt lõi giống Mobile App (Templates & Pipeline truy cập từ Card trên Tổng quan)
+  const mobileBottomNavItems = [
+    { id: 'overview', icon: Activity, label: isVi ? 'Tổng quan' : 'Overview' },
+    { id: 'anomalies', icon: AlertTriangle, label: isVi ? 'Sự cố' : 'Alerts' },
+    { id: 'search', icon: Search, label: isVi ? 'Tra cứu' : 'Search' },
+    { id: 'sre-chat', icon: MessageSquare, label: isVi ? 'Trao đổi' : 'Chat', badge: unreadSreCount },
+    { id: 'account', icon: User, label: isVi ? 'Tài khoản' : 'Account' },
+  ];
+
   const handleNavClick = (id) => {
+    if (id === 'account') {
+      setSidebarOpen(true);
+      setIsSidebarAdminDropdownOpen(true);
+      return;
+    }
     setActiveTab(id);
     if (id === 'sre-chat') {
       setUnreadSreCount(0);
@@ -1696,17 +1694,28 @@ export default function App() {
                 </div>
               )}
 
-              {/* Pipeline Health Quick Summary */}
+              {/* Pipeline Health Quick Summary (Click card để mở Tab Pipeline Health) */}
               {kpiStats && (
-                <div className="card" style={{ padding: '1rem 1.25rem' }}>
+                <div
+                  className="card kpi-card-clickable"
+                  style={{ padding: '1rem 1.25rem' }}
+                  onClick={() => setActiveTab('pipeline')}
+                  role="button"
+                  tabIndex={0}
+                  title={isVi ? 'Bấm để chuyển tới mục Sức Khỏe Pipeline' : 'Open Pipeline Health tab'}
+                >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
                     <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 600, fontSize: '0.95rem' }}>
                       <Activity size={18} color="#10b981" />
                       {isVi ? 'Sức Khỏe Pipeline Xử Lý' : 'Pipeline Health'}
                     </span>
                     <button
+                      type="button"
                       className="toggle-btn"
-                      onClick={() => setIsHealthModalOpen(true)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsHealthModalOpen(true);
+                      }}
                       style={{ fontSize: '0.76rem', padding: '0.2rem 0.6rem' }}
                     >
                       {isVi ? 'Chi tiết' : 'Details'}
@@ -3225,9 +3234,21 @@ export default function App() {
                   <div className="empty-state">
                     <Layers size={36} color="var(--accent-secondary)" style={{ opacity: 0.8 }} />
                     <p style={{ margin: '0.4rem 0 0.2rem', fontSize: '1rem', fontWeight: 600 }}>Chưa có Drain templates nào trong OpenSearch</p>
-                    <span style={{ maxWidth: '440px', lineHeight: 1.5 }}>
-                      Parser Worker đang tự động bóc tách các mẫu log từ pipeline theo thời gian thực.
+                    <span style={{ maxWidth: '440px', lineHeight: 1.5, marginBottom: '0.9rem' }}>
+                      OpenSearch đang trực tuyến nhưng chưa ghi nhận mẫu log mới. Bạn có thể bơm nhanh 35 log mẫu để Parser Worker bóc tách Drain.
                     </span>
+                    <button
+                      type="button"
+                      className="btn-primary"
+                      style={{ fontSize: '0.84rem', padding: '0.45rem 1.1rem', gap: '0.4rem' }}
+                      onClick={async () => {
+                        await handleGenerateSampleLogs();
+                        setTimeout(() => fetchTemplates(), 1200);
+                      }}
+                      disabled={isGeneratingLogs}
+                    >
+                      <Zap size={14} /> {isGeneratingLogs ? 'Đang nạp log mẫu...' : 'Phát sinh 35 log mẫu'}
+                    </button>
                   </div>
                 )}
               </div>
@@ -3474,31 +3495,24 @@ export default function App() {
         lang={lang}
       />
 
-      {/* ── MOBILE BOTTOM NAVIGATION BAR (CHUẨN GIAO DIỆN MOBILE APP) ── */}
+      {/* ── MOBILE BOTTOM NAVIGATION BAR (5 TAB CỐT LÕI GIỐNG MOBILE APP) ── */}
       <nav className="mobile-bottom-nav" aria-label="Thanh điều hướng di động">
-        {navItems.map(({ id, icon: Icon, label, badge }) => {
-          const isActive = activeTab === id;
-          const isCenter = id === 'search';
+        {mobileBottomNavItems.map(({ id, icon: Icon, label, badge }) => {
+          const isActive = id === 'account' ? (sidebarOpen || isAdminSettingsOpen || isCronJobsModalOpen || isPasswordChangeOpen) : activeTab === id;
           return (
             <button
               key={id}
               type="button"
-              className={`mobile-tab-item ${isActive ? 'active' : ''} ${isCenter ? 'center-tab' : ''}`}
+              className={`mobile-tab-item ${isActive ? 'active' : ''}`}
               onClick={() => {
                 handleNavClick(id);
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                if (id !== 'account') window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
               aria-label={label}
               title={label}
             >
-              <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
-                {isCenter ? (
-                  <div className="mobile-tab-center-icon">
-                    <Icon size={20} />
-                  </div>
-                ) : (
-                  <Icon size={19} className="mobile-tab-icon" />
-                )}
+              <div className="mobile-tab-icon-wrap">
+                <Icon size={19} className="mobile-tab-icon" />
                 {badge > 0 && (
                   <span className="mobile-tab-badge">{badge > 99 ? '99+' : badge}</span>
                 )}

@@ -2,6 +2,24 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, Send, X, Shield, User, Paperclip, ChevronDown, CheckCheck, RefreshCw, Terminal } from 'lucide-react';
 import { API_BASE } from '../config.js';
 
+const SRE_CHAT_CACHE_KEY = 'logpulse_sre_chat_cache';
+
+function readCachedMessages() {
+  try {
+    const raw = localStorage.getItem(SRE_CHAT_CACHE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeCachedMessages(list) {
+  try {
+    localStorage.setItem(SRE_CHAT_CACHE_KEY, JSON.stringify(list.slice(-100)));
+  } catch {}
+}
+
 export default function SreMessengerModal({
   isOpen,
   onClose,
@@ -12,7 +30,7 @@ export default function SreMessengerModal({
   onInspectLog,
   isTabMode = false
 }) {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(() => readCachedMessages());
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -28,14 +46,26 @@ export default function SreMessengerModal({
     }
   }, [messages, isOpen]);
 
-  // Tải lịch sử tin nhắn khi mở modal
+  // Tải lịch sử tin nhắn khi đăng nhập / mở kênh chat và đồng bộ cache
   const fetchMessages = async () => {
     try {
       setLoading(true);
       const res = await fetch(`${API_BASE}/chat/messages?limit=50`);
       if (res.ok) {
         const data = await res.json();
-        setMessages(data);
+        if (Array.isArray(data) && data.length > 0) {
+          setMessages(prev => {
+            const mergedMap = new Map();
+            [...prev, ...data].forEach(m => {
+              if (m && m.id !== undefined) mergedMap.set(String(m.id), m);
+            });
+            const merged = Array.from(mergedMap.values()).sort(
+              (a, b) => new Date(a.thoi_gian || 0) - new Date(b.thoi_gian || 0)
+            );
+            writeCachedMessages(merged);
+            return merged;
+          });
+        }
       }
     } catch (err) {
       console.warn('[SRE Chat] Không thể nạp lịch sử tin nhắn:', err.message);
@@ -45,10 +75,10 @@ export default function SreMessengerModal({
   };
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen || currentUser?.username) {
       fetchMessages();
     }
-  }, [isOpen]);
+  }, [isOpen, currentUser?.username]);
 
   // Lắng nghe sự kiện socket realtime
   useEffect(() => {
@@ -56,9 +86,10 @@ export default function SreMessengerModal({
 
     const handleNewMessage = (msg) => {
       setMessages(prev => {
-        // Tránh trùng lặp
         if (prev.some(m => m.id === msg.id)) return prev;
-        return [...prev, msg];
+        const next = [...prev, msg];
+        writeCachedMessages(next);
+        return next;
       });
     };
 

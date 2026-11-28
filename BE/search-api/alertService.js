@@ -28,6 +28,7 @@ export const alertConfig = {
 export function loadConfigFromSqlite() {
   try {
     const rows = db.prepare('SELECT khoa, gia_tri FROM cau_hinh_he_thong').all();
+    const rowMap = new Map(rows.map(r => [r.khoa, r.gia_tri]));
     for (const row of rows) {
       if (row.khoa === 'anomalyThreshold') alertConfig.anomalyThreshold = parseFloat(row.gia_tri);
       else if (row.khoa === 'discordEnabled') alertConfig.discordEnabled = row.gia_tri === 'true';
@@ -45,6 +46,20 @@ export function loadConfigFromSqlite() {
           alertConfig.alertKeywords = [row.gia_tri];
         }
       }
+    }
+
+    // Tự động kế thừa thông tin SMTP / Discord từ .env nếu SQLite đang rỗng (tránh bắt nhập lại khi restart/deploy)
+    if (!alertConfig.discordWebhookUrl && process.env.DISCORD_WEBHOOK_URL) {
+      alertConfig.discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL;
+    }
+    const dbHadNoEmailCreds = !rowMap.get('smtpUser') && !rowMap.get('smtpPass');
+    if (!alertConfig.smtpHost && process.env.SMTP_HOST) alertConfig.smtpHost = process.env.SMTP_HOST;
+    if (!alertConfig.smtpPort && process.env.SMTP_PORT) alertConfig.smtpPort = parseInt(process.env.SMTP_PORT, 10) || 587;
+    if (!alertConfig.smtpUser && process.env.SMTP_USERNAME) alertConfig.smtpUser = process.env.SMTP_USERNAME;
+    if (!alertConfig.smtpPass && process.env.SMTP_PASSWORD) alertConfig.smtpPass = process.env.SMTP_PASSWORD;
+    if (!alertConfig.receiverEmail && process.env.ADMIN_EMAIL) alertConfig.receiverEmail = process.env.ADMIN_EMAIL;
+    if (dbHadNoEmailCreds && !alertConfig.emailEnabled && (process.env.EMAIL_ALERT_ENABLED === 'true' || (alertConfig.smtpUser && alertConfig.smtpPass && alertConfig.receiverEmail))) {
+      alertConfig.emailEnabled = true;
     }
   } catch (err) {
     console.warn('[Alert Service] Không thể đọc cấu hình từ SQLite:', err.message);

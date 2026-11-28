@@ -2,6 +2,15 @@
 
 ## Nhật Ký Cập Nhật (Chronological Log)
 
+### [28/11/2026 21:10] — Khắc Phục AI Fallback, Cloud Log Streamer, SMTP `.env`, Lưu Lịch Sử Chat & 5 Tab Di Động Web
+- **Loại**: Sửa lỗi Deploy Cloud & Tối ưu UX Web (`web_deploy_and_ux_fixes_plan.md`)
+- **File**: `BE/search-api/aiService.js`, `BE/search-api/index.js`, `BE/database/sqlite.js`, `BE/search-api/alertService.js`, `BE/tests/api_security.test.js`, `FE/src/App.jsx`, `FE/src/index.css`, `FE/src/components/AiAssistant.jsx`, `FE/src/components/SreMessengerModal.jsx`, `tiendo.md`
+- **Mô tả**:
+  1. Backend: Nâng cấp `aiService.js` fallback đa model Groq & Gemini kèm chi tiết lỗi; tự bật `startCloudLogStreamer()` trên Render (`RENDER=true`); đồng bộ seed/fallback SMTP & Discord từ `.env` vào SQLite/`alertService.js`.
+  2. Web FE: Bỏ auto-search debounce khi đổi bộ lọc (`App.jsx`); thêm nút phát 35 log mẫu ở empty state `templates`; bấm Card Pipeline mở tab `pipeline`; rút gọn `.mobile-bottom-nav` xuống 5 tab phẳng giống Mobile (`Tổng quan`, `Sự cố`, `Tra cứu`, `Trao đổi`, `Tài khoản`).
+  3. Lưu lịch sử chat: Persist tin nhắn `AiAssistant.jsx` (`logpulse_ai_chat_*`) và cache hợp nhất `SreMessengerModal.jsx` (`logpulse_sre_chat_cache`) qua `localStorage`.
+- **Kết quả**: `BE` `npm test` đạt **11/11 pass**, `FE` `vite build` 2340 modules.
+
 ### [26/11/2026 14:48] — Hoàn Thiện Các Task Còn Tồn Đọng Từ `AUDIT_REPORT.md` (ML API, Rate-Limit, Export CSV, Mobile Stack Wiring)
 - **Loại**: Bảo mật, Tích hợp ML, Đồng bộ Web/Mobile & Kiểm thử (`AUDIT_REPORT.md` Nhóm A/B/C còn lại)
 - **File**: `BE/database/sqlite.js`, `BE/search-api/pipelineMetrics.js`, `BE/search-api/aiService.js`, `BE/search-api/index.js`, `BE/search-api/cronService.js`, `BE/anomaly-engine/ml-models/train_and_evaluate.py`, `BE/index.js`, `BE/.env.example`, `BE/tests/api_security.test.js`, `start_all.bat`, `FE/src/App.jsx`, `FE/src/components/AdminSettingsModal.jsx`, `Mobile/src/screens/profile/ProfileScreen.js`, `Mobile/src/screens/profile/ChangePasswordScreen.js`, `Mobile/src/screens/profile/AdminSettingsScreen.js`, `tiendo.md`
@@ -171,11 +180,3 @@
   2. Cập nhật `opensearchQueries.js`: Ưu tiên OpenSearch local khi chạy máy cá nhân; tự động chuyển sang tập log thật để tính KPI, biểu đồ và bảng log khi chạy trên Render.
   3. Xóa bỏ hoàn toàn 2 nút chọn tài khoản mẫu (Admin/Viewer) tại Modal Login, khôi phục giao diện đăng nhập chuẩn doanh nghiệp.
 - **Kết quả**: Web Cloud luôn có đầy đủ số liệu và biểu đồ log thật 100%, chạy local vẫn mượt mà với OpenSearch thật, biên dịch 100% không lỗi.
-
-### [20/11/2026 19:10] — Cố Định URL Backend Render (datn-juwa) & Tinh Gọn Modal Login
-- **Loại**: Cấu hình môi trường & Tối ưu giao diện (Production Config & UI Cleanup)
-- **File**: `FE/src/config.js`, `FE/src/components/LoginModal.jsx`, `FE/.env.example`, `tiendo.md`
-- **Mô tả**:
-  1. Cấu hình Backend URL mặc định trỏ thẳng tới Render `https://datn-juwa.onrender.com` khi chạy trên Cloud / Vercel.
-  2. Xóa bỏ nút và ô nhập URL tạm thời tại Modal Login, khôi phục giao diện đăng nhập doanh nghiệp tinh gọn.
-- **Kết quả**: Frontend sẵn sàng kết nối tự động với Backend Render, biên dịch esbuild 100% không lỗi.

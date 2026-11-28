@@ -1,7 +1,7 @@
 {
   "0": "useTheme",
   "1": "BE/package.json",
-  "2": "full_evaluation.js",
+  "2": "DrainParser",
   "3": "ml_api.py",
   "4": "App.jsx",
   "5": "Mobile/package.json",
@@ -18,6 +18,12 @@
   "16": "babel.config.js",
   "17": "cronService.js",
   "18": "alertService.js",
+  "19": "anomaly-engine/index.js",
+  "20": "parser/index.js",
+  "21": "bgl/generate_vectors.js",
+  "22": "hdfs/generate_vectors.js",
+  "23": "full_evaluation.js",
   "24": "vercel.json",
-  "39": "log_generator.js"
+  "25": "parseLog",
+  "26": "statistical/detector.js"
 }

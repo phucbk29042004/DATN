@@ -49,7 +49,10 @@ let streamInterval = null;
 let currentLogIndex = 0;
 
 function startCloudLogStreamer() {
-  if (process.env.ENABLE_DEMO_STREAMER !== 'true') return;
+  const shouldStream =
+    process.env.ENABLE_DEMO_STREAMER === 'true' ||
+    (process.env.RENDER === 'true' && process.env.ENABLE_DEMO_STREAMER !== 'false');
+  if (!shouldStream) return;
   const pool = getRealLogsPool();
   if (streamInterval || pool.length === 0) return;
   console.log('[Realtime Streamer] Bắt đầu phát sóng log HDFS/BGL định kỳ cho client trực tuyến.');

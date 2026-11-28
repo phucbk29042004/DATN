@@ -23,8 +23,17 @@ function cleanAsterisks(text) {
 }
 
 export default function AiAssistant({ lang, t, theme, currentUser, kpiStats }) {
+  const storageKey = `logpulse_ai_chat_${currentUser?.username || 'guest'}`;
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(() => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      const parsed = saved ? JSON.parse(saved) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null); // { base64, mimeType, previewUrl }
@@ -34,6 +43,34 @@ export default function AiAssistant({ lang, t, theme, currentUser, kpiStats }) {
   const typingTimerRef = useRef(null);
 
   const isVi = lang === 'vi';
+
+  // Nạp lại lịch sử chat khi đổi tài khoản đăng nhập
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      const parsed = saved ? JSON.parse(saved) : [];
+      setMessages(Array.isArray(parsed) ? parsed : []);
+    } catch {
+      setMessages([]);
+    }
+  }, [storageKey]);
+
+  // Lưu lịch sử chat vào localStorage để không mất khi F5 / đăng nhập lại
+  useEffect(() => {
+    try {
+      const hasTyping = messages.some(m => m.isTyping);
+      if (hasTyping) return;
+      const serializable = messages.slice(-50).map(({ role, content, provider, isError }) => ({
+        role,
+        content,
+        ...(provider ? { provider } : {}),
+        ...(isError ? { isError: true } : {})
+      }));
+      localStorage.setItem(storageKey, JSON.stringify(serializable));
+    } catch {
+      // Ignore storage quota errors
+    }
+  }, [messages, storageKey]);
 
   // Cleanup typing timer
   useEffect(() => {
@@ -348,6 +385,9 @@ export default function AiAssistant({ lang, t, theme, currentUser, kpiStats }) {
 
   const clearChat = () => {
     setMessages([]);
+    try {
+      localStorage.removeItem(storageKey);
+    } catch {}
   };
 
   return (
